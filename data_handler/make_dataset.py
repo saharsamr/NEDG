@@ -49,7 +49,7 @@ def create_dataset():
 
                 context = paragraphs[p_id]
                 context = context.replace('\1', '').replace('\n', '')
-                context = context[:start] + '<NE>' + context[start:end] + '</NE>' + context[end:]
+                context = context[:start] + '<NE> ' + context[start:end] + ' </NE>' + context[end:]
 
                 # INFO: extract first sentence as the description
                 try:
