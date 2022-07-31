@@ -15,8 +15,7 @@ def rouge(predictions, labels):
 def bleu(predictions, labels):
 
   bleu = load_metric('bleu')
-  bleu_output = bleu.compute
-  (
+  bleu_output = bleu.compute(
     predictions=predictions, references=labels, bleu_types=['bleu4']
   )['bleu4'].mid
 
