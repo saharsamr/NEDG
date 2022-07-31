@@ -7,7 +7,7 @@ class BART:
 
     def __init__(
       self, train_dataset, dev_dataset, test_dataset,
-      trainer_args, compute_metrics_func, model_name='bart-large'
+      trainer_args, compute_metrics_func, model_name='facebook/bart-large'
     ):
 
         self.model = BartForConditionalGeneration.from_pretrained(model_name)
