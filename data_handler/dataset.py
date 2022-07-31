@@ -6,7 +6,9 @@ class WikiDataset(Dataset):
 
     def __init__(self, path):
 
-        self.data = pd.read_csv(path, delimiter='\1', on_bad_lines='skip')
+        self.data = pd.read_csv(
+            path, delimiter='\1', on_bad_lines='skip', header=0, columns=['word', 'context', 'description']
+        )
 
     def __len__(self):
 
