@@ -1,13 +1,13 @@
 from transformers import BartTokenizer, BartForConditionalGeneration, BartConfig, TrainingArguments, Trainer
 from transformers.optimization import AdamW
 from utils.trainers import CrossEntropyTrainer
+from data_handler.dataset import create_train_dev_test_datasets
 
 
 class BART:
 
     def __init__(
-      self, train_dataset, dev_dataset, test_dataset,
-      trainer_args, compute_metrics_func, model_name='facebook/bart-large'
+      self, data, trainer_args, compute_metrics_func, model_name='facebook/bart-large'
     ):
 
         self.model = BartForConditionalGeneration.from_pretrained(model_name)
@@ -16,9 +16,10 @@ class BART:
         self.config = BartConfig.from_pretrained(model_name)
         self.model_name = model_name
 
-        self.train_dataset = train_dataset
-        self.dev_dataset = dev_dataset
-        self.test_dataset = test_dataset
+        self.data = data
+        self.train_dataset, self.dev_dataset, self.test_dataset = create_train_dev_test_datasets(
+            self.data, self.tokenizer, self.config.max_length
+        )
 
         self.optimizer = AdamW(self.model.parameters())
 
@@ -27,9 +28,9 @@ class BART:
             args=trainer_args,
             train_dataset=self.train_dataset,
             eval_dataset=self.dev_dataset,
-            optimizers=[self.optimizer],
-            tokenizer=self.tokenizer,
-            compute_metrics=compute_metrics_func,
+            # optimizers=[self.optimizer],
+            # tokenizer=self.tokenizer,
+            # compute_metrics=compute_metrics_func,
         )
 
     def train(self):

@@ -1,27 +1,47 @@
 from torch.utils.data import Dataset
-import pandas as pd
+from sklearn.model_selection import train_test_split
+import torch
+
+
+def create_train_dev_test_datasets(data, tokenizer, max_len):
+
+    X, Y = list(data['context']), list(data['description'])
+    x_train, x_test, y_train, y_test = train_test_split(X, Y, 0.9, 0.1)
+    x_train, x_dev, y_train, y_dev = train_test_split(x_train, y_train, 0.9, 0.1)
+
+    x_train = tokenizer(x_train, padding=True, truncation=True, max_length=max_len)
+    y_train = tokenizer(y_train, padding=True, truncation=True, max_length=max_len)
+    x_dev = tokenizer(x_dev, padding=True, truncation=True, max_length=max_len)
+    y_dev = tokenizer(y_dev, padding=True, truncation=True, max_length=max_len)
+    x_test = tokenizer(x_test, padding=True, truncation=True, max_length=max_len)
+    y_test = tokenizer(y_test, padding=True, truncation=True, max_length=max_len)
+
+    train_dataset = WikiDataset(x_train, y_train)
+    dev_dataset = WikiDataset(x_dev, y_dev)
+    test_dataset = WikiDataset(x_test, y_test)
+
+    return train_dataset, dev_dataset, test_dataset
 
 
 class WikiDataset(Dataset):
 
-    def __init__(self, path):
+    def __init__(self, encodings, labels=None):
 
-        self.data = pd.read_csv(
-            path, delimiter='\1', on_bad_lines='skip', header=0, columns=['word', 'context', 'description']
-        )
+        self.encodings = encodings
+        self.labels = labels
 
     def __len__(self):
 
-        return len(self.data)
+        return len(self.encodings)
 
     def __getitem__(self, idx):
 
-        item = self.data.iloc[idx]
-        context, description = item['context'], item['description']
-        # TODO: remove the replacements
-        context = context.replace('<NE>', '<NE> ').replace('</NE>', ' </NE>')
+        context = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
+        if self.labels:
+            description = {key: torch.tensor(val[idx]) for key, val in self.labels.items()}
+            return context, description
 
-        return context, description
+        return context, None
 
 
 

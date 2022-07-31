@@ -1,14 +1,14 @@
 from transformers import TrainingArguments
-from data_handler.dataset import WikiDataset
 from utils.metrics import rouge, bleu
-from utils.splitter import split_data
 from models.BART import BART
+import pandas as pd
 
 
 if __name__ == "__main__":
 
-  dataset = WikiDataset('./data/data.csv')
-  train_dataset, dev_dataset, test_dataset = split_data(dataset, 0.8, 0.1, 0.1)
+  data = pd.read_csv(
+    'data/data.csv', delimiter='\1', on_bad_lines='skip', header=0, names=['word', 'context', 'description']
+  )
 
   training_args = TrainingArguments(
     output_dir='./results',
@@ -27,7 +27,7 @@ if __name__ == "__main__":
       'bleu': bleu(predictions, labels)
     }
 
-  model = BART(train_dataset, dev_dataset, test_dataset, training_args, compute_metrics)
+  model = BART(data, training_args, compute_metrics)
   model.set_learnable_params()
   model.train()
 
