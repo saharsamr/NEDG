@@ -6,8 +6,8 @@ import torch
 def create_train_dev_test_datasets(data, tokenizer, max_len):
 
     X, Y = list(data['context']), list(data['description'])
-    x_train, x_test, y_train, y_test = train_test_split(X, Y, 0.9, 0.1)
-    x_train, x_dev, y_train, y_dev = train_test_split(x_train, y_train, 0.9, 0.1)
+    x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.1)
+    x_train, x_dev, y_train, y_dev = train_test_split(x_train, y_train, test_size=0.1)
 
     x_train = tokenizer(x_train, padding=True, truncation=True, max_length=max_len)
     y_train = tokenizer(y_train, padding=True, truncation=True, max_length=max_len)
