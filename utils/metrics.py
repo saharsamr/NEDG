@@ -4,8 +4,7 @@ from datasets import load_metric
 def rouge(predictions, labels):
 
   rouge = load_metric('rouge')
-  rouge_output = rouge.compute
-  (
+  rouge_output = rouge.compute(
     predictions=predictions, references=labels, rouge_types=['rouge2']
   )['rouge2'].mid
 
