@@ -1,12 +1,14 @@
 from transformers import TrainingArguments
 from data_handler.dataset import WikiDataset
 from utils.metrics import rouge, bleu
+from utils.splitter import split_data
 from models.BART import BART
+
 
 if __name__ == "__main__":
 
   dataset = WikiDataset('./data/data.csv')
-  train_dataset, dev_dataset, test_dataset = dataset.split(0.8, 0.1, 0.1)
+  train_dataset, dev_dataset, test_dataset = split_data(dataset, 0.8, 0.1, 0.1)
 
   training_args = TrainingArguments(
     output_dir='./results',
