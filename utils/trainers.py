@@ -2,6 +2,7 @@ from transformers import Trainer
 from torch import nn
 
 
+# TODO: it takes just two arguments and lables is extra, also, its model calls is totally false
 class CrossEntropyTrainer(Trainer):
 
   def compute_loss(self, model, inputs, labels, return_outputs=False):

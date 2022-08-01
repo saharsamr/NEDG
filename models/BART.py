@@ -1,6 +1,6 @@
 from transformers import BartTokenizer, BartForConditionalGeneration, BartConfig, TrainingArguments, Trainer
 from transformers.optimization import AdamW
-from utils.trainers import CrossEntropyTrainer
+from transformers import Trainer
 from data_handler.dataset import create_train_dev_test_datasets
 
 
@@ -24,7 +24,7 @@ class BART:
 
         self.optimizer = AdamW(self.model.parameters())
 
-        self.trainer = CrossEntropyTrainer(
+        self.trainer = Trainer(
             model=self.model,
             args=trainer_args,
             train_dataset=self.train_dataset,
