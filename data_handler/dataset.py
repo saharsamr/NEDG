@@ -39,9 +39,9 @@ class WikiDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
+        item = {'input_ids': torch.tensor(self.encodings['input_ids'][idx])}
         if self.labels:
-            item['labels'] = torch.tensor(self.labels[idx])
+            item['labels'] = torch.tensor(self.labels['input_ids'][idx])
 
         return item
 
