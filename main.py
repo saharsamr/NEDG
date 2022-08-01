@@ -27,7 +27,9 @@ if __name__ == "__main__":
       'bleu': bleu(predictions, labels)
     }
 
+  print('Initialing the model...')
   model = BART(data, training_args, compute_metrics)
   model.set_learnable_params()
+  print('Start training...')
   model.train()
 

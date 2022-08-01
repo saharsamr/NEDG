@@ -16,6 +16,7 @@ class BART:
         self.config = BartConfig.from_pretrained(model_name)
         self.model_name = model_name
 
+        print('Making datasets')
         self.data = data
         self.train_dataset, self.dev_dataset, self.test_dataset = create_train_dev_test_datasets(
             self.data, self.tokenizer, self.config.max_length
