@@ -39,12 +39,11 @@ class WikiDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        context = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
+        item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
         if self.labels:
-            description = {key: torch.tensor(val[idx]) for key, val in self.labels.items()}
-            return context, description
+            item['labels'] = torch.tensor(self.labels[idx])
 
-        return context, None
+        return item
 
 
 
