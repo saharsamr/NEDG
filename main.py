@@ -7,7 +7,7 @@ import pandas as pd
 if __name__ == "__main__":
 
   data = pd.read_csv(
-    'data/data.csv', delimiter='\1', on_bad_lines='skip', header=0, names=['word', 'context', 'description']
+    'NED/data/data.csv', delimiter='\1', on_bad_lines='skip', header=0, names=['word', 'context', 'description']
   )
 
   training_args = TrainingArguments(
@@ -32,4 +32,5 @@ if __name__ == "__main__":
   model.set_learnable_params()
   print('Start training...')
   model.train()
+  model.pred()
 

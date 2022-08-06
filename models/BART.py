@@ -2,6 +2,7 @@ from transformers import BartTokenizer, BartForConditionalGeneration, BartConfig
 from transformers.optimization import AdamW
 from transformers import Trainer
 from data_handler.dataset import create_train_dev_test_datasets
+import torch
 
 
 class BART:
@@ -45,7 +46,11 @@ class BART:
             param.requires_grad = not freeze_decoder
 
     def pred(self):
-        pass
+        for sample in self.dev_dataset:
+          print(sample['input_ids'])
+          print(50*'*')
+          preds = self.model(torch.unsqueeze(sample['input_ids'], dim=0))
+          print(preds)
 
     def save(self):
         pass

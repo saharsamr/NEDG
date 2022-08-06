@@ -9,6 +9,10 @@ def create_train_dev_test_datasets(data, tokenizer, max_len):
     x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.1)
     x_train, x_dev, y_train, y_dev = train_test_split(x_train, y_train, test_size=0.1)
 
+    x_train, y_train = x_train[:2000], y_train[:2000]
+    x_dev, y_dev = x_dev[:200], y_dev[:200]
+    x_test, y_test = x_test[:200], y_test[:200]
+
     print('Tokenizing train data')
     x_train = tokenizer(x_train, padding=True, truncation=True, max_length=max_len)
     y_train = tokenizer(y_train, padding=True, truncation=True, max_length=max_len)
