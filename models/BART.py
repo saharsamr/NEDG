@@ -3,6 +3,7 @@ from transformers.optimization import AdamW
 from transformers import Trainer
 from data_handler.dataset import create_train_dev_test_datasets
 import torch
+import numpy as np
 
 
 class BART:
@@ -13,7 +14,7 @@ class BART:
 
         self.model = BartForConditionalGeneration.from_pretrained(model_name)
         self.tokenizer = BartTokenizer.from_pretrained(model_name)
-        self.tokenizer.add_special_tokens({'additional_special_tokens': ['<NE>', '</NE>']})
+        # self.tokenizer.add_special_tokens({'additional_special_tokens': ['<NE>', '</NE>']})
         self.config = BartConfig.from_pretrained(model_name)
         self.model_name = model_name
 
@@ -46,11 +47,13 @@ class BART:
             param.requires_grad = not freeze_decoder
 
     def pred(self):
-        for sample in self.dev_dataset:
-          print(sample['input_ids'])
-          print(50*'*')
-          preds = self.model(torch.unsqueeze(sample['input_ids'], dim=0))
-          print(preds)
+
+        with open('results/test.csv', 'w') as f:
+            with torch.no_grad():
+                for sample in self.test_dataset:
+                    logits = self.model(torch.unsqueeze(sample['input_ids'], dim=0)).logits
+                    out = np.argmax(logits, axis=-1)
+                    f.write(f'{self.tokenizer.decode(sample["input_ids"])}\1{self.tokenizer.decode(out[0])}\n')
 
     def save(self):
         pass
