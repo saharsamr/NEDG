@@ -16,7 +16,7 @@ class BART:
         self.tokenizer.add_special_tokens({'additional_special_tokens': ['<NE>', '</NE>']})
         self.config = BartConfig.from_pretrained(model_name)
         self.model = BartForConditionalGeneration.from_pretrained(model_name)
-        self.model.resize_token_embeddings(2)
+        self.model.resize_token_embeddings(len(self.tokenizer))
         self.model_name = model_name
 
         print('Making datasets')
