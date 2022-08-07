@@ -9,13 +9,14 @@ import numpy as np
 class BART:
 
     def __init__(
-      self, data, trainer_args, compute_metrics_func, model_name='facebook/bart-large'
+      self, data, trainer_args, compute_metrics_func, model_name='facebook/bart-large-cnn'
     ):
 
-        self.model = BartForConditionalGeneration.from_pretrained(model_name)
         self.tokenizer = BartTokenizer.from_pretrained(model_name)
-        # self.tokenizer.add_special_tokens({'additional_special_tokens': ['<NE>', '</NE>']})
+        self.tokenizer.add_special_tokens({'additional_special_tokens': ['<NE>', '</NE>']})
         self.config = BartConfig.from_pretrained(model_name)
+        self.model = BartForConditionalGeneration.from_pretrained(model_name)
+        self.model.resize_token_embeddings(2)
         self.model_name = model_name
 
         print('Making datasets')
