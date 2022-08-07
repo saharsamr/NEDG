@@ -2,8 +2,8 @@ from transformers import BartTokenizer, BartForConditionalGeneration, BartConfig
 from transformers.optimization import AdamW
 from transformers import Trainer
 from data_handler.dataset import create_train_dev_test_datasets
+from torch.utils.data import DataLoader
 import torch
-import numpy as np
 
 
 class BART:
@@ -49,12 +49,14 @@ class BART:
 
     def pred(self):
 
-        with open('results/test.csv', 'w') as f:
-            with torch.no_grad():
-                for sample in self.test_dataset:
-                    logits = self.model(torch.unsqueeze(sample['input_ids'], dim=0)).logits
-                    out = np.argmax(logits, axis=-1)
-                    f.write(f'{self.tokenizer.decode(sample["input_ids"])}\1{self.tokenizer.decode(out[0])}\n')
+        test_dataloader = DataLoader(self.test_dataset, batch_size=64, shuffle=True)
+        predictions = []
+        with torch.no_grad():
+            for batch in test_dataloader:
+                ids = self.model.generate(batch['input_ids'].cuda(), max_length=256).logits
+                preds = self.tokenizer.batch_decode(ids, skip_special_tokens=True)
+                predictions.extend(preds)
+        return predictions
 
     def save(self):
         pass
