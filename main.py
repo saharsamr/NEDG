@@ -7,7 +7,7 @@ import pandas as pd
 if __name__ == "__main__":
 
   data = pd.read_csv(
-    'NED/data/data.csv', delimiter='\1', on_bad_lines='skip', header=0, names=['word', 'context', 'description']
+    'data/data.csv', delimiter='\1', on_bad_lines='skip', header=0, names=['word', 'context', 'description']
   )
 
   training_args = TrainingArguments(
