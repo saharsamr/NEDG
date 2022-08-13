@@ -10,7 +10,7 @@ import torch
 class BART:
 
     def __init__(
-      self, data, trainer_args, compute_metrics_func, model_name='facebook/bart-large-cnn'
+      self, data, trainer_args, model_name='facebook/bart-large-cnn'
     ):
 
         self.tokenizer = BartTokenizer.from_pretrained(model_name)
@@ -55,7 +55,7 @@ class BART:
         predictions = []
         with torch.no_grad():
             for batch in test_dataloader:
-                ids = self.model.generate(batch['input_ids'].cuda(), max_length=256).logits
+                ids = self.model.generate(batch['input_ids'].cuda(), max_length=256)
                 preds = self.tokenizer.batch_decode(ids, skip_special_tokens=True)
                 predictions.extend(preds)
         return predictions

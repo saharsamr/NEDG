@@ -20,20 +20,15 @@ if __name__ == "__main__":
     logging_steps=10,
     load_best_model_at_end=True,
     evaluation_strategy='steps',
-    eval_steps=100,
+    eval_steps=10,
     metric_for_best_model='f1'
   )
 
-  def compute_metrics(predictions, labels):
-    return {
-      'rouge': rouge(predictions, labels),
-      'bleu': bleu(predictions, labels)
-    }
-
   print('Initialing the model...')
-  model = BART(data, training_args, compute_metrics)
+  model = BART(data, training_args)
   model.set_learnable_params()
   print('Start training...')
   model.train()
+  print('Start prediction...')
   model.pred()
 
