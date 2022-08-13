@@ -2,6 +2,7 @@ from transformers import BartTokenizer, BartForConditionalGeneration, BartConfig
 from transformers.optimization import AdamW
 from transformers import Trainer
 from data_handler.dataset import create_train_dev_test_datasets
+from transformers import EarlyStoppingCallback
 from torch.utils.data import DataLoader
 import torch
 
@@ -32,6 +33,7 @@ class BART:
             args=trainer_args,
             train_dataset=self.train_dataset,
             eval_dataset=self.dev_dataset,
+            callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
             # optimizers=[self.optimizer],
             # tokenizer=self.tokenizer,
             # compute_metrics=compute_metrics_func,

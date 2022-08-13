@@ -12,13 +12,16 @@ if __name__ == "__main__":
 
   training_args = TrainingArguments(
     output_dir='./results',
-    num_train_epochs=100,
     per_device_train_batch_size=64,
     per_device_eval_batch_size=64,
     warmup_steps=200,
     weight_decay=0.01,
     logging_dir='./logs',
-    logging_steps=10
+    logging_steps=10,
+    load_best_model_at_end=True,
+    evaluation_strategy='steps',
+    eval_steps=100,
+    metric_for_best_model='f1'
   )
 
   def compute_metrics(predictions, labels):
