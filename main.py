@@ -17,11 +17,14 @@ if __name__ == "__main__":
     warmup_steps=200,
     weight_decay=0.01,
     logging_dir='./logs',
-    logging_steps=10,
+    logging_strategy='epoch',
+    logging_steps=1,
     load_best_model_at_end=True,
-    evaluation_strategy='steps',
-    eval_steps=10,
-    metric_for_best_model='f1'
+    evaluation_strategy='epoch',
+    do_eval=True,
+    eval_steps=1,
+    metric_for_best_model='f1',
+    save_strategy='epoch'
   )
 
   print('Initialing the model...')
