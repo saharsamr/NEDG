@@ -23,7 +23,6 @@ if __name__ == "__main__":
     evaluation_strategy='epoch',
     do_eval=True,
     eval_steps=1,
-    metric_for_best_model='f1',
     save_strategy='epoch'
   )
 
