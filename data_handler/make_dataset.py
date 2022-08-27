@@ -1,8 +1,9 @@
 from pymongo import MongoClient
-from nltk import tokenize
 import datasets
 from tqdm import tqdm
 import logging
+
+from utils.arrays import is_array_of_empty_strings
 
 
 def import_to_mongo():
@@ -43,25 +44,24 @@ def create_dataset():
             paragraphs = doc['text']['paragraph']
             anchors = doc['anchors']
 
-            for start, end, p_id, text, wiki_id in zip(
-                    anchors['start'], anchors['end'], anchors['paragraph_id'], anchors['text'], anchors['wikipedia_id']
-            ):
+            if not is_array_of_empty_strings(anchors['wikipedia_id']):
+                for start, end, p_id, text, wiki_id in zip(
+                        anchors['start'], anchors['end'], anchors['paragraph_id'], anchors['text'], anchors['wikipedia_id']
+                ):
 
-                context = paragraphs[p_id]
-                context = context.replace('\1', '').replace('\n', '')
-                context = context[:start] + '<NE> ' + context[start:end] + ' </NE>' + context[end:]
+                    context = paragraphs[p_id]
+                    context = context.replace('\1', '').replace('\n', '')
+                    context = context[:start] + '<NE> ' + context[start:end] + ' </NE>' + context[end:]
 
-                # INFO: extract first sentence as the description
-                try:
-                    description = collection.find_one(
-                        {'wikipedia_id': wiki_id})['text']['paragraph'][1].replace('\1', '').replace('\n', '')
-                    description = tokenize.sent_tokenize(description)[0]
-                except Exception as e:
-                    failed_counts += 1
-                    continue
+                    try:
+                        description = collection.find_one(
+                            {'wikipedia_id': wiki_id})['text']['paragraph'][1].replace('\1', '').replace('\n', '')
+                    except Exception as e:
+                        failed_counts += 1
+                        continue
 
-                text = text.replace('\1', '').replace('\n', '')
+                    text = text.replace('\1', '').replace('\n', '')
 
-                f.write(f'{text}\1{context}\1{description}\n')
+                    f.write(f'{text}\1{context}\1{description}\n')
 
         logging.error("Failed to find {} documents".format(failed_counts))
