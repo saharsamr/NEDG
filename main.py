@@ -11,6 +11,7 @@ if __name__ == "__main__":
   )
 
   training_args = TrainingArguments(
+    num_train_epochs=150,
     output_dir='./results',
     per_device_train_batch_size=64,
     per_device_eval_batch_size=64,
@@ -19,11 +20,11 @@ if __name__ == "__main__":
     logging_dir='./logs',
     logging_strategy='epoch',
     logging_steps=1,
-    load_best_model_at_end=True,
+    # load_best_model_at_end=True,
     evaluation_strategy='epoch',
     do_eval=True,
     eval_steps=1,
-    save_strategy='epoch'
+    # save_strategy='epoch'
   )
 
   print('Initialing the model...')
