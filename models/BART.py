@@ -1,4 +1,4 @@
-from transformers import BartTokenizer, BartForConditionalGeneration, BartConfig, TrainingArguments, Trainer
+from transformers import BartTokenizerFast, BartForConditionalGeneration, BartConfig, TrainingArguments, Trainer
 from transformers.optimization import AdamW
 from transformers import Trainer
 from data_handler.dataset import create_train_dev_test_datasets
@@ -13,7 +13,7 @@ class BART:
       self, data, trainer_args, model_name='facebook/bart-large-cnn'
     ):
 
-        self.tokenizer = BartTokenizer.from_pretrained(model_name)
+        self.tokenizer = BartTokenizerFast.from_pretrained(model_name)
         self.tokenizer.add_special_tokens({'additional_special_tokens': ['<NE>', '</NE>']})
         self.config = BartConfig.from_pretrained(model_name)
         self.model = BartForConditionalGeneration.from_pretrained(model_name)
