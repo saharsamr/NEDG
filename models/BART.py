@@ -51,14 +51,18 @@ class BART:
 
     def pred(self):
 
-        test_dataloader = DataLoader(self.test_dataset, batch_size=64, shuffle=True)
-        predictions = []
+        test_dataloader = DataLoader(self.test_dataset, batch_size=64, shuffle=False)
+        inputs, labels, predictions = [], [], []
         with torch.no_grad():
             for batch in test_dataloader:
                 ids = self.model.generate(batch['input_ids'].cuda(), max_length=256)
                 preds = self.tokenizer.batch_decode(ids, skip_special_tokens=True)
                 predictions.extend(preds)
-        return predictions
+                input = self.tokenizer.batch_decode(batch['input_ids'], skip_special_tokens=True)
+                inputs.extend(input)
+                label = self.tokenizer.batch_decode(batch['label'], skip_special_tokens=True)
+                labels.extend(label)
+        return predictions, inputs, labels
 
     def save(self):
         pass

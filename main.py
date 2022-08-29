@@ -1,5 +1,6 @@
 from transformers import TrainingArguments
 from utils.metrics import rouge, bleu
+from utils.save_data import save_predictions
 from models.BART import BART
 import pandas as pd
 
@@ -33,5 +34,9 @@ if __name__ == "__main__":
   print('Start training...')
   model.train()
   print('Start prediction...')
-  model.pred()
+  preds, inputs, labels = model.pred()
+
+  save_predictions(inputs, labels, preds)
+
+
 
