@@ -4,7 +4,7 @@ from utils.save_data import save_tokenized_datasets
 import torch
 
 
-def create_train_dev_test_datasets(data, tokenizer):
+def create_train_dev_test_datasets(data):
 
     X, Y = list(data['context']), list(data['description'])
     x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.1)
