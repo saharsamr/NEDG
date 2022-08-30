@@ -14,8 +14,8 @@ if __name__ == "__main__":
   training_args = TrainingArguments(
     num_train_epochs=150,
     output_dir='./results',
-    per_device_train_batch_size=64,
-    per_device_eval_batch_size=64,
+    per_device_train_batch_size=32,
+    per_device_eval_batch_size=32,
     warmup_steps=200,
     weight_decay=0.01,
     logging_dir='./logs',
