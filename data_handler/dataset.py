@@ -4,25 +4,27 @@ from utils.save_data import save_tokenized_datasets
 import torch
 
 
-def create_train_dev_test_datasets(data):
+def create_train_dev_test_datasets(data, tokenizer, max_length):
 
     X, Y = list(data['context']), list(data['description'])
     x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.1)
     x_train, x_dev, y_train, y_dev = train_test_split(x_train, y_train, test_size=0.1)
 
-    train_dataset = WikiDataset(x_train, y_train)
-    dev_dataset = WikiDataset(x_dev, y_dev)
-    test_dataset = WikiDataset(x_test, y_test)
+    train_dataset = WikiDataset(tokenizer, x_train, y_train, max_length)
+    dev_dataset = WikiDataset(tokenizer, x_dev, y_dev, max_length)
+    test_dataset = WikiDataset(tokenizer, x_test, y_test, max_length)
 
     return train_dataset, dev_dataset, test_dataset
 
 
 class WikiDataset(Dataset):
 
-    def __init__(self, inputs, labels=None):
+    def __init__(self, tokenizer, inputs, labels=None, max_length=256):
 
         self.inputs = inputs
         self.labels = labels
+        self.tokenizer = tokenizer
+        self.max_len = max_length
 
     def __len__(self):
 

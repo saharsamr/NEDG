@@ -22,7 +22,8 @@ class BART:
 
         print('Making datasets')
         self.data = data
-        self.train_dataset, self.dev_dataset, self.test_dataset = create_train_dev_test_datasets(self.data)
+        self.train_dataset, self.dev_dataset, self.test_dataset = \
+            create_train_dev_test_datasets(self.data, self.tokenizer, self.config.max_len)
 
         self.optimizer = AdamW(self.model.parameters())
 
