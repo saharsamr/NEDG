@@ -33,6 +33,7 @@ class BART:
             args=trainer_args,
             train_dataset=self.train_dataset,
             eval_dataset=self.dev_dataset,
+            tokenizer=self.tokenizer
             # callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
             # optimizers=[self.optimizer],
             # tokenizer=self.tokenizer,

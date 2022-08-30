@@ -10,21 +10,19 @@ def create_train_dev_test_datasets(data, tokenizer):
     x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.1)
     x_train, x_dev, y_train, y_dev = train_test_split(x_train, y_train, test_size=0.1)
 
-    train_dataset = WikiDataset(tokenizer, x_train, y_train)
-    dev_dataset = WikiDataset(tokenizer, x_dev, y_dev)
-    test_dataset = WikiDataset(tokenizer, x_test, y_test)
+    train_dataset = WikiDataset(x_train, y_train)
+    dev_dataset = WikiDataset(x_dev, y_dev)
+    test_dataset = WikiDataset(x_test, y_test)
 
     return train_dataset, dev_dataset, test_dataset
 
 
 class WikiDataset(Dataset):
 
-    def __init__(self, tokenizer, inputs, labels=None, max_len=128):
+    def __init__(self, inputs, labels=None):
 
         self.inputs = inputs
         self.labels = labels
-        self.max_len = max_len
-        self.tokenizer = tokenizer
 
     def __len__(self):
 
@@ -32,11 +30,9 @@ class WikiDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        input_encodings = self.tokenizer(self.inputs[idx], padding="max_length", truncation=True, max_length=self.max_len)
-        output_encodings = self.tokenizer(self.labels[idx], padding="max_length", truncation=True, max_length=self.max_len)
-        item = {'input_ids': torch.tensor(input_encodings['input_ids'])}
+        item = {'input_ids': torch.tensor(self.inputs[idx])}
         if self.labels:
-            item['labels'] = torch.tensor(output_encodings['input_ids'])
+            item['labels'] = torch.tensor(self.labels[idx])
 
         return item
 
