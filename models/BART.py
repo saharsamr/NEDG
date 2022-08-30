@@ -15,7 +15,6 @@ class BART:
 
         self.tokenizer = BartTokenizerFast.from_pretrained(model_name)
         self.tokenizer.add_special_tokens({'additional_special_tokens': ['<NE>', '</NE>']})
-        self.config = BartConfig.from_pretrained(model_name)
         self.model = BartForConditionalGeneration.from_pretrained(model_name)
         self.model.resize_token_embeddings(len(self.tokenizer))
         self.model_name = model_name
@@ -23,7 +22,7 @@ class BART:
         print('Making datasets')
         self.data = data
         self.train_dataset, self.dev_dataset, self.test_dataset = \
-            create_train_dev_test_datasets(self.data, self.tokenizer, self.config.max_len)
+            create_train_dev_test_datasets(self.data, self.tokenizer, 256)
 
         self.optimizer = AdamW(self.model.parameters())
 
