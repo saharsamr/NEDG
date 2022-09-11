@@ -1,20 +1,5 @@
 from torch.utils.data import Dataset
-from sklearn.model_selection import train_test_split
-from utils.save_data import save_tokenized_datasets
 import torch
-
-
-def create_train_dev_test_datasets(data, tokenizer, max_length):
-
-    X, Y = list(data['context']), list(data['description'])
-    x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.1)
-    x_train, x_dev, y_train, y_dev = train_test_split(x_train, y_train, test_size=0.1)
-
-    train_dataset = WikiDataset(tokenizer, x_train, y_train, max_length)
-    dev_dataset = WikiDataset(tokenizer, x_dev, y_dev, max_length)
-    test_dataset = WikiDataset(tokenizer, x_test, y_test, max_length)
-
-    return train_dataset, dev_dataset, test_dataset
 
 
 class WikiDataset(Dataset):

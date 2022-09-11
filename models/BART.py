@@ -1,7 +1,7 @@
 from transformers import BartTokenizerFast, BartForConditionalGeneration, BartConfig, TrainingArguments, Trainer
 from transformers.optimization import AdamW
 from transformers import Trainer
-from data_handler.dataset import create_train_dev_test_datasets
+from data_handler.dataset import WikiDataset
 from transformers import EarlyStoppingCallback
 from torch.utils.data import DataLoader
 import torch
@@ -10,7 +10,11 @@ import torch
 class BART:
 
     def __init__(
-      self, data, trainer_args, model_name='facebook/bart-large-cnn'
+      self, trainer_args,
+      train_x, train_y,
+      test_x, test_y,
+      valid_x, valid_y,
+      model_name='facebook/bart-large-cnn'
     ):
 
         self.tokenizer = BartTokenizerFast.from_pretrained(model_name)
@@ -20,9 +24,9 @@ class BART:
         self.model_name = model_name
 
         print('Making datasets')
-        self.data = data
-        self.train_dataset, self.dev_dataset, self.test_dataset = \
-            create_train_dev_test_datasets(self.data, self.tokenizer, 256)
+        self.train_dataset = WikiDataset(self.tokenizer, train_x, train_y, max_length=256)
+        self.test_dataset = WikiDataset(self.tokenizer, test_x, test_y, max_length=256)
+        self.valid_dataset = WikiDataset(self.tokenizer, valid_x, valid_y, max_length=256)
 
         self.optimizer = AdamW(self.model.parameters())
 
@@ -30,7 +34,7 @@ class BART:
             model=self.model,
             args=trainer_args,
             train_dataset=self.train_dataset,
-            eval_dataset=self.dev_dataset,
+            eval_dataset=self.valid_dataset,
             tokenizer=self.tokenizer
             # callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
             # optimizers=[self.optimizer],

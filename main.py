@@ -7,9 +7,13 @@ import pandas as pd
 
 if __name__ == "__main__":
 
-  data = pd.read_csv(
-    'data.csv', delimiter='\1', on_bad_lines='skip', header=0, names=['word', 'context', 'description']
-  )
+  train = pd.read_csv('data/train.csv', delimiter='\1', header=0, names=['title', 'context', 'description'])
+  test = pd.read_csv('data/test.csv', delimiter='\1', header=0, names=['title', 'context', 'description'])
+  valid = pd.read_csv('data/valid.csv', delimiter='\1', header=0, names=['title', 'context', 'description'])
+
+  train_x, train_y = train['context'], train['description']
+  test_x, test_y = test['context'], test['description']
+  valid_x, valid_y = valid['context'], valid['description']
 
   training_args = TrainingArguments(
     num_train_epochs=150,
@@ -29,7 +33,12 @@ if __name__ == "__main__":
   )
 
   print('Initialing the model...')
-  model = BART(data, training_args)
+  model = BART(
+    training_args,
+    train_x, train_y,
+    test_x, test_y,
+    valid_x, valid_y,
+  )
   model.set_learnable_params()
   print('Start training...')
   model.train()
