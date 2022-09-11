@@ -11,9 +11,9 @@ if __name__ == "__main__":
   test = pd.read_csv('data/test.csv', delimiter='\1', header=0, names=['title', 'context', 'description'])
   valid = pd.read_csv('data/valid.csv', delimiter='\1', header=0, names=['title', 'context', 'description'])
 
-  train_x, train_y = train['context'], train['description']
-  test_x, test_y = test['context'], test['description']
-  valid_x, valid_y = valid['context'], valid['description']
+  train_x, train_y = list(train['context']), list(train['description'])
+  test_x, test_y = list(test['context']), list(test['description'])
+  valid_x, valid_y = list(valid['context']), list(valid['description'])
 
   training_args = TrainingArguments(
     num_train_epochs=150,
