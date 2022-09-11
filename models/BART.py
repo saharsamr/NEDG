@@ -1,6 +1,5 @@
 from transformers import BartTokenizerFast, BartForConditionalGeneration, BartConfig, TrainingArguments, Trainer
 from transformers.optimization import AdamW
-from transformers import Trainer
 from data_handler.dataset import WikiDataset
 from transformers import EarlyStoppingCallback
 from torch.utils.data import DataLoader
