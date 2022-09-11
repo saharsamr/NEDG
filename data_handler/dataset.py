@@ -23,7 +23,11 @@ class WikiDataset(Dataset):
         print('>>>>>>>>>>>>>>>', len(input_encodings), input_encodings)
         print('>>>>>>>>>>>>>>>', len(output_encodings), output_encodings)
 
-        item = {'input_ids': torch.tensor(input_encodings['input_ids'])}
+        item = {
+            'input_ids': torch.tensor(input_encodings['input_ids']),
+            'attention_mask': torch.tensor(input_encodings['attention_mask'])
+        }
+        
         if self.labels:
             item['labels'] = torch.tensor(output_encodings['input_ids'])
 
