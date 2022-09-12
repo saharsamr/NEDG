@@ -1,28 +1,30 @@
 from transformers import TrainingArguments
-from utils.metrics import rouge, bleu
 from utils.save_data import save_predictions
 from models.BART import BART
 import pandas as pd
+from config import TRAIN_FILE, TEST_FILE, VALID_FILE, \
+  EPOCHS, BATCH_SIZE, WARMUP_STEPS, WEIGHT_DECAY, \
+  LOGGING_DIR, OUTPUT_DIR
 
 
 if __name__ == "__main__":
 
-  train = pd.read_csv('data/train.csv', delimiter='\1', header=0, names=['title', 'context', 'description'])
-  test = pd.read_csv('data/test.csv', delimiter='\1', header=0, names=['title', 'context', 'description'])
-  valid = pd.read_csv('data/valid.csv', delimiter='\1', header=0, names=['title', 'context', 'description'])
+  train = pd.read_csv(TRAIN_FILE, delimiter='\1', header=0, names=['title', 'context', 'description'])
+  test = pd.read_csv(TEST_FILE, delimiter='\1', header=0, names=['title', 'context', 'description'])
+  valid = pd.read_csv(VALID_FILE, delimiter='\1', header=0, names=['title', 'context', 'description'])
 
   train_x, train_y = list(train['context']), list(train['description'])
   test_x, test_y = list(test['context']), list(test['description'])
   valid_x, valid_y = list(valid['context']), list(valid['description'])
 
   training_args = TrainingArguments(
-    num_train_epochs=150,
-    output_dir='./results',
-    per_device_train_batch_size=32,
-    per_device_eval_batch_size=32,
-    warmup_steps=200,
-    weight_decay=0.01,
-    logging_dir='./logs',
+    num_train_epochs=EPOCHS,
+    output_dir=OUTPUT_DIR,
+    per_device_train_batch_size=BATCH_SIZE,
+    per_device_eval_batch_size=BATCH_SIZE,
+    warmup_steps=WARMUP_STEPS,
+    weight_decay=WEIGHT_DECAY,
+    logging_dir=LOGGING_DIR,
     logging_strategy='epoch',
     logging_steps=1,
     # load_best_model_at_end=True,

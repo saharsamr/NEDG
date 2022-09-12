@@ -5,6 +5,7 @@ from data_handler.dataset import WikiDataset
 from transformers import EarlyStoppingCallback
 from torch.utils.data import DataLoader
 import torch
+from config import MODEL_NAME, ADDITIONAL_SPECIAL_TOKENS
 
 
 class BART:
@@ -14,19 +15,19 @@ class BART:
       train_x, train_y,
       test_x, test_y,
       valid_x, valid_y,
-      model_name='facebook/bart-large-cnn'
+      model_name=MODEL_NAME
     ):
 
         self.tokenizer = BartTokenizerFast.from_pretrained(model_name)
-        self.tokenizer.add_special_tokens({'additional_special_tokens': ['<NE>', '</NE>']})
+        self.tokenizer.add_special_tokens({'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS})
         self.model = BartForConditionalGeneration.from_pretrained(model_name)
         self.model.resize_token_embeddings(len(self.tokenizer))
         self.model_name = model_name
 
         print('Making datasets')
-        self.train_dataset = WikiDataset(self.tokenizer, train_x, train_y, max_length=256)
-        self.test_dataset = WikiDataset(self.tokenizer, test_x, test_y, max_length=256)
-        self.valid_dataset = WikiDataset(self.tokenizer, valid_x, valid_y, max_length=256)
+        self.train_dataset = WikiDataset(self.tokenizer, train_x, train_y)
+        self.test_dataset = WikiDataset(self.tokenizer, test_x, test_y)
+        self.valid_dataset = WikiDataset(self.tokenizer, valid_x, valid_y)
 
         self.optimizer = AdamW(self.model.parameters())
 
