@@ -18,7 +18,7 @@ class WikiDataset(Dataset):
     def __getitem__(self, idx):
 
         input_encodings = self.tokenizer(self.inputs[idx], padding=True, truncation=True, max_length=self.max_len)
-        output_encodings = self.tokenizer(self.labels[idx], padding=True, truncation=True, max_length=self.max_len)
+        output_encodings = self.tokenizer(self.labels[idx], padding='max_length', truncation=True, max_length=40)
         item = {'input_ids': torch.tensor(input_encodings['input_ids'])}
         if self.labels:
             item['labels'] = torch.tensor(output_encodings['input_ids'])
