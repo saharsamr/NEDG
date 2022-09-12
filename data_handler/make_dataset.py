@@ -95,13 +95,20 @@ def create_dataset():
 
 def make_jsonl_to_csv(file_path):
 
+    count_no_desc, count_with_desc = 0, 0
     with open(file_path, 'r') as f:
         with open(f'{file_path[:-5]}.csv', 'w') as g:
             writer = csv.writer(g, delimiter='\1')
             for line in f:
                 data = json.loads(line)
                 key, value = list(data.keys())[0], list(data.values())[0]
+                if value['description'] == '':
+                    count_no_desc += 1
+                    continue
+                count_with_desc += 1
                 for context in value['contexts']:
                     title, context, description = \
                         value['label'].replace('\1', ''), context.replace('\1', ''), value['description'].replace('\1', '')
                     writer.writerow([title, context, description])
+
+    print(f'No description: {count_no_desc}, with description: {count_with_desc}')
