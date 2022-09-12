@@ -1,7 +1,7 @@
 import pickle
 
-# from pymongo import MongoClient
-# import datasets
+from pymongo import MongoClient
+import datasets
 from tqdm import tqdm
 from collections import defaultdict
 import logging
