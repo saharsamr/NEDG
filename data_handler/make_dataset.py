@@ -2,6 +2,8 @@ import pickle
 
 from pymongo import MongoClient
 import datasets
+import random
+
 from tqdm import tqdm
 from collections import defaultdict
 import logging
@@ -10,6 +12,7 @@ import json
 import csv
 
 from utils.data_structures import is_array_of_empty_strings
+from config import MIN_CONTEXT_LEN, MAX_CONTEXT_NUM
 
 
 def import_to_mongo():
@@ -106,7 +109,10 @@ def make_jsonl_to_csv(file_path):
                     count_no_desc += 1
                     continue
                 count_with_desc += 1
-                for context in value['contexts']:
+                contexts = [context for context in value['contexts'] if len(context.split()) > MIN_CONTEXT_LEN]
+                if len(contexts) > MAX_CONTEXT_NUM:
+                    contexts = random.sample(contexts, MAX_CONTEXT_NUM)
+                for context in contexts:
                     title, context, description = \
                         value['label'].replace('\1', ''), context.replace('\1', ''), value['description'].replace('\1', '')
                     writer.writerow([title, context, description])
