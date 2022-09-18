@@ -9,9 +9,9 @@ MODEL_NAME = 'facebook/bart-large-cnn'
 LOGGING_DIR = 'logs'
 OUTPUT_DIR = 'results'
 
-TRAIN_FILE = 'data/train.csv'
-TEST_FILE = 'data/test.csv'
-VALID_FILE = 'data/valid.csv'
+TRAIN_FILE = 'data/train_human.csv'
+TEST_FILE = 'data/test_human.csv'
+VALID_FILE = 'data/valid_human.csv'
 
 WARMUP_STEPS = 200
 WEIGHT_DECAY = 0.01
