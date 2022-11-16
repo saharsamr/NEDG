@@ -42,7 +42,7 @@ if __name__ == "__main__":
         test_x, test_y,
         valid_x, valid_y,
     )
-    model.set_learnable_params()
+    model.set_learnable_params(freeze_decoder=False)
     print('Start training...')
     model.train()
     print('Start prediction...')
