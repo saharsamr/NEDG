@@ -46,7 +46,7 @@ class BART:
     def train(self):
         self.trainer.train()
 
-    def set_learnable_params(self, freeze_encoder=True, freeze_decoder=False):
+    def set_learnable_params(self, freeze_encoder=True, freeze_decoder=True):
 
         for param in self.model.get_encoder().parameters():
             param.requires_grad = not freeze_encoder
