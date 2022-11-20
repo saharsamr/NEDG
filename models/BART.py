@@ -48,7 +48,7 @@ class BART:
 
     def set_learnable_params(self, freeze_encoder=True, freeze_decoder=True):
 
-        for part in [self.model.encoder, self.model.decoder]:
+        for part in [self.model.get_encoder(), self.model.get_decoder()]:
             for param in part.embed_positions.parameters():
                 param.requires_grad = False
             for param in part.embed_tokens.parameters():
