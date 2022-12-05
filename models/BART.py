@@ -29,17 +29,16 @@ class BART:
         self.test_dataset = WikiDataset(self.tokenizer, test_x, test_y)
         self.valid_dataset = WikiDataset(self.tokenizer, valid_x, valid_y)
 
-        self.optimizer = AdamW(self.model.parameters())
+        self.optimizer = AdamW(self.model.get_decoder().parameters())
 
         self.trainer = Trainer(
             model=self.model,
             args=trainer_args,
             train_dataset=self.train_dataset,
             eval_dataset=self.valid_dataset,
-            tokenizer=self.tokenizer
+            tokenizer=self.tokenizer,
+            optimizers=(self.optimizer, None)
             # callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
-            # optimizers=[self.optimizer],
-            # tokenizer=self.tokenizer,
             # compute_metrics=compute_metrics_func,
         )
 
