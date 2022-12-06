@@ -5,7 +5,7 @@ from data_handler.dataset import WikiDataset
 from transformers import EarlyStoppingCallback
 from torch.utils.data import DataLoader
 import torch
-from config import MODEL_NAME, ADDITIONAL_SPECIAL_TOKENS
+from config import MODEL_NAME, ADDITIONAL_SPECIAL_TOKENS, MODEL_PATH
 
 
 class BART:
@@ -15,12 +15,16 @@ class BART:
       train_x, train_y,
       test_x, test_y,
       valid_x, valid_y,
-      model_name=MODEL_NAME
+      model_name=MODEL_NAME,
+      load=False,
     ):
 
         self.tokenizer = BartTokenizerFast.from_pretrained(model_name)
         self.tokenizer.add_special_tokens({'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS})
-        self.model = BartForConditionalGeneration.from_pretrained(model_name)
+        if load:
+            self.model = BartForConditionalGeneration.from_pretrained(MODEL_PATH)
+        else:
+            self.model = BartForConditionalGeneration.from_pretrained(model_name)
         self.model.resize_token_embeddings(len(self.tokenizer))
         self.model_name = model_name
 
@@ -74,7 +78,4 @@ class BART:
         return predictions, inputs, labels
 
     def save(self):
-        pass
-
-    def load(self):
         pass

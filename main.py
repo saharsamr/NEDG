@@ -4,7 +4,7 @@ from models.BART import BART
 import pandas as pd
 from config import TRAIN_FILE, TEST_FILE, VALID_FILE, \
     EPOCHS, BATCH_SIZE, WARMUP_STEPS, WEIGHT_DECAY, \
-    LOGGING_DIR, OUTPUT_DIR
+    LOGGING_DIR, OUTPUT_DIR, LOAD_MODEL
 
 
 if __name__ == "__main__":
@@ -41,6 +41,7 @@ if __name__ == "__main__":
         train_x, train_y,
         test_x, test_y,
         valid_x, valid_y,
+        load=LOAD_MODEL
     )
     model.set_learnable_params(freeze_decoder=False)
     print('Start training...')

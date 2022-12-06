@@ -21,5 +21,8 @@ ADDITIONAL_SPECIAL_TOKENS = ['<NE>', '</NE>']
 MIN_CONTEXT_LEN = 30
 MAX_CONTEXT_NUM = 5
 
+LOAD_MODEL = False
+MODEL_PATH = 'results/...'
+
 
 
