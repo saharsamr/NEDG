@@ -5,7 +5,7 @@ from data_handler.dataset import WikiDataset
 from transformers import EarlyStoppingCallback
 from torch.utils.data import DataLoader
 import torch
-from config import MODEL_NAME, ADDITIONAL_SPECIAL_TOKENS, MODEL_PATH
+from config import MODEL_NAME, ADDITIONAL_SPECIAL_TOKENS, MODEL_PATH, OUTPUT_MAX_LENGTH
 
 
 class BART:
@@ -68,7 +68,7 @@ class BART:
         inputs, labels, predictions = [], [], []
         with torch.no_grad():
             for batch in test_dataloader:
-                ids = self.model.generate(batch['input_ids'].cuda(), max_length=256)
+                ids = self.model.generate(batch['input_ids'].cuda(), max_length=OUTPUT_MAX_LENGTH)
                 preds = self.tokenizer.batch_decode(ids, skip_special_tokens=True)
                 predictions.extend(preds)
                 input = self.tokenizer.batch_decode(batch['input_ids'], skip_special_tokens=True)
