@@ -96,11 +96,12 @@ def create_dataset():
         logging.error("Failed to find {} documents".format(failed_counts))
 
 
-def make_jsonl_to_csv(file_path):
+def make_jsonl_to_csv(file_path, concat_contexts=False):
 
     count_no_desc, count_with_desc = 0, 0
     with open(file_path, 'r') as f:
         with open(f'{file_path[:-5]}.csv', 'w') as g:
+
             writer = csv.writer(g, delimiter='\1')
             for line in f:
                 data = json.loads(line)
@@ -109,12 +110,18 @@ def make_jsonl_to_csv(file_path):
                     count_no_desc += 1
                     continue
                 count_with_desc += 1
-                contexts = [context for context in value['contexts'] if len(context.split()) > MIN_CONTEXT_LEN]
+
+                contexts = [context.replace('\1', '') for context in value['contexts'] if len(context.split()) > MIN_CONTEXT_LEN]
+                title, description = value['label'].replace('\1', ''), value['description'].replace('\1', '')
+
                 if len(contexts) > MAX_CONTEXT_NUM:
                     contexts = random.sample(contexts, MAX_CONTEXT_NUM)
-                for context in contexts:
-                    title, context, description = \
-                        value['label'].replace('\1', ''), context.replace('\1', ''), value['description'].replace('\1', '')
-                    writer.writerow([title, context, description])
+
+                if concat_contexts:
+                    contexts = '<CNTXT>' + '</CNTXT><CNTXT>'.join(contexts) + '</CNTXT>'
+                    writer.writerow([title, contexts, description])
+                else:
+                    for context in contexts:
+                        writer.writerow([title, context, description])
 
     print(f'No description: {count_no_desc}, with description: {count_with_desc}')
