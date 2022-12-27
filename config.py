@@ -14,7 +14,8 @@ TEST_FILE = 'data/test_human.csv'
 VALID_FILE = 'data/valid_human.csv'
 
 WARMUP_STEPS = 200
-WEIGHT_DECAY = 0.01
+WEIGHT_DECAY = 0
+LEARNING_RATE = 5e-5
 
 ADDITIONAL_SPECIAL_TOKENS = ['<NE>', '</NE>', '<CNTXT>', '</CNTXT>']
 

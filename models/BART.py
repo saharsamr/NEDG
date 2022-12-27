@@ -5,7 +5,7 @@ from data_handler.dataset import WikiDataset
 from transformers import EarlyStoppingCallback
 from torch.utils.data import DataLoader
 import torch
-from config import MODEL_NAME, ADDITIONAL_SPECIAL_TOKENS, MODEL_PATH, OUTPUT_MAX_LENGTH
+from config import MODEL_NAME, ADDITIONAL_SPECIAL_TOKENS, MODEL_PATH, OUTPUT_MAX_LENGTH, LEARNING_RATE
 
 
 class BART:
@@ -33,7 +33,7 @@ class BART:
         self.test_dataset = WikiDataset(self.tokenizer, test_x, test_y)
         self.valid_dataset = WikiDataset(self.tokenizer, valid_x, valid_y)
 
-        self.optimizer = AdamW(self.model.get_decoder().parameters())
+        self.optimizer = AdamW(self.model.get_decoder().parameters(), lr=LEARNING_RATE)
 
         self.trainer = Trainer(
             model=self.model,
