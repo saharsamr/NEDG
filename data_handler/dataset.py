@@ -7,7 +7,8 @@ class WikiDataset(Dataset):
 
     def __init__(
       self, tokenizer, inputs, labels=None,
-      input_max_length=INPUT_MAX_LENGTH, output_max_length=OUTPUT_MAX_LENGTH
+      input_max_length=INPUT_MAX_LENGTH, output_max_length=OUTPUT_MAX_LENGTH,
+      input_padding=True
     ):
 
         self.inputs = inputs
@@ -15,6 +16,7 @@ class WikiDataset(Dataset):
         self.tokenizer = tokenizer
         self.input_max_len = input_max_length
         self.output_max_len = output_max_length
+        self.input_padding = input_padding
 
     def __len__(self):
 
@@ -23,7 +25,7 @@ class WikiDataset(Dataset):
     def __getitem__(self, idx):
 
         input_encodings = self.tokenizer(
-            self.inputs[idx], padding=True, truncation=True, max_length=self.input_max_len
+            self.inputs[idx], padding=self.input_padding, truncation=True, max_length=self.input_max_len
         )
         output_encodings = self.tokenizer(
             self.labels[idx], padding='max_length', truncation=True, max_length=self.output_max_len
