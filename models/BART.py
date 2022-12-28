@@ -6,7 +6,8 @@ from transformers import EarlyStoppingCallback
 from torch.utils.data import DataLoader
 import torch
 from config import MODEL_NAME, ADDITIONAL_SPECIAL_TOKENS, \
-    MODEL_PATH, OUTPUT_MAX_LENGTH, LEARNING_RATE, INPUT_MAX_LENGTH
+    MODEL_PATH, OUTPUT_MAX_LENGTH, LEARNING_RATE, INPUT_MAX_LENGTH, \
+    OUTPUT_MIN_LENGTH, BATCH_SIZE
 
 
 class BART:
@@ -67,15 +68,17 @@ class BART:
 
     def pred(self):
 
-        test_dataloader = DataLoader(self.test_dataset, batch_size=64, shuffle=False)
+        test_dataloader = DataLoader(self.test_dataset, batch_size=BATCH_SIZE, shuffle=False)
         inputs, labels, predictions = [], [], []
         with torch.no_grad():
             for batch in test_dataloader:
-                ids = self.model.generate(batch['input_ids'].cuda(), max_length=OUTPUT_MAX_LENGTH)
+                ids = self.model.generate(
+                    batch['input_ids'].cuda(), min_length=OUTPUT_MIN_LENGTH, max_length=OUTPUT_MAX_LENGTH
+                )
                 preds = self.tokenizer.batch_decode(ids, skip_special_tokens=True)
                 predictions.extend(preds)
-                input = self.tokenizer.batch_decode(batch['input_ids'], skip_special_tokens=True)
-                inputs.extend(input)
+                input_ = self.tokenizer.batch_decode(batch['input_ids'], skip_special_tokens=True)
+                inputs.extend(input_)
                 label = self.tokenizer.batch_decode(batch['labels'], skip_special_tokens=True)
                 labels.extend(label)
         return predictions, inputs, labels

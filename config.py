@@ -3,6 +3,7 @@ EPOCHS = 4
 
 INPUT_MAX_LENGTH = 600
 OUTPUT_MAX_LENGTH = 10
+OUTPUT_MIN_LENGTH = 3
 
 MODEL_NAME = 'facebook/bart-large-cnn'
 
