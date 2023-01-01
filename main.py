@@ -3,8 +3,8 @@ from utils.save_data import save_predictions
 from models.BART import BART
 import pandas as pd
 from config import TRAIN_FILE, TEST_FILE, VALID_FILE, \
-    EPOCHS, BATCH_SIZE, WARMUP_STEPS, WEIGHT_DECAY, \
-    LOGGING_DIR, OUTPUT_DIR, LOAD_MODEL
+    EPOCHS, TRAIN_BATCH_SIZE, EVAL_BATCH_SIZE, WARMUP_STEPS, \
+    WEIGHT_DECAY, LOGGING_DIR, OUTPUT_DIR, LOAD_MODEL
 
 
 if __name__ == "__main__":
@@ -20,8 +20,8 @@ if __name__ == "__main__":
     training_args = TrainingArguments(
         num_train_epochs=EPOCHS,
         output_dir=OUTPUT_DIR,
-        per_device_train_batch_size=BATCH_SIZE,
-        per_device_eval_batch_size=BATCH_SIZE,
+        per_device_train_batch_size=TRAIN_BATCH_SIZE,
+        per_device_eval_batch_size=EVAL_BATCH_SIZE,
         warmup_steps=WARMUP_STEPS,
         weight_decay=WEIGHT_DECAY,
         logging_dir=LOGGING_DIR,
