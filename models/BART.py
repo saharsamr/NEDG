@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 import torch
 from config import MODEL_NAME, ADDITIONAL_SPECIAL_TOKENS, \
     MODEL_PATH, OUTPUT_MAX_LENGTH, LEARNING_RATE, INPUT_MAX_LENGTH, \
-    OUTPUT_MIN_LENGTH, BATCH_SIZE
+    OUTPUT_MIN_LENGTH, TEST_BATCH_SIZE
 
 
 class BART:
@@ -69,7 +69,7 @@ class BART:
 
     def pred(self):
 
-        test_dataloader = DataLoader(self.test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+        test_dataloader = DataLoader(self.test_dataset, batch_size=TEST_BATCH_SIZE, shuffle=False)
         inputs, labels, predictions = [], [], []
         with torch.no_grad():
             for batch in test_dataloader:
