@@ -31,7 +31,7 @@ if __name__ == "__main__":
         evaluation_strategy='steps',
         do_eval=True,
         eval_steps=500,
-        save_strategy='epoch',
+        save_strategy='steps',
         save_total_limit=3
     )
 
