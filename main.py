@@ -1,10 +1,13 @@
 from transformers import TrainingArguments
 from utils.save_data import save_predictions
+from utils.metrics import evaluate
 from models.BART import BART
 import pandas as pd
-from config import TRAIN_FILE, TEST_FILE, VALID_FILE, \
-    EPOCHS, TRAIN_BATCH_SIZE, EVAL_BATCH_SIZE, WARMUP_STEPS, \
-    WEIGHT_DECAY, LOGGING_DIR, OUTPUT_DIR, LOAD_MODEL
+from config import \
+    TRAIN_FILE, TEST_FILE, VALID_FILE, \
+    EPOCHS, TRAIN_BATCH_SIZE, EVAL_BATCH_SIZE, \
+    WARMUP_STEPS, WEIGHT_DECAY, LOGGING_DIR, \
+    OUTPUT_DIR, LOAD_MODEL, PRED_FILE_PATH, EVALUATE
 
 
 if __name__ == "__main__":
@@ -43,13 +46,17 @@ if __name__ == "__main__":
         valid_x, valid_y,
         load=LOAD_MODEL
     )
+
     model.set_learnable_params(freeze_decoder=False)
     print('Start training...')
     model.train()
+
     print('Start prediction...')
     preds, inputs, labels = model.pred()
-
     save_predictions(inputs, labels, preds)
+
+    if EVALUATE:
+        evaluate(PRED_FILE_PATH)
 
 
 

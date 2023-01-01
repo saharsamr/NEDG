@@ -1,5 +1,5 @@
 TRAIN_BATCH_SIZE = 12
-EVAL_BATCH_SIZE = 1
+EVAL_BATCH_SIZE = 12
 TEST_BATCH_SIZE = 12
 EPOCHS = 4
 
@@ -27,6 +27,9 @@ MAX_CONTEXT_NUM = 5
 
 LOAD_MODEL = False
 MODEL_PATH = 'results/...'
+
+EVALUATE = False
+PRED_FILE_PATH = 'preds.csv'
 
 
 

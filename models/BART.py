@@ -47,7 +47,7 @@ class BART:
             eval_dataset=self.valid_dataset,
             tokenizer=self.tokenizer,
             optimizers=(self.optimizer, None),
-            compute_metrics=compute_metrics,
+            # compute_metrics=compute_metrics,
             # callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
         )
 
