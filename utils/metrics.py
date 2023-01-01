@@ -3,9 +3,9 @@ import numpy as np
 import pandas as pd
 
 
-def evaluate(pred_file):
+def evaluate(pred_file, delimiter='~'):
 
-    pred_data = pd.read_csv(pred_file, names=['context', 'label', 'pred'], delimiter='||')
+    pred_data = pd.read_csv(pred_file, names=['context', 'label', 'pred'], delimiter=delimiter)
     references = pred_data['label'].values()
     predictions = pred_data['pred'].values()
 
