@@ -28,9 +28,9 @@ if __name__ == "__main__":
         logging_strategy='steps',
         logging_steps=100,
         load_best_model_at_end=True,
-        evaluation_strategy='epoch',
+        evaluation_strategy='steps',
         do_eval=True,
-        eval_steps=1,
+        eval_steps=500,
         save_strategy='epoch',
         save_total_limit=3
     )

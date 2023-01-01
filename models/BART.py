@@ -1,7 +1,8 @@
-from transformers import BartTokenizerFast, BartForConditionalGeneration, BartConfig, TrainingArguments, Trainer
+from transformers import BartTokenizerFast, BartForConditionalGeneration
 from transformers.optimization import AdamW
 from transformers import Trainer
 from data_handler.dataset import WikiDataset
+from utils.metrics import compute_metrics
 from transformers import EarlyStoppingCallback
 from torch.utils.data import DataLoader
 import torch
@@ -45,9 +46,9 @@ class BART:
             train_dataset=self.train_dataset,
             eval_dataset=self.valid_dataset,
             tokenizer=self.tokenizer,
-            optimizers=(self.optimizer, None)
+            optimizers=(self.optimizer, None),
+            compute_metrics=compute_metrics,
             # callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
-            # compute_metrics=compute_metrics_func,
         )
 
     def train(self):
