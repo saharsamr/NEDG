@@ -1,20 +1,38 @@
 from datasets import load_metric
 import numpy as np
 import pandas as pd
+from nltk.tokenize import word_tokenize
 
 
 def evaluate(pred_file, delimiter='~'):
-
     pred_data = pd.read_csv(pred_file, names=['context', 'label', 'pred'], delimiter=delimiter)
-    references = pred_data['label'].values()
-    predictions = pred_data['pred'].values()
+    pred_data.dropna(inplace=True)
+    references = pred_data['label'].values
+    predictions = pred_data['pred'].values
 
-    print(compute_bleu(predictions, references))
-    print(compute_rouge(predictions, references))
+    references = [[word_tokenize(ref)] for ref in references]
+    predictions = [word_tokenize(pred) for pred in predictions]
+
+    bleu1 = compute_bleu(predictions, references, 1)
+    bleu2 = compute_bleu(predictions, references, 2)
+    bleu3 = compute_bleu(predictions, references, 3)
+    bleu4 = compute_bleu(predictions, references, 4)
+    bleu5 = compute_bleu(predictions, references, 5)
+    rouge = compute_rouge(predictions, references)
+    print(bleu1)
+    print(bleu2)
+    print(bleu3)
+    print(bleu4)
+    print(bleu5)
+    print({'rouge1': rouge['rouge1']})
+    print({'rouge2': rouge['rouge2']})
+    print({'rouge3': rouge['rouge3']})
+    print({'rouge4': rouge['rouge4']})
+    print({'rougeL': rouge['rougeL']})
+    print({'rougeLsum': rouge['rougeLsum']})
 
 
 def compute_metrics(eval_preds):
-
     bleu_metric = load_metric('bleu')
     rouge_metric = load_metric('rouge')
 
@@ -26,9 +44,9 @@ def compute_metrics(eval_preds):
     )
     rouge_output = rouge_metric.compute(
         predictions=predictions, references=labels,
-        rouge_types=['rouge1', 'rouge2', 'rouge3', 'rouge4', 'rougeL', 'rougeLsum', 'rougeSU4']
+        rouge_types=['rouge1', 'rouge2', 'rouge3', 'rouge4', 'rougeL', 'rougeLsum']
     )
-    
+
     return {
         'bleu': bleu_output['score'],
         'rouge1': rouge_output['rouge1'][0]['fmeasure'],
@@ -36,33 +54,31 @@ def compute_metrics(eval_preds):
         'rouge3': rouge_output['rouge3'][0]['fmeasure'],
         'rouge4': rouge_output['rouge4'][0]['fmeasure'],
         'rougeL': rouge_output['rougeL'][0]['fmeasure'],
-        'rougeLsum': rouge_output['rougeLsum'][0]['fmeasure'],
-        'rougeSU4': rouge_output['rougeSU4'][0]['fmeasure']
+        'rougeLsum': rouge_output['rougeLsum'][0]['fmeasure']
     }
 
 
-def compute_bleu(preds, labels):
-
+def compute_bleu(preds, labels, max_order):
     bleu_metric = load_metric('bleu')
     bleu_output = bleu_metric.compute(
-        predictions=preds, references=labels, max_order=4
+        predictions=preds, references=labels, max_order=max_order
     )
-    return bleu_output['score']
+
+    return bleu_output
 
 
 def compute_rouge(preds, labels):
-
     rouge_metric = load_metric('rouge')
     rouge_output = rouge_metric.compute(
         predictions=preds, references=labels,
-        rouge_types=['rouge1', 'rouge2', 'rouge3', 'rouge4', 'rougeL', 'rougeLsum', 'rougeSU4']
+        rouge_types=['rouge1', 'rouge2', 'rouge3', 'rouge4', 'rougeL', 'rougeLsum']
     )
+
     return {
-        'rouge1': rouge_output['rouge1'][0]['fmeasure'],
-        'rouge2': rouge_output['rouge2'][0]['fmeasure'],
-        'rouge3': rouge_output['rouge3'][0]['fmeasure'],
-        'rouge4': rouge_output['rouge4'][0]['fmeasure'],
-        'rougeL': rouge_output['rougeL'][0]['fmeasure'],
-        'rougeLsum': rouge_output['rougeLsum'][0]['fmeasure'],
-        'rougeSU4': rouge_output['rougeSU4'][0]['fmeasure']
+        'rouge1': rouge_output['rouge1'],
+        'rouge2': rouge_output['rouge2'],
+        'rouge3': rouge_output['rouge3'],
+        'rouge4': rouge_output['rouge4'],
+        'rougeL': rouge_output['rougeL'],
+        'rougeLsum': rouge_output['rougeLsum']
     }
