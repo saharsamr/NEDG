@@ -94,7 +94,11 @@ def compute_bertscore(preds, labels):
         predictions=preds, references=labels, lang='en', model_type='bert-base-uncased'
     )
 
-    return bertscore_output
+    return {
+        'precision': np.mean(bertscore_output['precision']),
+        'recall': np.mean(bertscore_output['recall']),
+        'f1': np.mean(bertscore_output['f1'])
+    }
 
 
 def compute_accuracy(preds, labels):
