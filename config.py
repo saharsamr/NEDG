@@ -31,5 +31,7 @@ MODEL_PATH = 'results/...'
 EVALUATE = False
 PRED_FILE_PATH = 'preds.csv'
 
+MASKING_PROBABILITY = 0.5
+
 
 

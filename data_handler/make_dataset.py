@@ -10,9 +10,10 @@ import logging
 
 import json
 import csv
+import re
 
 from utils.data_structures import is_array_of_empty_strings
-from config import MIN_CONTEXT_LEN, MAX_CONTEXT_NUM
+from config import MIN_CONTEXT_LEN, MAX_CONTEXT_NUM, MASKING_PROBABILITY
 
 
 def import_to_mongo():
@@ -96,13 +97,40 @@ def create_dataset():
         logging.error("Failed to find {} documents".format(failed_counts))
 
 
+def mask_ne(string, probability=MASKING_PROBABILITY):
+
+    starts, ends = re.finditer('<NE>', string), re.finditer('</NE>', string)
+    new_string, pre_end_idx = '', 0
+    for start, end in zip(starts, ends):
+        new_string += string[pre_end_idx:start.start()]
+        entity = string[start.start():end.end()]
+        tokens = entity.split(' ')
+        new_tokens = []
+        for i, t in enumerate(tokens):
+            if random.random() > probability or i == 0 or i == len(tokens)-1:
+                new_tokens.append(t)
+            else:
+                new_tokens.append('<MASK>')
+        new_string += ' '.join(new_tokens)
+        pre_end_idx = end.end()
+    new_string += string[pre_end_idx:]
+
+    return new_string
+
+
 def make_jsonl_to_csv(file_path, concat_contexts=False):
 
     count_no_desc, count_with_desc = 0, 0
     with open(file_path, 'r') as f:
-        with open(f'{file_path[:-5]}.csv', 'w') as g:
+        with \
+          open(f'{file_path[:-5]}_ne_with_context.csv', 'w') as ne_with_context, \
+          open(f'{file_path[:-5]}_ne_no_context.csv', 'w') as ne_no_context, \
+          open(f'{file_path[:-5]}_masked_ne_with_context.csv', 'w') as masked_ne_with_context:
 
-            writer = csv.writer(g, delimiter='\1')
+            ne_with_context_writer = csv.writer(ne_with_context, delimiter='\1')
+            ne_no_context_writer = csv.writer(ne_no_context, delimiter='\1')
+            masked_ne_with_context_writer = csv.writer(masked_ne_with_context, delimiter='\1')
+
             for line in f:
                 data = json.loads(line)
                 key, value = list(data.keys())[0], list(data.values())[0]
@@ -111,7 +139,7 @@ def make_jsonl_to_csv(file_path, concat_contexts=False):
                     continue
                 count_with_desc += 1
 
-                contexts = [context.replace('\1', '') for context in value['contexts'] if len(context.split()) > MIN_CONTEXT_LEN]
+                contexts = [context.replace('\1', '') for context in value['contexts'] if len(context.split())]
                 title, description = value['label'].replace('\1', ''), value['description'].replace('\1', '')
 
                 if len(contexts) > MAX_CONTEXT_NUM:
@@ -119,9 +147,14 @@ def make_jsonl_to_csv(file_path, concat_contexts=False):
 
                 if concat_contexts:
                     contexts = '<CNTXT>' + '</CNTXT><CNTXT>'.join(contexts) + '</CNTXT>'
-                    writer.writerow([title, contexts, description])
+                    ne_with_context_writer.writerow([title, contexts, description])
+                    ne_no_context_writer.writerow([title, title, description])
+                    masked_ne_with_context_writer.writerow([title, mask_ne(contexts), description])
+
                 else:
                     for context in contexts:
-                        writer.writerow([title, context, description])
+                        ne_with_context_writer.writerow([title, context, description])
+                        ne_no_context_writer.writerow([title, title, description])
+                        masked_ne_with_context_writer.writerow([title, mask_ne(context), description])
 
     print(f'No description: {count_no_desc}, with description: {count_with_desc}')
