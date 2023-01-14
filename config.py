@@ -12,9 +12,13 @@ MODEL_NAME = 'facebook/bart-large-cnn'
 LOGGING_DIR = 'logs'
 OUTPUT_DIR = 'results'
 
-TRAIN_FILE = 'data/train_human.csv'
-TEST_FILE = 'data/test_human.csv'
-VALID_FILE = 'data/valid_human.csv'
+DATA_FOLDER = 'data/HumanConcatenated'
+DATA_CATEGORY = 'human'
+DATA_STYLE = 'ne_with_context'
+
+TRAIN_FILE = f'{DATA_FOLDER}/train_{DATA_CATEGORY}_{DATA_STYLE}.csv'
+TEST_FILE = f'{DATA_FOLDER}/test_{DATA_CATEGORY}_{DATA_STYLE}.csv'
+VALID_FILE = f'{DATA_FOLDER}/valid_{DATA_CATEGORY}_{DATA_STYLE}.csv'
 
 WARMUP_STEPS = 200
 WEIGHT_DECAY = 0
@@ -22,16 +26,16 @@ LEARNING_RATE = 5e-5
 
 ADDITIONAL_SPECIAL_TOKENS = ['<NE>', '</NE>', '<CNTXT>', '</CNTXT>']
 
-MIN_CONTEXT_LEN = 30
+MIN_CONTEXT_LEN = 30  # TODO: I removed this parameter in this version of data, if that matters at all.
 MAX_CONTEXT_NUM = 5
 
 LOAD_MODEL = False
 MODEL_PATH = 'results/...'
 
-EVALUATE = False
+EVALUATE = True
 PRED_FILE_PATH = 'preds.csv'
 
-MASKING_PROBABILITY = 0.5
+MASKING_PROBABILITY = 1.0
 
 
 
