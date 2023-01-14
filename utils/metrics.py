@@ -19,6 +19,8 @@ def evaluate(pred_file, delimiter='~'):
     bleu4 = compute_bleu(predictions, references, 4)
     bleu5 = compute_bleu(predictions, references, 5)
     rouge = compute_rouge(predictions, references)
+    accuracy = compute_accuracy(predictions, references)
+    bertscore = compute_bertscore(predictions, references)
     print(bleu1)
     print(bleu2)
     print(bleu3)
@@ -30,6 +32,8 @@ def evaluate(pred_file, delimiter='~'):
     print({'rouge4': rouge['rouge4']})
     print({'rougeL': rouge['rougeL']})
     print({'rougeLsum': rouge['rougeLsum']})
+    print(accuracy)
+    print(bertscore)
 
 
 def compute_metrics(eval_preds):
@@ -81,4 +85,26 @@ def compute_rouge(preds, labels):
         'rouge4': rouge_output['rouge4'],
         'rougeL': rouge_output['rougeL'],
         'rougeLsum': rouge_output['rougeLsum']
+    }
+
+
+def compute_bertscore(preds, labels):
+    bertscore = load_metric('bertscore')
+    bertscore_output = bertscore.compute(
+        predictions=preds, references=labels, lang='en', model_type='bert-base-uncased'
+    )
+
+    return bertscore_output
+
+
+def compute_accuracy(preds, labels):
+
+    correct, whole = 0, 0
+    for pred, label in zip(preds, labels):
+        if pred == label:
+            correct += 1
+        whole += 1
+
+    return {
+        'accuracy': correct/whole
     }
