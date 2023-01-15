@@ -105,7 +105,7 @@ def compute_accuracy(preds, labels):
 
     correct, whole = 0, 0
     for pred, label in zip(preds, labels):
-        if pred == label:
+        if pred == label[0]:
             correct += 1
         whole += 1
 
