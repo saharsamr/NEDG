@@ -9,6 +9,7 @@ import torch
 from config import MODEL_NAME, ADDITIONAL_SPECIAL_TOKENS, \
     MODEL_PATH, OUTPUT_MAX_LENGTH, LEARNING_RATE, INPUT_MAX_LENGTH, \
     OUTPUT_MIN_LENGTH, TEST_BATCH_SIZE
+from tqdm import tqdm
 
 
 class BART:
@@ -72,7 +73,7 @@ class BART:
         test_dataloader = DataLoader(self.test_dataset, batch_size=TEST_BATCH_SIZE, shuffle=False)
         inputs, labels, predictions = [], [], []
         with torch.no_grad():
-            for batch in test_dataloader:
+            for batch in tqdm(test_dataloader):
                 ids = self.model.generate(
                     batch['input_ids'].cuda(), min_length=OUTPUT_MIN_LENGTH, max_length=OUTPUT_MAX_LENGTH
                 )
