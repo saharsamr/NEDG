@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from nltk.tokenize import word_tokenize
 from tqdm import tqdm
+import json
 
 
 def evaluate(pred_file, delimiter='~'):
@@ -118,6 +119,7 @@ def compute_accuracy(preds, labels):
 def list_lowest_bertscores(file_path, delimiter='~'):
 
     data = pd.read_csv(file_path, names=['context', 'label', 'pred'], delimiter=delimiter)
+    contexts = data['context'].values
     preds = data['pred'].values
     labels = data['label'].values
 
@@ -127,9 +129,16 @@ def list_lowest_bertscores(file_path, delimiter='~'):
     )
     bertscore_output = bertscore_output['f1']
     bertscore_list = {}
-    for pred, label, bert in tqdm(zip(preds, labels, bertscore_output)):
+    for context, pred, label, bert in tqdm(zip(contexts, preds, labels, bertscore_output)):
         if pred != label[0]:
-            bertscore_list[(pred, label)] = bertscore['f1']
+            bertscore_list[(context, pred, label)] = bert
 
-    print(sorted(bertscore_list.items(), key=lambda x: x[1])[:10])
+    result = {}
+    for k, v in bertscore_list.items():
+        c, l, p = k
+        result[l] = {'context': c, 'prediction': p, 'bertscore': v}
+
+    with open('worst_outputs.json', 'w+') as f:
+        json.dump(result, f)
+
 
