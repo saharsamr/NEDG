@@ -121,10 +121,14 @@ def list_lowest_bertscores(file_path, delimiter='~'):
     preds = data['pred'].values
     labels = data['label'].values
 
+    bertscore = load_metric('bertscore')
+    bertscore_output = bertscore.compute(
+        predictions=preds, references=labels, lang='en', model_type='bert-base-uncased'
+    )
+    bertscore_output = bertscore_output['f1']
     bertscore_list = {}
-    for pred, label in tqdm(zip(preds, labels)):
+    for pred, label, bert in tqdm(zip(preds, labels, bertscore_output)):
         if pred != label[0]:
-            bertscore = compute_bertscore([pred], [label])
             bertscore_list[(pred, label)] = bertscore['f1']
 
     print(sorted(bertscore_list.items(), key=lambda x: x[1])[:10])
