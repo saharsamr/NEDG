@@ -2,6 +2,7 @@ from datasets import load_metric
 import numpy as np
 import pandas as pd
 from nltk.tokenize import word_tokenize
+from tqdm import tqdm
 
 
 def evaluate(pred_file, delimiter='~'):
@@ -112,3 +113,19 @@ def compute_accuracy(preds, labels):
     return {
         'accuracy': correct/whole
     }
+
+
+def list_lowest_bertscores(file_path, delimiter='~'):
+
+    data = pd.read_csv(file_path, names=['context', 'label', 'pred'], delimiter=delimiter)
+    preds = data['pred'].values
+    labels = data['label'].values
+
+    bertscore_list = {}
+    for pred, label in tqdm(zip(preds, labels)):
+        if pred != label[0]:
+            bertscore = compute_bertscore([pred], [label])
+            bertscore_list[(pred, label)] = bertscore['f1']
+
+    print(sorted(bertscore_list.items(), key=lambda x: x[1])[:10])
+
