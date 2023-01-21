@@ -8,12 +8,16 @@ from tqdm import tqdm
 from collections import defaultdict
 import logging
 
+<<<<<<< Updated upstream
 import json
 import csv
 import re
 
 from utils.data_structures import is_array_of_empty_strings
 from config import MIN_CONTEXT_LEN, MAX_CONTEXT_NUM, MASKING_PROBABILITY
+=======
+from utils.arrays import is_array_of_empty_strings
+>>>>>>> Stashed changes
 
 
 def import_to_mongo():
@@ -78,6 +82,7 @@ def create_dataset():
                 for start, end, p_id, text, wiki_id in zip(
                         anchors['start'], anchors['end'], anchors['paragraph_id'], anchors['text'], anchors['wikipedia_id']
                 ):
+<<<<<<< Updated upstream
 
                     context = paragraphs[p_id]
                     context = context.replace('\1', '').replace('\n', '')
@@ -92,6 +97,22 @@ def create_dataset():
 
                     text = text.replace('\1', '').replace('\n', '')
 
+=======
+
+                    context = paragraphs[p_id]
+                    context = context.replace('\1', '').replace('\n', '')
+                    context = context[:start] + '<NE> ' + context[start:end] + ' </NE>' + context[end:]
+
+                    try:
+                        description = collection.find_one(
+                            {'wikipedia_id': wiki_id})['text']['paragraph'][1].replace('\1', '').replace('\n', '')
+                    except Exception as e:
+                        failed_counts += 1
+                        continue
+
+                    text = text.replace('\1', '').replace('\n', '')
+
+>>>>>>> Stashed changes
                     f.write(f'{text}\1{context}\1{description}\n')
 
         logging.error("Failed to find {} documents".format(failed_counts))

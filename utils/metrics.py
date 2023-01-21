@@ -126,17 +126,17 @@ def list_lowest_bertscores(file_path, delimiter='~'):
     bertscore = load_metric('bertscore')
     bertscore_output = bertscore.compute(
         predictions=preds, references=labels, lang='en', model_type='bert-base-uncased'
-    )
-    bertscore_output = bertscore_output['f1']
-    bertscore_list = {}
+    )['f1']
+    bertscore_dict = {}
     for context, pred, label, bert in tqdm(zip(contexts, preds, labels, bertscore_output)):
         if pred != label[0]:
-            bertscore_list[(context, pred, label)] = bert
+            bertscore_dict[(context, pred, label)] = bert
+    bertscores = sorted(bertscore_dict.items(), key=lambda x: x[1])[:100]
 
     result = {}
-    for k, v in bertscore_list.items():
-        c, l, p = k
-        result[l] = {'context': c, 'prediction': p, 'bertscore': v}
+    for item in bertscores:
+        (context, pred, label), score = item
+        result[label] = {'context': context, 'prediction': pred, 'bertscore': score}
 
     with open('worst_outputs.json', 'w+') as f:
         json.dump(result, f)
