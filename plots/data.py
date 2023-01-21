@@ -24,6 +24,7 @@ def plot_features_len_bar_plots(data_path, feature_name, num_bins=30, hard_limit
     ax.lines[0].set_linewidth(2)
     plt.axvline(x=data[f'{feature_name}_len'].mean(), color='orangered', ls='--', lw=2, label='Mean')
     plt.axvline(x=data[f'{feature_name}_len'].median(), color='mediumblue', ls='--', lw=2, label='Median')
+    plt.gcf().subplots_adjust(left=0.15)
     plt.legend()
     plt.show()
 
