@@ -1,22 +1,15 @@
 from torch.utils.data import Dataset
 import torch
-from config import INPUT_MAX_LENGTH, OUTPUT_MAX_LENGTH
 
 
 class WikiDataset(Dataset):
 
-    def __init__(
-      self, tokenizer, inputs, labels=None,
-      input_max_length=INPUT_MAX_LENGTH, output_max_length=OUTPUT_MAX_LENGTH,
-      input_padding=True
-    ):
+    def __init__(self, tokenizer, inputs, labels=None, max_length=256):
 
         self.inputs = inputs
         self.labels = labels
         self.tokenizer = tokenizer
-        self.input_max_len = input_max_length
-        self.output_max_len = output_max_length
-        self.input_padding = input_padding
+        self.max_len = max_length
 
     def __len__(self):
 
@@ -24,13 +17,20 @@ class WikiDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        input_encodings = self.tokenizer(
-            self.inputs[idx], padding=self.input_padding, truncation=True, max_length=self.input_max_len
-        )
-        output_encodings = self.tokenizer(
-            self.labels[idx], padding='max_length', truncation=True, max_length=self.output_max_len
-        )
-        item = {'input_ids': torch.tensor(input_encodings['input_ids'])}
+        print('#INPUT', self.inputs[idx])
+        print('#LABEL', self.labels[idx])
+
+        input_encodings = self.tokenizer(self.inputs[idx], padding='longest', truncation=True, max_length=self.max_len)
+        output_encodings = self.tokenizer(self.labels[idx], padding='max_length', truncation=True, max_length=15)
+
+        print('>>>>>>>>>>>>>>>', input_encodings)
+        print('>>>>>>>>>>>>>>>', output_encodings)
+
+        item = {
+            'input_ids': torch.tensor(input_encodings['input_ids']),
+            'attention_mask': torch.tensor(input_encodings['attention_mask'])
+        }
+
         if self.labels:
             item['labels'] = torch.tensor(output_encodings['input_ids'])
 

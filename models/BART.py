@@ -1,6 +1,5 @@
 from transformers import BartTokenizerFast, BartForConditionalGeneration
 from transformers.optimization import AdamW
-from transformers import Trainer
 from data_handler.dataset import WikiDataset
 from utils.metrics import compute_metrics
 from transformers import EarlyStoppingCallback
