@@ -141,7 +141,7 @@ def list_lowest_bertscores(file_path, delimiter='~'):
 
 
 def compare_lowest_bertscores(file_path1, file_path2, num_of_samples=100, delimiter='~'):
-    
+
     data_we = pd.read_csv(file_path1, names=['context', 'label', 'pred'], delimiter=delimiter)
     data_woe = pd.read_csv(file_path2, names=['context', 'label', 'pred'], delimiter=delimiter)
     preds_we = data_we['pred'].values
@@ -167,5 +167,5 @@ def compare_lowest_bertscores(file_path1, file_path2, num_of_samples=100, delimi
         (pred_we, pred_woe, label, bert_woe), bert_we = item
         result[label] = {'pred_we': pred_we, 'pred_woe': pred_woe, 'bertscore_we': bert_we, 'bertscore_woe': bert_woe}
 
-    with open('worst_outputs.json', 'w+') as f:
+    with open('worst_outputs_comparison.json', 'w+') as f:
         json.dump(result, f)
