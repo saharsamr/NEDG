@@ -17,14 +17,8 @@ class WikiDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        print('#INPUT', self.inputs[idx])
-        print('#LABEL', self.labels[idx])
-
         input_encodings = self.tokenizer(self.inputs[idx], padding='longest', truncation=True, max_length=self.max_len)
         output_encodings = self.tokenizer(self.labels[idx], padding='max_length', truncation=True, max_length=15)
-
-        print('>>>>>>>>>>>>>>>', input_encodings)
-        print('>>>>>>>>>>>>>>>', output_encodings)
 
         item = {
             'input_ids': torch.tensor(input_encodings['input_ids']),
