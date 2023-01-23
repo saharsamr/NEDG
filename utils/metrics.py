@@ -1,6 +1,7 @@
 from datasets import load_metric
 import numpy as np
 import pandas as pd
+from scipy import stats
 from nltk.tokenize import word_tokenize
 from tqdm import tqdm
 import json
@@ -169,3 +170,22 @@ def compare_lowest_bertscores(file_path1, file_path2, num_of_samples=100, delimi
 
     with open('worst_outputs_comparison.json', 'w+') as f:
         json.dump(result, f)
+
+
+def compare_bertscore_means(file_path):
+
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+
+    bert_score_we, bert_score_woe = [], []
+    for key, value in data.items():
+        if value['bertscore_we'] and value['bertscore_woe']:
+            bert_score_we.append(value['bertscore_we'])
+            bert_score_woe.append(value['bertscore_woe'])
+
+    print(
+        f'mean of bertscores in with-entity situation: {np.mean(bert_score_we)} '
+        f'and in without entity situation:{np.mean(bert_score_woe)}\n'
+        f'and the t-test results:\n'
+        f'{stats.ttest_ind(bert_score_we, bert_score_woe)}'
+    )
