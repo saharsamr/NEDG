@@ -104,7 +104,6 @@ def compute_bertscore(preds, labels):
 
 
 def compute_accuracy(preds, labels):
-
     correct, whole = 0, 0
     for pred, label in zip(preds, labels):
         if pred == label[0]:
@@ -112,12 +111,11 @@ def compute_accuracy(preds, labels):
         whole += 1
 
     return {
-        'accuracy': correct/whole
+        'accuracy': correct / whole
     }
 
 
 def list_lowest_bertscores(file_path, delimiter='~'):
-
     data = pd.read_csv(file_path, names=['context', 'label', 'pred'], delimiter=delimiter)
     contexts = data['context'].values
     preds = data['pred'].values
@@ -142,3 +140,32 @@ def list_lowest_bertscores(file_path, delimiter='~'):
         json.dump(result, f)
 
 
+def compare_lowest_bertscores(file_path1, file_path2, num_of_samples=100, delimiter='~'):
+    
+    data_we = pd.read_csv(file_path1, names=['context', 'label', 'pred'], delimiter=delimiter)
+    data_woe = pd.read_csv(file_path2, names=['context', 'label', 'pred'], delimiter=delimiter)
+    preds_we = data_we['pred'].values
+    preds_woe = data_woe['pred']
+    labels = data_we['label'].values
+
+    bertscore = load_metric('bertscore')
+    bertscore_output_we = bertscore.compute(
+        predictions=preds_we, references=labels, lang='en', model_type='bert-base-uncased'
+    )['f1']
+    bertscore_output_woe = bertscore.compute(
+        predictions=preds_woe, references=labels, lang='en', model_type='bert-base-uncased'
+    )['f1']
+    bertscore_dict = {}
+    for pred_we, pred_woe, label, bert_we, bert_woe in \
+      tqdm(zip(preds_we, preds_woe, labels, bertscore_output_we, bertscore_output_woe)):
+        if pred_we != label[0]:
+            bertscore_dict[(pred_we, pred_woe, label, bert_woe)] = bert_we
+    bertscores = sorted(bertscore_dict.items(), key=lambda x: x[1])[:num_of_samples]
+
+    result = {}
+    for item in bertscores:
+        (pred_we, pred_woe, label, bert_woe), bert_we = item
+        result[label] = {'pred_we': pred_we, 'pred_woe': pred_woe, 'bertscore_we': bert_we, 'bertscore_woe': bert_woe}
+
+    with open('worst_outputs.json', 'w+') as f:
+        json.dump(result, f)
