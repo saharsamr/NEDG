@@ -1,6 +1,5 @@
 from transformers import Trainer
-from transformers import AutoTokenizer
-from transformers import AutoModelForSequenceClassification
+from transformers import BertTokenizer, BertForSequenceClassification
 from data_handler.classification_dataset import ClassificationDataset
 from config import ADDITIONAL_SPECIAL_TOKENS, MODEL_PATH, LEARNING_RATE, \
     TEST_BATCH_SIZE
@@ -16,35 +15,40 @@ class BERTBinaryClassification:
       self, training_args,
       train_x, train_y,
       test_x, test_y,
-      valid_x, valid_y,
       load=False
     ):
 
-        self.tokenizer = AutoTokenizer.from_pretrained('bert-base-cased')
+        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', problem_type='binary_classification', max_lenght=512, do_lower_case=True)
         self.tokenizer.add_special_tokens({'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS})
-        if load:
-            self.model = AutoModelForSequenceClassification.from_pretrained("bert-base-cased", num_labels=2)
+        if not load:
+            self.model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
         else:
-            self.model = AutoModelForSequenceClassification.from_pretrained(MODEL_PATH, num_labels=2)
+            self.model = BertForSequenceClassification.from_pretrained(MODEL_PATH, num_labels=2)
         self.model.resize_token_embeddings(len(self.tokenizer))
+        self.model.model_max_length = 512
+        self.model.cuda()
 
         print('Making datasets')
         self.train_dataset = ClassificationDataset(self.tokenizer, train_x, train_y)
         self.test_dataset = ClassificationDataset(self.tokenizer, test_x, test_y)
-        self.valid_dataset = ClassificationDataset(self.tokenizer, valid_x, valid_y)
+        # self.valid_dataset = ClassificationDataset(self.tokenizer, valid_x, valid_y)
 
-        self.optimizer = AdamW(self.model.get_decoder().parameters(), lr=LEARNING_RATE)
+        self.optimizer = AdamW(self.model.parameters(), lr=LEARNING_RATE)
 
         self.trainer = Trainer(
             model=self.model, args=training_args,
             tokenizer=self.tokenizer,
             train_dataset=self.train_dataset,
-            eval_dataset=self.valid_dataset,
             optimizers=(self.optimizer, None)
         )
 
+    def set_learnable_params(self, freeze_encoder=True):
+
+        for param in self.model.parameters():
+            param.requires_grad = not freeze_encoder
+
     def train(self):
-        self.model.train()
+        self.trainer.train()
 
     def pred(self):
 
@@ -52,7 +56,7 @@ class BERTBinaryClassification:
         inputs, labels, predictions = [], [], []
         with torch.no_grad():
             for batch in tqdm(test_dataloader):
-                preds = self.model.generate(batch['input_ids'].cuda())
+                preds = self.model(batch['input_ids'].cuda())
                 predictions.extend(preds)
                 input_ = self.tokenizer.batch_decode(batch['input_ids'], skip_special_tokens=True)
                 inputs.extend(input_)

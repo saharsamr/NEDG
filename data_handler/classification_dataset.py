@@ -4,7 +4,7 @@ import torch
 
 class ClassificationDataset(Dataset):
 
-    def __init__(self, tokenizer, inputs, labels=None, max_length=256):
+    def __init__(self, tokenizer, inputs, labels=None, max_length=512):
 
         self.inputs = inputs
         self.labels = labels
@@ -17,7 +17,10 @@ class ClassificationDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        input_encodings = self.tokenizer(self.inputs[idx], padding='longest', truncation=True, max_length=self.max_len)
+        input_encodings = self.tokenizer.encode_plus(
+            self.inputs[idx], add_special_tokens=True,
+            padding='max_length', max_length=self.max_len
+            )
 
         item = {
             'input_ids': torch.tensor(input_encodings['input_ids']),
@@ -25,9 +28,7 @@ class ClassificationDataset(Dataset):
         }
 
         if self.labels:
-            item['labels'] = torch.tensor(self.labels[idx])
+            labels = [1.0, 0.0] if self.labels[idx] == 0 else [0.0, 1.0]
+            item['labels'] = torch.tensor(labels)
 
         return item
-
-
-
