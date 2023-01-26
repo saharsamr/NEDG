@@ -8,11 +8,13 @@ from tqdm import tqdm
 from collections import defaultdict
 import logging
 
+import pandas as pd
 import json
 import csv
 import re
 
 from utils.data_structures import is_array_of_empty_strings
+from utils.metrics import compute_bertscores_from_file
 from config import MIN_CONTEXT_LEN, MAX_CONTEXT_NUM, MASKING_PROBABILITY
 
 
@@ -158,3 +160,17 @@ def make_jsonl_to_csv(file_path, concat_contexts=False):
                         masked_ne_with_context_writer.writerow([title, mask_ne(context), description])
 
     print(f'No description: {count_no_desc}, with description: {count_with_desc}')
+
+
+def label_based_on_bertscores(file_path1, file_path2, output_file, delimiter='~'):
+
+    contexts, preds_we, labels_we, bertscore_output_we = compute_bertscores_from_file(file_path1, delimiter=delimiter)
+    _, preds_woe, labels_woe, bertscore_output_woe = compute_bertscores_from_file(file_path2, delimiter=delimiter)
+    labels = labels_we
+
+    with open(output_file, 'w+') as f:
+        for l, c, bert_we, bert_woe in tqdm(zip(labels, contexts, bertscore_output_we, bertscore_output_woe)):
+            if not bert_we or not bert_woe:
+                continue
+            classification_label = 1 if bert_we > bert_woe else 0
+            f.write(f'{l}\1{c}\1{classification_label}\n')
