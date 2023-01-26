@@ -104,6 +104,21 @@ def compute_bertscore(preds, labels):
     }
 
 
+def compute_bertscores_from_file(file_path, delimiter='~'):
+
+    data = pd.read_csv(file_path, names=['context', 'label', 'pred'], delimiter=delimiter)
+    contexts = data['context'].values
+    preds = data['pred'].values
+    labels = data['label'].values
+
+    bertscore = load_metric('bertscore')
+    bertscore_output = bertscore.compute(
+        predictions=preds, references=labels, lang='en', model_type='bert-base-uncased'
+    )['f1']
+
+    return contexts, preds, labels, bertscore_output
+
+
 def compute_accuracy(preds, labels):
     correct, whole = 0, 0
     for pred, label in zip(preds, labels):
@@ -117,15 +132,8 @@ def compute_accuracy(preds, labels):
 
 
 def list_lowest_bertscores(file_path, delimiter='~'):
-    data = pd.read_csv(file_path, names=['context', 'label', 'pred'], delimiter=delimiter)
-    contexts = data['context'].values
-    preds = data['pred'].values
-    labels = data['label'].values
 
-    bertscore = load_metric('bertscore')
-    bertscore_output = bertscore.compute(
-        predictions=preds, references=labels, lang='en', model_type='bert-base-uncased'
-    )['f1']
+    contexts, preds, labels, bertscore_output = compute_bertscores_from_file(file_path, delimiter=delimiter)
     bertscore_dict = {}
     for context, pred, label, bert in tqdm(zip(contexts, preds, labels, bertscore_output)):
         if pred != label[0]:
@@ -142,20 +150,11 @@ def list_lowest_bertscores(file_path, delimiter='~'):
 
 
 def compare_lowest_bertscores(file_path1, file_path2, num_of_samples=100, delimiter='~'):
+    
+    _, preds_we, labels_we, bertscore_output_we = compute_bertscores_from_file(file_path1, delimiter=delimiter)
+    _, preds_woe, labels_woe, bertscore_output_woe = compute_bertscores_from_file(file_path2, delimiter=delimiter)
+    labels = labels_we
 
-    data_we = pd.read_csv(file_path1, names=['context', 'label', 'pred'], delimiter=delimiter)
-    data_woe = pd.read_csv(file_path2, names=['context', 'label', 'pred'], delimiter=delimiter)
-    preds_we = data_we['pred'].values
-    preds_woe = data_woe['pred']
-    labels = data_we['label'].values
-
-    bertscore = load_metric('bertscore')
-    bertscore_output_we = bertscore.compute(
-        predictions=preds_we, references=labels, lang='en', model_type='bert-base-uncased'
-    )['f1']
-    bertscore_output_woe = bertscore.compute(
-        predictions=preds_woe, references=labels, lang='en', model_type='bert-base-uncased'
-    )['f1']
     bertscore_dict = {}
     for pred_we, pred_woe, label, bert_we, bert_woe in \
       tqdm(zip(preds_we, preds_woe, labels, bertscore_output_we, bertscore_output_woe)):
