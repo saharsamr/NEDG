@@ -11,11 +11,18 @@ from config import \
 
 def classification_main():
 
-    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'label']).dropna()
-    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'label']).dropna()
+    train = pd.read_csv(
+        TRAIN_CLASSIFICATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'label', 'entity_name']
+    ).dropna()
+    test = pd.read_csv(
+        TEST_CLASSIFICATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'label', 'entity_name']
+    ).dropna()
 
-    train_x, train_y = list(train['context']), list(train['label'])
-    test_x, test_y = list(test['context']), list(test['label'])
+    train['text'] = train['entity_name'].astype(str) + train['context']
+    test['text'] = test['entity_name'].astype(str) + test['context']
+
+    train_x, train_y = list(train['text']), list(train['label'])
+    test_x, test_y = list(test['text']), list(test['label'])
 
     training_args = TrainingArguments(
         num_train_epochs=EPOCHS,
