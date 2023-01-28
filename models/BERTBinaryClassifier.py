@@ -1,8 +1,8 @@
 from transformers import Trainer
 from transformers import BertTokenizer, BertForSequenceClassification
 from data_handler.classification_dataset import ClassificationDataset
-from config import ADDITIONAL_SPECIAL_TOKENS, MODEL_PATH, LEARNING_RATE, \
-    TEST_BATCH_SIZE
+from config import ADDITIONAL_SPECIAL_TOKENS, MODEL_CLASSIFICATION_PATH, LEARNING_RATE, \
+    TEST_CLASSIFICATION_BATCH_SIZE
 from transformers.optimization import AdamW
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -23,7 +23,7 @@ class BERTBinaryClassification:
         if not load:
             self.model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
         else:
-            self.model = BertForSequenceClassification.from_pretrained(MODEL_PATH, num_labels=2)
+            self.model = BertForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_PATH, num_labels=2)
         self.model.resize_token_embeddings(len(self.tokenizer))
         self.model.model_max_length = 512
         self.model.cuda()
@@ -31,7 +31,6 @@ class BERTBinaryClassification:
         print('Making datasets')
         self.train_dataset = ClassificationDataset(self.tokenizer, train_x, train_y)
         self.test_dataset = ClassificationDataset(self.tokenizer, test_x, test_y)
-        # self.valid_dataset = ClassificationDataset(self.tokenizer, valid_x, valid_y)
 
         self.optimizer = AdamW(self.model.parameters(), lr=LEARNING_RATE)
 
@@ -52,7 +51,7 @@ class BERTBinaryClassification:
 
     def pred(self):
 
-        test_dataloader = DataLoader(self.test_dataset, batch_size=TEST_BATCH_SIZE, shuffle=False)
+        test_dataloader = DataLoader(self.test_dataset, batch_size=TEST_CLASSIFICATION_BATCH_SIZE, shuffle=False)
         inputs, labels, predictions = [], [], []
         with torch.no_grad():
             for batch in tqdm(test_dataloader):

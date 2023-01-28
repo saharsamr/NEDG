@@ -6,9 +6,9 @@ from transformers import EarlyStoppingCallback
 from transformers import Trainer
 from torch.utils.data import DataLoader
 import torch
-from config import MODEL_NAME, ADDITIONAL_SPECIAL_TOKENS, \
-    MODEL_PATH, OUTPUT_MAX_LENGTH, LEARNING_RATE, INPUT_MAX_LENGTH, \
-    OUTPUT_MIN_LENGTH, TEST_BATCH_SIZE
+from config import MODEL_GENERATION_NAME, ADDITIONAL_SPECIAL_TOKENS, \
+    MODEL_GENERATION_PATH, OUTPUT_GENERATION_MAX_LENGTH, LEARNING_RATE, INPUT_GENERATION_MAX_LENGTH, \
+    OUTPUT_GENERATION_MIN_LENGTH, TEST_GENERATION_BATCH_SIZE
 from tqdm import tqdm
 
 
@@ -19,17 +19,17 @@ class BART:
       train_x, train_y,
       test_x, test_y,
       valid_x, valid_y,
-      model_name=MODEL_NAME,
+      model_name=MODEL_GENERATION_NAME,
       load=False,
     ):
 
         self.model_name = model_name
         self.tokenizer = BartTokenizerFast.from_pretrained(
-            self.model_name, model_max_length=INPUT_MAX_LENGTH, padding=True, truncation=True,
+            self.model_name, model_max_length=INPUT_GENERATION_MAX_LENGTH, padding=True, truncation=True,
         )
         self.tokenizer.add_special_tokens({'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS})
         if load:
-            self.model = BartForConditionalGeneration.from_pretrained(MODEL_PATH)
+            self.model = BartForConditionalGeneration.from_pretrained(MODEL_GENERATION_PATH)
         else:
             self.model = BartForConditionalGeneration.from_pretrained(self.model_name)
         self.model.resize_token_embeddings(len(self.tokenizer))
@@ -70,12 +70,12 @@ class BART:
 
     def pred(self):
 
-        test_dataloader = DataLoader(self.test_dataset, batch_size=TEST_BATCH_SIZE, shuffle=False)
+        test_dataloader = DataLoader(self.test_dataset, batch_size=TEST_GENERATION_BATCH_SIZE, shuffle=False)
         inputs, labels, predictions = [], [], []
         with torch.no_grad():
             for batch in tqdm(test_dataloader):
                 ids = self.model.generate(
-                    batch['input_ids'].cuda(), min_length=OUTPUT_MIN_LENGTH, max_length=OUTPUT_MAX_LENGTH
+                    batch['input_ids'].cuda(), min_length=OUTPUT_GENERATION_MIN_LENGTH, max_length=OUTPUT_GENERATION_MAX_LENGTH
                 )
                 preds = self.tokenizer.batch_decode(ids, skip_special_tokens=True)
                 predictions.extend(preds)

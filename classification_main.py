@@ -3,16 +3,16 @@ from utils.save_data import save_classification_prediction
 from models.BERTBinaryClassifier import BERTBinaryClassification
 import pandas as pd
 from config import \
-    TRAIN_FILE, TEST_FILE, \
-    EPOCHS, TRAIN_BATCH_SIZE, \
+    TRAIN_CLASSIFICATION_FILE, TEST_CLASSIFICATION_FILE,\
+    EPOCHS, TRAIN_CLASSIFICATION_BATCH_SIZE, \
     WARMUP_STEPS, WEIGHT_DECAY, LOGGING_DIR, \
-    OUTPUT_DIR, LOAD_MODEL
+    OUTPUT_DIR, LOAD_CLASSIFICATION_MODEL
 
 
 def classification_main():
 
-    train = pd.read_csv(TRAIN_FILE, delimiter='\1', header=0, names=['title', 'context', 'label']).dropna()
-    test = pd.read_csv(TEST_FILE, delimiter='\1', header=0, names=['title', 'context', 'label']).dropna()
+    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='\1', header=0, names=['title', 'context', 'label']).dropna()
+    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1', header=0, names=['title', 'context', 'label']).dropna()
 
     train_x, train_y = list(train['context']), list(train['label'])
     test_x, test_y = list(test['context']), list(test['label'])
@@ -20,7 +20,7 @@ def classification_main():
     training_args = TrainingArguments(
         num_train_epochs=EPOCHS,
         output_dir=OUTPUT_DIR,
-        per_device_train_batch_size=TRAIN_BATCH_SIZE,
+        per_device_train_batch_size=TRAIN_CLASSIFICATION_BATCH_SIZE,
         warmup_steps=WARMUP_STEPS,
         weight_decay=WEIGHT_DECAY,
         logging_dir=LOGGING_DIR,
@@ -33,7 +33,7 @@ def classification_main():
         training_args,
         train_x, train_y,
         test_x, test_y,
-        load=LOAD_MODEL
+        load=LOAD_CLASSIFICATION_MODEL
     )
 
     model.set_learnable_params(freeze_encoder=True)
