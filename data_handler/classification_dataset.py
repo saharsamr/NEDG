@@ -19,7 +19,8 @@ class ClassificationDataset(Dataset):
 
         input_encodings = self.tokenizer.encode_plus(
             self.inputs[idx], add_special_tokens=True,
-            padding='max_length', max_length=self.max_len
+            padding='max_length', max_length=self.max_len,
+            truncation=True
             )
 
         item = {
