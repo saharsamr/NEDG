@@ -171,6 +171,7 @@ def label_based_on_bertscores(file_path1, file_path2, output_file, delimiter='~'
     with open(output_file, 'w+') as f:
         for l, c, bert_we, bert_woe in tqdm(zip(labels, contexts, bertscore_output_we, bertscore_output_woe)):
             if not bert_we or not bert_woe:
-                continue
-            classification_label = 1 if bert_we > bert_woe else 0
+                classification_label = 1
+            else:
+                classification_label = 1 if bert_we > bert_woe else 0
             f.write(f'{l}\1{c}\1{classification_label}\n')
