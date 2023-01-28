@@ -36,7 +36,7 @@ def classification_main():
         load=LOAD_MODEL
     )
 
-    model.set_learnable_params(freeze_encoder=False)
+    model.set_learnable_params(freeze_encoder=True)
     print('Start training...')
     model.train()
 

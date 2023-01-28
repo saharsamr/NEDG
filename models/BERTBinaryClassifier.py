@@ -44,7 +44,7 @@ class BERTBinaryClassification:
 
     def set_learnable_params(self, freeze_encoder=True):
 
-        for param in self.model.parameters():
+        for param in self.model.bert.bert.parameters():
             param.requires_grad = not freeze_encoder
 
     def train(self):
