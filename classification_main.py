@@ -11,8 +11,8 @@ from config import \
 
 def classification_main():
 
-    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='\1', header=0, names=['title', 'context', 'label']).dropna()
-    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1', header=0, names=['title', 'context', 'label']).dropna()
+    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'label']).dropna()
+    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'label']).dropna()
 
     train_x, train_y = list(train['context']), list(train['label'])
     test_x, test_y = list(test['context']), list(test['label'])

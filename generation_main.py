@@ -12,9 +12,9 @@ from config import \
 
 def generation_main():
 
-    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1', header=0, names=['title', 'context', 'description'])
-    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1', header=0, names=['title', 'context', 'description'])
-    valid = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1', header=0, names=['title', 'context', 'description'])
+    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'description'])
+    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'description'])
+    valid = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'description'])
 
     train_x, train_y = list(train['context']), list(train['description'])
     test_x, test_y = list(test['context']), list(test['description'])

@@ -8,7 +8,7 @@ import json
 
 
 def evaluate(pred_file, delimiter='~'):
-    pred_data = pd.read_csv(pred_file, names=['context', 'label', 'pred'], delimiter=delimiter)
+    pred_data = pd.read_csv(pred_file, names=['context', 'label', 'pred'], header=None, delimiter=delimiter)
     pred_data.dropna(inplace=True)
     references = pred_data['label'].values
     predictions = pred_data['pred'].values
@@ -106,7 +106,7 @@ def compute_bertscore(preds, labels):
 
 def compute_bertscores_from_file(file_path, delimiter='~'):
 
-    data = pd.read_csv(file_path, names=['context', 'label', 'pred'], delimiter=delimiter)
+    data = pd.read_csv(file_path, names=['context', 'label', 'pred'], header=None, delimiter=delimiter)
     contexts = data['context'].values
     preds = data['pred'].values
     labels = data['label'].values

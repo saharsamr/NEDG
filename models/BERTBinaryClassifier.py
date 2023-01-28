@@ -53,12 +53,13 @@ class BERTBinaryClassification:
 
         test_dataloader = DataLoader(self.test_dataset, batch_size=TEST_CLASSIFICATION_BATCH_SIZE, shuffle=False)
         inputs, labels, predictions = [], [], []
+        self.model.eval()
         with torch.no_grad():
             for batch in tqdm(test_dataloader):
                 preds = self.model(batch['input_ids'].cuda())
-                predictions.extend(preds)
+                predictions.extend([preds.logits[0].argmax().cpu().numpy()])
                 input_ = self.tokenizer.batch_decode(batch['input_ids'], skip_special_tokens=True)
                 inputs.extend(input_)
-                label = batch['label']
-                labels.extend(label)
+                label = batch['labels']
+                labels.extend([label[0].argmax().cpu().numpy()])
         return predictions, inputs, labels
