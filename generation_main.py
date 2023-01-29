@@ -1,6 +1,6 @@
 from transformers import TrainingArguments
 from utils.save_data import save_generation_predictions
-from utils.metrics import evaluate
+from utils.metrics import evaluate_generation
 from models.BART import BART
 import pandas as pd
 from config import \
@@ -56,4 +56,4 @@ def generation_main():
     save_generation_predictions(inputs, labels, preds)
 
     if EVALUATE_GENERATION:
-        evaluate(PRED_GENERATION_FILE_PATH)
+        evaluate_generation(PRED_GENERATION_FILE_PATH)

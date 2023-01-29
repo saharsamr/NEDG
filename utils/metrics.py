@@ -1,3 +1,5 @@
+from sklearn.metrics import accuracy_score, average_precision_score, \
+f1_score, precision_score, recall_score, roc_auc_score
 from datasets import load_metric
 import numpy as np
 import pandas as pd
@@ -7,7 +9,7 @@ from tqdm import tqdm
 import json
 
 
-def evaluate(pred_file, delimiter='~'):
+def evaluate_generation(pred_file, delimiter='~'):
     pred_data = pd.read_csv(pred_file, names=['context', 'label', 'pred'], header=None, delimiter=delimiter)
     pred_data.dropna(inplace=True)
     references = pred_data['label'].values
@@ -37,6 +39,17 @@ def evaluate(pred_file, delimiter='~'):
     print({'rougeLsum': rouge['rougeLsum']})
     print(accuracy)
     print(bertscore)
+
+
+def evaluate_classification(pred_file, delimiter='~'):
+    preds = pd.read_csv(pred_file, names=['context', 'label', 'prediction'], header=None, delimiter=delimiter)
+
+    print('accuracy: ', accuracy_score(preds['label'], preds['prediction']))
+    print('avg precision score: ', average_precision_score(preds['label'], preds['prediction']))
+    print('f1 score: ', f1_score(preds['label'], preds['prediction']))
+    print('precision_score: ', precision_score(preds['label'], preds['prediction']))
+    print('recall_score: ', recall_score(preds['label'], preds['prediction']))
+    print('roc auc score: ', roc_auc_score(preds['label'], preds['prediction']))
 
 
 def compute_metrics(eval_preds):

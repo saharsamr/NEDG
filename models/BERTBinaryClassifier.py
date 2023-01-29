@@ -3,10 +3,19 @@ from transformers import BertTokenizer, BertForSequenceClassification
 from data_handler.classification_dataset import ClassificationDataset
 from config import ADDITIONAL_SPECIAL_TOKENS, MODEL_CLASSIFICATION_PATH, LEARNING_RATE, \
     TEST_CLASSIFICATION_BATCH_SIZE
+from datasets import load_metric
 from transformers.optimization import AdamW
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import torch
+import numpy as np
+
+
+def compute_metrics(eval_preds):
+    metric = load_metric('accuracy')
+    logits, labels = eval_preds
+    predictions = np.argmax(logits, axis=-1)
+    return metric.compute(predictions=predictions, references=labels)
 
 
 class BERTBinaryClassification:
@@ -15,10 +24,12 @@ class BERTBinaryClassification:
       self, training_args,
       train_x, train_y,
       test_x, test_y,
+      valid_x, valid_y,
       load=False
     ):
 
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', problem_type='binary_classification', max_lenght=512, do_lower_case=True)
+        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', problem_type='binary_classification',
+                                                       max_lenght=512, do_lower_case=True)
         self.tokenizer.add_special_tokens({'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS})
         if not load:
             self.model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
@@ -31,14 +42,17 @@ class BERTBinaryClassification:
         print('Making datasets')
         self.train_dataset = ClassificationDataset(self.tokenizer, train_x, train_y)
         self.test_dataset = ClassificationDataset(self.tokenizer, test_x, test_y)
+        self.valid_dataset = ClassificationDataset(self.tokenizer, valid_x, valid_y)
 
         self.optimizer = AdamW(self.model.parameters(), lr=LEARNING_RATE)
-
+        accuracy = load_metric('accuracy')
         self.trainer = Trainer(
             model=self.model, args=training_args,
             tokenizer=self.tokenizer,
             train_dataset=self.train_dataset,
-            optimizers=(self.optimizer, None)
+            eval_dataset=self.valid_dataset,
+            optimizers=(self.optimizer, None),
+            compute_metrics=compute_metrics
         )
 
     def set_learnable_params(self, freeze_encoder=True):
