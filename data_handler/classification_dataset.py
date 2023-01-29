@@ -29,7 +29,6 @@ class ClassificationDataset(Dataset):
         }
 
         if self.labels:
-            labels = [1.0, 0.0] if self.labels[idx] == 0 else [0.0, 1.0]
-            item['labels'] = torch.tensor(labels)
+            item['labels'] = torch.tensor(int(self.labels[idx]))
 
         return item
