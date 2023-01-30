@@ -1,5 +1,6 @@
 import pickle
 
+from datasets import load_metric
 from pymongo import MongoClient
 import datasets
 import random
@@ -9,6 +10,7 @@ from collections import defaultdict
 import logging
 
 import pandas as pd
+import numpy as np
 import json
 import csv
 import re
@@ -176,3 +178,30 @@ def label_based_on_bertscores(file_path1, file_path2, output_file, delimiter='~'
             else:
                 classification_label = 1 if bert_we >= bert_woe else 0
             f.write(f'{l}\1{pred_we}\1{bert_we}\1{pred_woe}\1{bert_woe}\1{c}\1{classification_label}\n')
+
+
+def x(file_path1, file_path2, output_file, delimiter='~'):
+
+    bertscore = load_metric('bertscore')
+
+    data1 = pd.read_csv(file_path1, names=['context1', 'label1', 'pred1'], header=None, delimiter=delimiter)
+    data2 = pd.read_csv(file_path2, names=['context2', 'label2', 'pred2'], header=None, delimiter=delimiter)
+
+    contexts1, labels1, preds1 = data1['context1'].values, data1['label1'].values, data1['pred1'].values
+    contexts2, labels2, preds2 = data2['context2'].values, data2['label2'].values, data2['pred2'].values
+
+    bertscore_output1 = bertscore.compute(
+        predictions=preds1, references=labels1, lang='en', model_type='bert-base-uncased'
+    )['f1']
+    bertscore_output2 = bertscore.compute(
+        predictions=preds2, references=labels2, lang='en', model_type='bert-base-uncased'
+    )['f1']
+
+    data1['bertscore1'] = bertscore_output1
+    data2['bertscore2'] = bertscore_output2
+
+    data = pd.concat([data1, data2], axis=1)
+
+    data['classification_label'] = np.where(data['bertscore1'] >= data['bertscore2'], 1, 0)
+
+    data.to_csv(output_file, header=False, index=False, sep='\1')
