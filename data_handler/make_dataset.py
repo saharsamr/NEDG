@@ -174,5 +174,5 @@ def label_based_on_bertscores(file_path1, file_path2, output_file, delimiter='~'
             if not bert_we or not bert_woe:
                 classification_label = 1
             else:
-                classification_label = 1 if bert_we > bert_woe else 0
+                classification_label = 1 if bert_we >= bert_woe else 0
             f.write(f'{l}\1{pred_we}\1{bert_we}\1{pred_woe}\1{bert_woe}\1{c}\1{classification_label}\n')
