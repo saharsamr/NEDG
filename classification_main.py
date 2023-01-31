@@ -12,23 +12,23 @@ from config import \
 
 def classification_main():
 
-    train = pd.read_csv(
-        TRAIN_CLASSIFICATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'label', 'entity_name']
-    ).dropna()
-    test = pd.read_csv(
-        TEST_CLASSIFICATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'label', 'entity_name']
-    ).dropna()
-    valid = pd.read_csv(
-        VALID_CLASSIFICATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'label', 'entity_name']
-    )
+    col_names = [
+        'context_we', 'label_we', 'pred_we', 'bert_we', 'context_woe',
+        'label_woe', 'pred_woe', 'bert_woe', 'classification_label',
+        'masked_context', 'entity_name'
+    ]
 
-    train['text'] = train['entity_name'].astype(str) + train['context']
-    test['text'] = test['entity_name'].astype(str) + test['context']
-    valid['text'] = valid['entity_name'].astype(str) + valid['context']
+    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='\1', header=None, names=col_names)
+    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1', header=None, names=col_names)
+    valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='\1', header=None, names=col_names)
 
-    train_x, train_y = list(train['text']), list(train['label'])
-    test_x, test_y = list(test['text']), list(test['label'])
-    valid_x, valid_y = list(valid['text']), list(valid['label'])
+    train['text'] = train['entity_name'].astype(str) + train['masked_context']
+    test['text'] = test['entity_name'].astype(str) + test['masked_context']
+    valid['text'] = valid['entity_name'].astype(str) + valid['masked_context']
+
+    train_x, train_y = list(train['text']), list(train['classification_label'])
+    test_x, test_y = list(test['text']), list(test['classification_label'])
+    valid_x, valid_y = list(valid['text']), list(valid['classification_label'])
 
     training_args = TrainingArguments(
         num_train_epochs=EPOCHS,
