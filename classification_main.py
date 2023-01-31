@@ -18,9 +18,9 @@ def classification_main():
         'masked_context', 'entity_name'
     ]
 
-    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='\1', header=None, names=col_names)
-    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1', header=None, names=col_names)
-    valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='\1', header=None, names=col_names)
+    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='~', header=None, names=col_names)
+    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='~', header=None, names=col_names)
+    valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='~', header=None, names=col_names)
 
     train['text'] = train['entity_name'].astype(str) + train['masked_context']
     test['text'] = test['entity_name'].astype(str) + test['masked_context']
