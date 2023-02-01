@@ -23,9 +23,9 @@ def classification_main():
     test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='~', header=None, names=col_names)
     valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='~', header=None, names=col_names)
 
-    train['text'] = train['entity_name'].astype(str) + train['masked_context']
-    test['text'] = test['entity_name'].astype(str) + test['masked_context']
-    valid['text'] = valid['entity_name'].astype(str) + valid['masked_context']
+    train['text'] = train['entity_name'] + "[SEP]" + train['pred_we'] + "[SEP]" + train['pred_woe'] + "[SEP]" + train['masked_context']
+    test['text'] = test['entity_name'] + "[SEP]" + test['pred_we'] + "[SEP]" + test['pred_woe'] + "[SEP]" + test['masked_context']
+    valid['text'] = valid['entity_name'] + "[SEP]" + valid['pred_we'] + "[SEP]" + valid['pred_woe'] + "[SEP]" + valid['masked_context']
 
     train_x, train_y = list(train['text']), list(train['classification_label'])
     test_x, test_y = list(test['text']), list(test['classification_label'])
