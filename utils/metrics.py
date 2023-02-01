@@ -56,9 +56,16 @@ def evaluate_classification(test_df):
     print('roc auc score: ', roc_auc_score(test_df['classification_label'], test_df['classification_prediction']))
 
     references = [[word_tokenize(ref)] for ref in test_df['label_we']]
-    predictions = [word_tokenize(pred) for pred in test_df['selected_prediction']]
+    predictions_hybrid = [word_tokenize(pred) for pred in test_df['selected_prediction']]
+    predictions_we = [word_tokenize(pred) for pred in test_df['pred_we']]
+    predictions_woe = [word_tokenize(pred) for pred in test_df['pred_woe']]
 
-    compute_generation_metrics(predictions, references)
+    print('Hybrid Model Evaluation:')
+    compute_generation_metrics(predictions_hybrid, references)
+    print('Context With Entity Evaluation:')
+    compute_generation_metrics(predictions_we, references)
+    print('Context With Masked Entity Evaluation:')
+    compute_generation_metrics(predictions_woe, references)
 
 
 def compute_metrics(eval_preds):
