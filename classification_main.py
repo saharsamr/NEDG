@@ -62,6 +62,7 @@ def classification_main():
     print('Start prediction...')
     preds, inputs, labels = model.pred()
     save_classification_prediction(inputs, labels, preds)
+    preds = np.array(preds).reshape([-1])
     test['classification_prediction'] = preds
     test['selected_prediction'] = np.where(test['classification_prediction'] == 1, test['pred_we'], test['pred_woe'])
 
