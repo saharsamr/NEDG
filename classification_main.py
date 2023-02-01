@@ -9,6 +9,7 @@ from config import \
     EPOCHS, TRAIN_CLASSIFICATION_BATCH_SIZE, EVAL_CLASSIFICATION_BATCH_SIZE, \
     WARMUP_STEPS, WEIGHT_DECAY, LOGGING_DIR, \
     OUTPUT_DIR, LOAD_CLASSIFICATION_MODEL, EVALUATE_CLASSIFICATION
+import pickle
 
 
 def classification_main():
@@ -70,3 +71,6 @@ def classification_main():
 
     if EVALUATE_CLASSIFICATION:
         evaluate_classification(test)
+
+    with open('test_result_df.pkl', 'wb') as f:
+        pickle.dump(test, f)
