@@ -43,7 +43,9 @@ def classification_main():
         logging_steps=100,
         evaluation_strategy='steps',
         do_eval=True,
-        eval_steps=100
+        eval_steps=100,
+        disable_tqdm=True,
+        load_best_model_at_end=True
     )
 
     print('Initialing the model...')
