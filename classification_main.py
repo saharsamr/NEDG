@@ -3,6 +3,7 @@ from utils.save_data import save_classification_prediction
 from models.BERTBinaryClassifier import BERTBinaryClassification
 from utils.metrics import evaluate_classification
 import pandas as pd
+import numpy as np
 from config import \
     TRAIN_CLASSIFICATION_FILE, TEST_CLASSIFICATION_FILE, VALID_CLASSIFICATION_FILE,\
     EPOCHS, TRAIN_CLASSIFICATION_BATCH_SIZE, EVAL_CLASSIFICATION_BATCH_SIZE, \
@@ -61,6 +62,8 @@ def classification_main():
     print('Start prediction...')
     preds, inputs, labels = model.pred()
     save_classification_prediction(inputs, labels, preds)
+    test['classification_prediction'] = preds
+    test['selected_prediction'] = np.where(test['classification_prediction'] == 1, test['pred_we'], test['pred_woe'])
 
     if EVALUATE_CLASSIFICATION:
-        evaluate_classification('classification_preds.csv')
+        evaluate_classification(test)

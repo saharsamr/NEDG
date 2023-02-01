@@ -18,6 +18,11 @@ def evaluate_generation(pred_file, delimiter='~'):
     references = [[word_tokenize(ref)] for ref in references]
     predictions = [word_tokenize(pred) for pred in predictions]
 
+    compute_generation_metrics(predictions, references)
+
+
+def compute_generation_metrics(predictions, references):
+
     bleu1 = compute_bleu(predictions, references, 1)
     bleu2 = compute_bleu(predictions, references, 2)
     bleu3 = compute_bleu(predictions, references, 3)
@@ -41,15 +46,19 @@ def evaluate_generation(pred_file, delimiter='~'):
     print(bertscore)
 
 
-def evaluate_classification(pred_file, delimiter='~'):
-    preds = pd.read_csv(pred_file, names=['context', 'label', 'prediction'], header=None, delimiter=delimiter)
+def evaluate_classification(test_df):
 
-    print('accuracy: ', accuracy_score(preds['label'], preds['prediction']))
-    print('avg precision score: ', average_precision_score(preds['label'], preds['prediction']))
-    print('f1 score: ', f1_score(preds['label'], preds['prediction']))
-    print('precision_score: ', precision_score(preds['label'], preds['prediction']))
-    print('recall_score: ', recall_score(preds['label'], preds['prediction']))
-    print('roc auc score: ', roc_auc_score(preds['label'], preds['prediction']))
+    print('accuracy: ', accuracy_score(test_df['classification_label'], test_df['classification_prediction']))
+    print('avg precision score: ', average_precision_score(test_df['classification_label'], test_df['classification_prediction']))
+    print('f1 score: ', f1_score(test_df['classification_label'], test_df['classification_prediction']))
+    print('precision_score: ', precision_score(test_df['classification_label'], test_df['classification_prediction']))
+    print('recall_score: ', recall_score(test_df['classification_label'], test_df['classification_prediction']))
+    print('roc auc score: ', roc_auc_score(test_df['classification_label'], test_df['classification_prediction']))
+
+    references = [[word_tokenize(ref)] for ref in test_df['label_we']]
+    predictions = [word_tokenize(pred) for pred in test_df['selected_prediction']]
+
+    compute_generation_metrics(predictions, references)
 
 
 def compute_metrics(eval_preds):
