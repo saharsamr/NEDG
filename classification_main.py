@@ -19,9 +19,9 @@ def classification_main():
         'masked_context', 'entity_name'
     ]
 
-    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='~', header=None, names=col_names)
-    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='~', header=None, names=col_names)
-    valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='~', header=None, names=col_names)
+    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='~', header=None, names=col_names).dropna()
+    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='~', header=None, names=col_names).dropna()
+    valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='~', header=None, names=col_names).dropna()
 
     train['text'] = train['entity_name'] + "[SEP]" + train['pred_we'] + "[SEP]" + train['pred_woe'] + "[SEP]" + train['masked_context']
     test['text'] = test['entity_name'] + "[SEP]" + test['pred_we'] + "[SEP]" + test['pred_woe'] + "[SEP]" + test['masked_context']
