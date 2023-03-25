@@ -12,7 +12,7 @@ venv/*
 
 # C extensions
 *.so
-
+*.pkl
 # Distribution / packaging
 .Python
 build/
