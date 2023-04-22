@@ -1,240 +1,143 @@
-from typing import Optional
 from lit_nlp.api import dataset as lit_dataset
 from lit_nlp.api import model as lit_model
 from lit_nlp.api import types as lit_types
-import pandas as pd
-import tensorflow_datasets as tfds
+from lit_nlp.lib import utils
+from lit_nlp import dev_server
+from lit_nlp import server_flags
+
+import sys
+import tempfile
+from typing import Optional, Sequence
+
+from absl import app
+from absl import flags
+from absl import logging
+
+import torch
+import transformers
+from datasets import load_dataset
+from transformers import AutoTokenizer
+from transformers import AutoModelForSequenceClassification
 
 
-class WikiDataset(lit_dataset.Dataset):
+def preprocess_function(examples):
+    return tokenizer(examples["text"], truncation=True)
 
-    def __init__(self, data_path):
 
-        data = pd.read_csv(data_path, delimiter='\1', header=None, names=['title', 'context', 'definition'])
+class IMDBData(lit_dataset.Dataset):
+
+    LABELS = ["0", "1"]
+
+    def __init__(self):
+        imdb = load_dataset("imdb")
+        dataset = imdb["test"].shuffle(seed=42).select([i for i in list(range(300))])
 
         self._examples = [{
-          'title': row['title'],
-          'context': row['context'],
-          'definition': row['definition'],
-        } for _, row in data.iterrows()]
+            "text": sample['text'],
+            "label": sample['label']
+        } for sample in dataset]
 
-    def spec(self):
+    def spec(self) -> lit_types.Spec:
         return {
-            'title': lit_types.TextSegment(),
-            'context': lit_types.TextSegment(),
-            'definition': lit_types.TextSegment()
+            "text": lit_types.TextSegment(),
+            "label": lit_types.CategoryLabel(vocab=self.LABELS)
         }
 
 
-class NEDModel(lit_model.Model):
+class NewsClassificationModel(lit_model.Model):
 
-    @property
-    def num_layers(self):
-        return self.model.config.num_layers
+    LABELS = ["0", "1"]
 
-    def __init__(self,
-                 model_name="t5-small",
-                 model=None,
-                 tokenizer=None,
-                 **config_kw):
-        super().__init__()
-        self.config = T5ModelConfig(**config_kw)
-        assert self.config.num_to_generate <= self.config.beam_size
-        self.tokenizer = tokenizer or transformers.T5Tokenizer.from_pretrained(
-            model_name)
-        self.model = model or model_utils.load_pretrained(
-            transformers.TFT5ForConditionalGeneration,
-            model_name,
-            output_hidden_states=True,
-            output_attentions=self.config.output_attention)
+    def __init__(self, model_path):
 
-    def _encode_texts(self, texts: List[str]):
-        return self.tokenizer.batch_encode_plus(
-            texts,
-            return_tensors="tf",
-            padding="longest",
-            truncation="longest_first")
-    
-    def _force_decode(self, encoded_inputs, encoded_targets):
-    """Get predictions for a batch of tokenized examples.
-    Each forward pass produces the following:
-      logits: batch_size x dec_len x vocab_size
-      decoder_past_key_value_states: tuple with cached outputs.
-      dec_states: tuple[len:dec_layers]:
-                  batch_size x dec_len x hid_size
-      dec_attn: [optional] tuple[len:dec_layers+1]
-                batch_size x num_heads x dec_len x dec_len
-      enc_final_state: batch_size x enc_len x hid_size
-      enc_states: tuple[len:enc_layers]:
-                  batch_size x enc_len x hid_size
-      enc_attn: [optional] tuple[len:enc_layers+1]
-                batch_size x num_heads x enc_len x enc_len
-    The two optional attention fields are only returned if
-    config.output_attention is set.
-    Args:
-      encoded_inputs: Dict as returned from Tokenizer for inputs.
-      encoded_targets: Dict as returned from Tokenizer for outputs
-    Returns:
-      batched_outputs: Dict[str, tf.Tensor]
-    """
-    results = self.model(
-        input_ids=encoded_inputs["input_ids"],
-        decoder_input_ids=encoded_targets["input_ids"],
-        attention_mask=encoded_inputs["attention_mask"],
-        decoder_attention_mask=encoded_targets["attention_mask"])
+        self.tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+        self.model = AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=2)
 
-    model_probs = tf.nn.softmax(results.logits, axis=-1)
-    top_k = tf.math.top_k(
-        model_probs, k=self.config.token_top_k, sorted=True, name=None)
-    batched_outputs = {
-        "input_ids": encoded_inputs["input_ids"],
-        "input_ntok": tf.reduce_sum(encoded_inputs["attention_mask"], axis=1),
-        "target_ids": encoded_targets["input_ids"],
-        "target_ntok": tf.reduce_sum(encoded_targets["attention_mask"], axis=1),
-        "top_k_indices": top_k.indices,
-        "top_k_probs": top_k.values,
-    }
-    # encoder_last_hidden_state is <float>[batch_size, num_tokens, emb_dim]
-    # take the mean over real tokens to get <float>[batch_size, emb_dim]
-    batched_outputs["encoder_final_embedding"] = masked_token_mean(
-        results.encoder_last_hidden_state, encoded_inputs["attention_mask"])
-
-    if self.config.output_attention:
-      for i in range(len(results.decoder_attentions)):
-        batched_outputs[
-            f"decoder_layer_{i+1:d}_attention"] = results.decoder_attentions[i]
-      for i in range(len(results.encoder_attentions)):
-        batched_outputs[
-            f"encoder_layer_{i+1:d}_attention"] = results.encoder_attentions[i]
-
-    return batched_outputs
-
-    def _postprocess(self, preds):
-    """Post-process single-example preds. Operates on numpy arrays."""
-    # Return tokenization for input text.
-    input_ntok = preds.pop("input_ntok")
-    input_ids = preds.pop("input_ids")[:input_ntok]
-    preds["input_tokens"] = self.tokenizer.convert_ids_to_tokens(input_ids)
-    # Return tokenization for target text.
-    target_ntok = preds.pop("target_ntok")
-    target_ids = preds.pop("target_ids")[:target_ntok]
-    preds["target_tokens"] = self.tokenizer.convert_ids_to_tokens(target_ids)
-
-    # Decode predicted top-k tokens.
-    # token_topk_preds will be a List[List[(word, prob)]]
-    # Initialize prediction for 0th token as N/A.
-    token_topk_preds = [[("N/A", 1.)]]
-    pred_ids = preds.pop("top_k_indices")[:target_ntok]  # <int>[num_tokens, k]
-    pred_probs = preds.pop(
-        "top_k_probs")[:target_ntok]  # <float32>[num_tokens, k]
-    for token_pred_ids, token_pred_probs in zip(pred_ids, pred_probs):
-      token_pred_words = self.tokenizer.convert_ids_to_tokens(token_pred_ids)
-      token_topk_preds.append(list(zip(token_pred_words, token_pred_probs)))
-    preds["pred_tokens"] = token_topk_preds
-
-    # Decode generated ids
-    candidates = [
-        self.tokenizer.decode(ids, skip_special_tokens=True)
-        for ids in preds.pop("generated_ids")
-    ]
-    if self.config.num_to_generate > 1:
-      preds["output_text"] = [(s, None) for s in candidates]
-    else:
-      preds["output_text"] = candidates[0]
-
-    # Process attention fields, if present.
-    for key in preds:
-      if not re.match(r"\w+_layer_(\d+)/attention", key):
-        continue
-      if key.startswith("encoder_"):
-        ntok = input_ntok
-      elif key.startswith("decoder_"):
-        ntok = target_ntok
-      else:
-        raise ValueError(f"Invalid attention key: '{key}'")
-      # Select only real tokens, since most of this matrix is padding.
-      # <float32>[num_heads, max_seq_length, max_seq_length]
-      # -> <float32>[num_heads, num_tokens, num_tokens]
-      preds[key] = preds[key][:, :ntok, :ntok].transpose((0, 2, 1))
-      # Make a copy of this array to avoid memory leaks, since NumPy otherwise
-      # keeps a pointer around that prevents the source array from being GCed.
-      preds[key] = preds[key].copy()
-
-    return preds
-
-    ##
-    # LIT API implementations
-    def max_minibatch_size(self) -> int:
-    # The lit.Model base class handles batching automatically in the
-    # implementation of predict(), and uses this value as the batch size.
-    return self.config.inference_batch_size
+    @staticmethod
+    def max_minibatch_size():
+        return 32
 
     def predict_minibatch(self, inputs):
-    """Run model on a single batch.
-    Args:
-      inputs: List[Dict] with fields as described by input_spec()
-    Returns:
-      outputs: List[Dict] with fields as described by output_spec()
-    """
-    # Text as sequence of sentencepiece ID"s.
-    encoded_inputs = self._encode_texts([ex["input_text"] for ex in inputs])
-    encoded_targets = self._encode_texts(
-        [ex.get("target_text", "") for ex in inputs])
 
-    ##
-    # Force-decode on target text, and also get encoder embs and attention.
-    batched_outputs = self._force_decode(encoded_inputs, encoded_targets)
-    # Get the conditional generation from the model.
-    # Workaround for output_hidden not being compatible with generate.
-    # See https://github.com/huggingface/transformers/issues/8361
-    self.model.config.output_hidden_states = False
-    generated_ids = self.model.generate(
-        encoded_inputs.input_ids,
-        num_beams=self.config.beam_size,
-        attention_mask=encoded_inputs.attention_mask,
-        max_length=self.config.max_gen_length,
-        num_return_sequences=self.config.num_to_generate)
-    # [batch_size*num_return_sequences, num_steps]
-    # -> [batch_size, num_return_sequences, num_steps]
-    batched_outputs["generated_ids"] = tf.reshape(
-        generated_ids,
-        [-1, self.config.num_to_generate, generated_ids.shape[-1]])
-    self.model.config.output_hidden_states = True
+        encoded_input = self.tokenizer.batch_encode_plus(
+            [ex["TITLE"] for ex in inputs],
+            return_tensors="pt",
+            add_special_tokens=True,
+            max_length=128,
+            padding="longest",
+            truncation="longest_first"
+        )
 
-    # Convert to numpy for post-processing.
-    detached_outputs = {k: v.numpy() for k, v in batched_outputs.items()}
-    # Split up batched outputs, then post-process each example.
-    unbatched_outputs = utils.unbatch_preds(detached_outputs)
-    return list(map(self._postprocess, unbatched_outputs))
+        if torch.cuda.is_available():
+            self.model.cuda()
+            for tensor in encoded_input:
+                encoded_input[tensor] = encoded_input[tensor].cuda()
 
-    def input_spec(self):
-    return {
-        "input_text": lit_types.TextSegment(),
-        "target_text": lit_types.TextSegment(required=False),
-    }
+        with torch.no_grad():  # remove this if you need gradients.
+            out: transformers.modeling_outputs.SequenceClassifierOutput = \
+                self.model(**encoded_input)
 
-    def output_spec(self):
-    spec = {
-        "output_text": lit_types.GeneratedText(parent="target_text"),
-        "input_tokens": lit_types.Tokens(parent="input_text"),
-        "encoder_final_embedding": lit_types.Embeddings(),
-        # If target text is given, the following will also be populated.
-        "target_tokens": lit_types.Tokens(parent="target_text"),
-        "pred_tokens": lit_types.TokenTopKPreds(align="target_tokens"),
-    }
-    if self.config.num_to_generate > 1:
-      spec["output_text"] = lit_types.GeneratedTextCandidates(
-          parent="target_text")
+        batched_outputs = {
+            "probas": torch.nn.functional.softmax(out.logits, dim=-1),
+            "input_ids": encoded_input["input_ids"],
+            "ntok": torch.sum(encoded_input["attention_mask"], dim=1),
+            "cls_emb": out.hidden_states[-1][:, 0],  # last layer, first token
+        }
 
-    if self.config.output_attention:
-      # Add attention for each layer.
-      for i in range(self.num_layers):
-        spec[f"encoder_layer_{i+1:d}_attention"] = lit_types.AttentionHeads(
-            align_in="input_tokens", align_out="input_tokens")
-        spec[f"decoder_layer_{i+1:d}_attention"] = lit_types.AttentionHeads(
-            align_in="target_tokens", align_out="target_tokens")
-    return spec
+        detached_outputs = {k: v.cpu().numpy() for k, v in batched_outputs.items()}
+
+        for output in utils.unbatch_preds(detached_outputs):
+            ntok = output.pop("ntok")
+            output["tokens"] = self.tokenizer.convert_ids_to_tokens(
+                output.pop("input_ids")[1:ntok - 1])
+            yield output
+
+    def input_spec(self) -> lit_types.Spec:
+        return {
+            "text": lit_types.TextSegment(),
+            "label": lit_types.CategoryLabel(vocab=self.LABELS, required=False)
+        }
+
+    def output_spec(self) -> lit_types.Spec:
+        return {
+            "tokens": lit_types.Tokens(),
+            "probas": lit_types.MulticlassPreds(parent="label", vocab=self.LABELS),
+            "cls_emb": lit_types.Embeddings()
+        }
 
 
-    ##
-    # Task-specific wrapper classes.
+def get_wsgi_app() -> Optional[dev_server.LitServerType]:
+
+    # Parse flags without calling app.run(main), to avoid conflict with
+    # gunicorn command line flags.
+    unused = flags.FLAGS(sys.argv, known_only=True)
+    if unused:
+        logging.info(
+            "quickstart_sst_demo:get_wsgi_app() called with unused "
+            "args: %s", unused)
+    return main([])
+
+
+def main(argv: Sequence[str]) -> Optional[dev_server.LitServerType]:
+
+    model_path = _MODEL_PATH.value or tempfile.mkdtemp()
+    logging.info("Working directory: %s", model_path)
+
+    # Start the LIT server. See server_flags.py for server options.
+    lit_demo = dev_server.Server(models, datasets, **server_flags.get_flags())
+    return lit_demo.serve()
+
+
+if __name__ == "__main__":
+
+    FLAGS = flags.FLAGS
+    FLAGS.set_default("development_demo", True)
+    FLAGS.set_default("server_type", "external")
+    FLAGS.set_default("demo_mode", True)
+    _MODEL_PATH = flags.DEFINE_string("results/model", None,
+                                      "Path to save trained model.")
+
+    datasets = {'news_test': IMDBData()}
+    models = {"imdb_classifier": NewsClassificationModel('/content/model/')}
+
+    app.run(main)
