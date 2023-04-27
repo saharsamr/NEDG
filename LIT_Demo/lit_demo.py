@@ -20,6 +20,9 @@ from transformers import AutoTokenizer
 from transformers import AutoModelForSequenceClassification
 
 
+FLAGS = flags.FLAGS
+
+
 def preprocess_function(examples):
     return tokenizer(examples["text"], truncation=True)
 
@@ -108,6 +111,9 @@ class NewsClassificationModel(lit_model.Model):
 
 def get_wsgi_app() -> Optional[dev_server.LitServerType]:
 
+    FLAGS.set_default("server_type", "default")
+    FLAGS.set_default("host", "0.0.0.0")
+    FLAGS.set_default("demo_mode", True)
     # Parse flags without calling app.run(main), to avoid conflict with
     # gunicorn command line flags.
     unused = flags.FLAGS(sys.argv, known_only=True)
@@ -120,8 +126,8 @@ def get_wsgi_app() -> Optional[dev_server.LitServerType]:
 
 def main(argv: Sequence[str]) -> Optional[dev_server.LitServerType]:
 
-    model_path = _MODEL_PATH.value or tempfile.mkdtemp()
-    logging.info("Working directory: %s", model_path)
+    datasets = {'news_test': IMDBData()}
+    models = {"imdb_classifier": NewsClassificationModel('/content/model/')}
 
     # Start the LIT server. See server_flags.py for server options.
     lit_demo = dev_server.Server(models, datasets, **server_flags.get_flags())
@@ -129,15 +135,4 @@ def main(argv: Sequence[str]) -> Optional[dev_server.LitServerType]:
 
 
 if __name__ == "__main__":
-
-    FLAGS = flags.FLAGS
-    FLAGS.set_default("development_demo", True)
-    FLAGS.set_default("server_type", "external")
-    FLAGS.set_default("demo_mode", True)
-    _MODEL_PATH = flags.DEFINE_string("results/model", None,
-                                      "Path to save trained model.")
-
-    datasets = {'news_test': IMDBData()}
-    models = {"imdb_classifier": NewsClassificationModel('/content/model/')}
-
     app.run(main)
