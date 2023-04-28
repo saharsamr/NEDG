@@ -112,11 +112,12 @@ class GenerativeModel(lit_model.Model):
 
     def _force_decode(self, encoded_inputs, encoded_targets):
 
-        input_ids = torch.tensor(encoded_inputs["input_ids"]).to(self.device)
-        attention_mask = torch.tensor(encoded_inputs["attention_mask"]).to(self.device)
-        decoder_input_ids = torch.tensor(encoded_targets["input_ids"]).to(self.device)
-        decoder_attention_mask = torch.tensor(encoded_targets["attention_mask"]).to(self.device)
+        input_ids = torch.tensor(encoded_inputs["input_ids"]).cuda()
+        attention_mask = torch.tensor(encoded_inputs["attention_mask"]).cuda()
+        decoder_input_ids = torch.tensor(encoded_targets["input_ids"]).cuda()
+        decoder_attention_mask = torch.tensor(encoded_targets["attention_mask"]).cuda()
 
+        self.model.cuda()
         results = self.model(
             input_ids=input_ids,
             decoder_input_ids=decoder_input_ids,
