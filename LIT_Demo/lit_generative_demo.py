@@ -13,22 +13,13 @@ from absl import app
 from absl import flags
 from absl import logging
 
-import torch
 import tensorflow as tf
-import transformers
 from transformers import BartTokenizerFast, BartForConditionalGeneration
-from transformers import AutoModelForSequenceClassification
 
 import pandas as pd
 
-from config import INPUT_GENERATION_MAX_LENGTH
-
-
+INPUT_GENERATION_MAX_LENGTH = 600
 FLAGS = flags.FLAGS
-
-
-def preprocess_function(examples):
-    return tokenizer(examples["text"], truncation=True)
 
 
 def masked_token_mean(vectors, masks):
@@ -78,6 +69,10 @@ class GenerativeModel(lit_model.Model):
             model_name, model_max_length=INPUT_GENERATION_MAX_LENGTH, padding=True, truncation=True,
         )
         self.model = BartForConditionalGeneration.from_pretrained(model_path)
+
+    @property
+    def num_layers(self):
+        return self.model.config.num_layers
 
     def _encode_texts(self, texts: List[str]):
         return self.tokenizer.batch_encode_plus(
@@ -188,29 +183,29 @@ class GenerativeModel(lit_model.Model):
     def input_spec(self):
 
         return {
-            "input_text": lit_types.TextSegment(),
-            "target_text": lit_types.TextSegment(required=False),
+            "context": lit_types.TextSegment(),
+            "description": lit_types.TextSegment(required=False),
         }
 
     def output_spec(self):
 
         spec = {
-            "output_text": lit_types.GeneratedText(parent="target_text"),
-            "input_tokens": lit_types.Tokens(parent="input_text"),
+            "output_text": lit_types.GeneratedText(parent="description"),
+            "input_tokens": lit_types.Tokens(parent="context"),
             "encoder_final_embedding": lit_types.Embeddings(),
-            "target_tokens": lit_types.Tokens(parent="target_text"),
+            "target_tokens": lit_types.Tokens(parent="description"),
             "pred_tokens": lit_types.TokenTopKPreds(align="target_tokens"),
         }
         if self.config.num_to_generate > 1:
             spec["output_text"] = lit_types.GeneratedTextCandidates(
-                parent="target_text")
+                parent="description")
 
-        if self.config.output_attention:
-            for i in range(self.num_layers):
-                spec[f"encoder_layer_{i + 1:d}_attention"] = lit_types.AttentionHeads(
-                    align_in="input_tokens", align_out="input_tokens")
-                spec[f"decoder_layer_{i + 1:d}_attention"] = lit_types.AttentionHeads(
-                    align_in="target_tokens", align_out="target_tokens")
+        # if self.config.output_attention:
+        #     for i in range(self.num_layers):
+        #         spec[f"encoder_layer_{i + 1:d}_attention"] = lit_types.AttentionHeads(
+        #             align_in="input_tokens", align_out="input_tokens")
+        #         spec[f"decoder_layer_{i + 1:d}_attention"] = lit_types.AttentionHeads(
+        #             align_in="target_tokens", align_out="target_tokens")
         return spec
 
 
@@ -231,8 +226,8 @@ def get_wsgi_app() -> Optional[dev_server.LitServerType]:
 
 def main(argv: Sequence[str]) -> Optional[dev_server.LitServerType]:
 
-    datasets = {'news_test': WikiDataset('data/HumanConcatenated/test_human_ne_no_context.csv')}
-    models = {"imdb_classifier": GenerativeModel('results/ConcatedCME', 'facebook/bart-large-cnn')}
+    datasets = {'news_test': WikiDataset('../data/HumanConcatenated/test_human_ne_no_context.csv')}
+    models = {"imdb_classifier": GenerativeModel('../results/ConcatedCME', 'facebook/bart-large-cnn')}
 
     # Start the LIT server. See server_flags.py for server options.
     lit_demo = dev_server.Server(models, datasets, **server_flags.get_flags())
