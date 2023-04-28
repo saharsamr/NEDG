@@ -83,8 +83,10 @@ class BartModel(lit_model.Model):
             [sample['description'] for sample in inputs], padding='max_length', truncation=True, max_length=self.def_max_len)
 
         self.model.cuda()
+        for tensor in encoded_context:
+            encoded_context[tensor] = encoded_context[tensor].cuda()
         with torch.no_grad():
-            ids = self.model.generate(encoded_context['input_ids'].cuda(), min_length=3, max_length=self.def_max_len)
+            ids = self.model.generate(encoded_context['input_ids'], min_length=3, max_length=self.def_max_len)
 
         batched_outputs = {
             "probas": torch.nn.functional.softmax(ids.logits, dim=-1),
