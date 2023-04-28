@@ -13,6 +13,7 @@ from absl import app
 from absl import flags
 from absl import logging
 
+import torch
 import tensorflow as tf
 from transformers import BartTokenizerFast, BartForConditionalGeneration
 
@@ -77,36 +78,68 @@ class GenerativeModel(lit_model.Model):
     def _encode_texts(self, texts: List[str]):
         return self.tokenizer.batch_encode_plus(
             texts,
-            return_tensors="tf",
             padding="longest",
             truncation=True)
 
+    # def _force_decode(self, encoded_inputs, encoded_targets):
+    #
+    #     results = self.model(
+    #         input_ids=encoded_inputs["input_ids"],
+    #         decoder_input_ids=encoded_targets["input_ids"],
+    #         attention_mask=encoded_inputs["attention_mask"],
+    #         decoder_attention_mask=encoded_targets["attention_mask"])
+    #
+    #     model_probs = tf.nn.softmax(results.logits, axis=-1)
+    #     top_k = tf.math.top_k(
+    #         model_probs, k=self.config.token_top_k, sorted=True, name=None)
+    #     batched_outputs = {"input_ids": encoded_inputs["input_ids"],
+    #                        "input_ntok": tf.reduce_sum(encoded_inputs["attention_mask"], axis=1),
+    #                        "target_ids": encoded_targets["input_ids"],
+    #                        "target_ntok": tf.reduce_sum(encoded_targets["attention_mask"], axis=1),
+    #                        "top_k_indices": top_k.indices, "top_k_probs": top_k.values,
+    #                        "encoder_final_embedding": masked_token_mean(
+    #                            results.encoder_last_hidden_state, encoded_inputs["attention_mask"])}
+    #
+    #     if self.config.output_attention:
+    #         for i in range(len(results.decoder_attentions)):
+    #             batched_outputs[
+    #                 f"decoder_layer_{i + 1:d}_attention"] = results.decoder_attentions[i]
+    #         for i in range(len(results.encoder_attentions)):
+    #             batched_outputs[
+    #                 f"encoder_layer_{i + 1:d}_attention"] = results.encoder_attentions[i]
+    #
+    #     return batched_outputs
+
     def _force_decode(self, encoded_inputs, encoded_targets):
 
-        results = self.model(
-            input_ids=encoded_inputs["input_ids"],
-            decoder_input_ids=encoded_targets["input_ids"],
-            attention_mask=encoded_inputs["attention_mask"],
-            decoder_attention_mask=encoded_targets["attention_mask"])
+        input_ids = torch.tensor(encoded_inputs["input_ids"]).to(self.device)
+        attention_mask = torch.tensor(encoded_inputs["attention_mask"]).to(self.device)
+        decoder_input_ids = torch.tensor(encoded_targets["input_ids"]).to(self.device)
+        decoder_attention_mask = torch.tensor(encoded_targets["attention_mask"]).to(self.device)
 
-        model_probs = tf.nn.softmax(results.logits, axis=-1)
-        top_k = tf.math.top_k(
-            model_probs, k=self.config.token_top_k, sorted=True, name=None)
+        results = self.model(
+            input_ids=input_ids,
+            decoder_input_ids=decoder_input_ids,
+            attention_mask=attention_mask,
+            decoder_attention_mask=decoder_attention_mask)
+
+        model_probs = torch.nn.functional.softmax(results.logits, dim=-1)
+        top_k_values, top_k_indices = torch.topk(
+            model_probs, k=self.config.token_top_k, dim=-1, sorted=True)
         batched_outputs = {"input_ids": encoded_inputs["input_ids"],
-                           "input_ntok": tf.reduce_sum(encoded_inputs["attention_mask"], axis=1),
+                           "input_ntok": attention_mask.sum(dim=1),
                            "target_ids": encoded_targets["input_ids"],
-                           "target_ntok": tf.reduce_sum(encoded_targets["attention_mask"], axis=1),
-                           "top_k_indices": top_k.indices, "top_k_probs": top_k.values,
+                           "target_ntok": decoder_attention_mask.sum(dim=1),
+                           "top_k_indices": top_k_indices,
+                           "top_k_probs": top_k_values,
                            "encoder_final_embedding": masked_token_mean(
-                               results.encoder_last_hidden_state, encoded_inputs["attention_mask"])}
+                               results.encoder_last_hidden_state, attention_mask)}
 
         if self.config.output_attention:
-            for i in range(len(results.decoder_attentions)):
-                batched_outputs[
-                    f"decoder_layer_{i + 1:d}_attention"] = results.decoder_attentions[i]
-            for i in range(len(results.encoder_attentions)):
-                batched_outputs[
-                    f"encoder_layer_{i + 1:d}_attention"] = results.encoder_attentions[i]
+            for i, decoder_attention in enumerate(results.decoder_attentions):
+                batched_outputs[f"decoder_layer_{i + 1:d}_attention"] = decoder_attention
+            for i, encoder_attention in enumerate(results.encoder_attentions):
+                batched_outputs[f"encoder_layer_{i + 1:d}_attention"] = encoder_attention
 
         return batched_outputs
 
@@ -179,6 +212,34 @@ class GenerativeModel(lit_model.Model):
         detached_outputs = {k: v.numpy() for k, v in batched_outputs.items()}
         unbatched_outputs = utils.unbatch_preds(detached_outputs)
         return list(map(self._postprocess, unbatched_outputs))
+
+    # def predict_minibatch(self, inputs):
+    #
+    #     encoded_inputs = self._encode_texts([ex["context"] for ex in inputs])
+    #     encoded_targets = self._encode_texts(
+    #         [ex.get("description", "") for ex in inputs])
+    #
+    #     if torch.cuda.is_available():
+    #         self.model.cuda()
+    #         # for tensor in encoded_inputs:
+    #         #     encoded_inputs[tensor] = encoded_inputs[tensor].cuda()
+    #
+    #     ids = self.model.generate(
+    #         encoded_inputs, min_length=3, max_length=20
+    #     )
+    #     preds = self.tokenizer.batch_decode(ids, skip_special_tokens=True)
+    #
+    #     batched_outputs = {"input_ids": encoded_inputs["input_ids"],
+    #                        "input_ntok": tf.reduce_sum(encoded_inputs["attention_mask"], axis=1),
+    #                        "target_ids": encoded_targets["input_ids"],
+    #                        "target_ntok": tf.reduce_sum(encoded_targets["attention_mask"], axis=1)}
+    #     detached_outputs = {k: v.cpu().numpy() for k, v in batched_outputs.items()}
+    #
+    #     for output in utils.unbatch_preds(detached_outputs):
+    #         ntok = output.pop("ntok")
+    #         output["tokens"] = self.tokenizer.convert_ids_to_tokens(
+    #             output.pop("input_ids")[1:ntok - 1])
+    #         yield output
 
     def input_spec(self):
 
