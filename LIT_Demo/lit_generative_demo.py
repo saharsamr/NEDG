@@ -158,9 +158,9 @@ class GenerativeModel(lit_model.Model):
 
     def predict_minibatch(self, inputs):
 
-        encoded_inputs = self._encode_texts([ex["input_text"] for ex in inputs])
+        encoded_inputs = self._encode_texts([ex["context"] for ex in inputs])
         encoded_targets = self._encode_texts(
-            [ex.get("target_text", "") for ex in inputs])
+            [ex.get("description", "") for ex in inputs])
 
         batched_outputs = self._force_decode(encoded_inputs, encoded_targets)
         self.model.config.output_hidden_states = False
