@@ -27,13 +27,24 @@ def preprocess_function(examples):
     return tokenizer(examples["text"], truncation=True)
 
 
+def _from_pretrained(cls, *args, **kw):
+  """Load a transformers model in PyTorch, with fallback to TF2/Keras weights."""
+  try:
+    return cls.from_pretrained(*args, **kw)
+  except OSError as e:
+    logging.warning("Caught OSError loading model: %s", e)
+    logging.warning(
+        "Re-trying to convert from TensorFlow checkpoint (from_tf=True)")
+    return cls.from_pretrained(*args, from_tf=True, **kw)
+
+
 class IMDBData(lit_dataset.Dataset):
 
     LABELS = ["0", "1"]
 
     def __init__(self):
         imdb = load_dataset("imdb")
-        dataset = imdb["test"].shuffle(seed=42).select([i for i in list(range(300))])
+        dataset = imdb["test"].shuffle(seed=42).select([i for i in list(range(300))])\
 
         self._examples = [{
             "text": sample['text'],
@@ -53,8 +64,18 @@ class NewsClassificationModel(lit_model.Model):
 
     def __init__(self, model_path):
 
-        self.tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
-        self.model = AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=2)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model_config = transformers.AutoConfig.from_pretrained(
+                                                model_path,
+                                                num_labels=len(self.LABELS),
+                                                output_hidden_states=True,
+                                                output_attentions=True
+                                            )
+        self.model = _from_pretrained(
+            transformers.AutoModelForSequenceClassification,
+            model_path,
+            config=model_config
+            )
 
     @staticmethod
     def max_minibatch_size():
@@ -63,7 +84,7 @@ class NewsClassificationModel(lit_model.Model):
     def predict_minibatch(self, inputs):
 
         encoded_input = self.tokenizer.batch_encode_plus(
-            [ex["TITLE"] for ex in inputs],
+            [ex["text"] for ex in inputs], #changed
             return_tensors="pt",
             add_special_tokens=True,
             max_length=128,
@@ -112,8 +133,7 @@ class NewsClassificationModel(lit_model.Model):
 def get_wsgi_app() -> Optional[dev_server.LitServerType]:
 
     FLAGS.set_default("server_type", "default")
-    FLAGS.set_default("host", "0.0.0.0")
-    FLAGS.set_default("demo_mode", True)
+    FLAGS.set_default("host", '0.0.0.0')
     # Parse flags without calling app.run(main), to avoid conflict with
     # gunicorn command line flags.
     unused = flags.FLAGS(sys.argv, known_only=True)
@@ -121,18 +141,22 @@ def get_wsgi_app() -> Optional[dev_server.LitServerType]:
         logging.info(
             "quickstart_sst_demo:get_wsgi_app() called with unused "
             "args: %s", unused)
+
     return main([])
 
 
 def main(argv: Sequence[str]) -> Optional[dev_server.LitServerType]:
 
     datasets = {'news_test': IMDBData()}
-    models = {"imdb_classifier": NewsClassificationModel('/content/model/')}
-
+    models = {"imdb_classifier": NewsClassificationModel('./model/')}
     # Start the LIT server. See server_flags.py for server options.
     lit_demo = dev_server.Server(models, datasets, **server_flags.get_flags())
     return lit_demo.serve()
 
 
 if __name__ == "__main__":
+
+    FLAGS.set_default("development_demo", True)
     app.run(main)
+
+
