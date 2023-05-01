@@ -180,6 +180,61 @@ def label_based_on_bertscores(file_path1, file_path2, output_file, delimiter='~'
             f.write(f'{l}\1{pred_we}\1{bert_we}\1{pred_woe}\1{bert_woe}\1{c}\1{classification_label}\n')
 
 
+def make_classification_dataset(CPE_model_name, CME_model_name, CPE_input_file, CME_input_file, delimiter='~'):
+
+    CPE_input_data = pd.read_csv(CPE_input_file, delimiter='\1', header=None,
+                                 names=['title', 'context', 'description'])
+    CPE_input_x, CPE_input_y = list(CPE_input_data['context']), list(CPE_input_data['description'])
+
+    CME_input_data = pd.read_csv(CME_input_file, delimiter='\1', header=None,
+                                 names=['title', 'context', 'description'])
+    CME_input_x, CME_input_y = list(CME_input_data['context']), list(CME_input_data['description'])
+
+    training_args = TrainingArguments(output_dir=OUTPUT_DIR)
+    CPE_model = BART(
+        training_args,
+        CPE_input_x, CPE_input_y,
+        CPE_input_x, CPE_input_y,
+        CPE_input_x, CPE_input_y,
+        load=True,
+        model_name=CPE_model_name
+    )
+    CME_model = BART(
+        training_args,
+        CME_input_x, CME_input_y,
+        CME_input_x, CME_input_y,
+        CME_input_x, CME_input_y,
+        load=True,
+        model_name=CME_model_name
+    )
+
+    CPE_preds, CPE_inputs, CPE_labels = CPE_model.pred()
+    CME_preds, CME_inputs, CME_labels = CME_model.pred()
+
+    bertscore = load_metric('bertscore')
+    CPE_bert = bertscore.compute(
+        predictions=CPE_preds, references=CPE_labels, lang='en', model_type='bert-large-uncased'
+    )['f1']
+    CME_bert = bertscore.compute(
+        predictions=CME_preds, references=CME_labels, lang='en', model_type='bert-large-uncased'
+    )['f1']
+    classification_labels = [1 if cpe >= cme else 0 for cpe, cme in zip(CPE_bert, CME_bert)]
+
+    with open('test_classification_no_concat.csv', 'w') as f:
+        for context_cpe, label_cpe, pred_cpe, bert_cpe, context_cme, label_cme, \
+            pred_cme, bert_cme, class_label, masked_input, entity_name in \
+          zip(
+              CPE_inputs, CPE_labels, CPE_preds, CPE_bert,
+              CME_inputs, CME_labels, CME_preds, CME_bert,
+              classification_labels, CME_input_x, list(CPE_input_data['title'])
+          ):
+
+            f.write(f'{context_cpe.replace(delimiter, "")}{delimiter}{label_cpe}{delimiter}{pred_cpe}{delimiter}'
+                    f'{bert_cpe}{delimiter}{context_cme.replace(delimiter, "")}{delimiter}{label_cme}{delimiter}'
+                    f'{pred_cme}{delimiter}{bert_cme}{delimiter}{class_label}{delimiter}'
+                    f'{masked_input.replace(delimiter, "")}{delimiter}{entity_name}\n')
+
+
 def x(file_path1, file_path2, output_file, delimiter='~'):
 
     bertscore = load_metric('bertscore')
