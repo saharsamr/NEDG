@@ -28,7 +28,7 @@ for root, dirs, files in tqdm(os.walk(path)):
 
             # Load the JSONL data from the file
             with open(filepath, 'r') as f:
-                for line in f:
+                for line in f.readlines():
                     # Parse each JSON object from the line
                     data = json.loads(line)
 
