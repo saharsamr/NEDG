@@ -22,7 +22,8 @@ for root, dirs, files in tqdm(os.walk(path)):
         dir_path = os.path.join(root, direc)
         # print(f'Opening folder: {dir_path}')
         # Loop through each file in the directory
-        for filename in os.listdir(dir_path):
+        file_articles = []
+        for filename in tqdm(os.listdir(dir_path)):
             # Path to the JSONL file
             filepath = os.path.join(dir_path, filename)
 
@@ -31,6 +32,6 @@ for root, dirs, files in tqdm(os.walk(path)):
                 for line in f.readlines():
                     # Parse each JSON object from the line
                     data = json.loads(line)
-
+                    file_articles.append(data)
                     # Insert the JSON object into the MongoDB collection
-                    collection.insert_one(data)
+            collection.insert_many(file_articles)
