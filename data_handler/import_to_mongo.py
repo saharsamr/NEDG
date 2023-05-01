@@ -22,11 +22,10 @@ for root, dirs, files in tqdm(os.walk(path)):
         dir_path = os.path.join(root, direc)
         # print(f'Opening folder: {dir_path}')
         # Loop through each file in the directory
-        file_articles = []
         for filename in tqdm(os.listdir(dir_path)):
             # Path to the JSONL file
             filepath = os.path.join(dir_path, filename)
-
+            file_articles = []
             # Load the JSONL data from the file
             with open(filepath, 'r') as f:
                 for line in f.readlines():
