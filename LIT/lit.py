@@ -10,6 +10,7 @@ from absl import logging
 
 from datasets import WikiDataset
 from models import BartModel
+from metrics import BertScore
 
 
 FLAGS = flags.FLAGS
@@ -34,8 +35,9 @@ def main(argv: Sequence[str]) -> Optional[dev_server.LitServerType]:
 
     datasets = {'wiki_dataset': WikiDataset('../data/HumanConcatenated/test_human_masked_ne_with_context.csv')}
     models = {"bart": BartModel('../results/ConcatedCME', 'facebook/bart-large-cnn')}
+    metrics = {'bert_score': BertScore()}
 
-    lit_demo = dev_server.Server(models, datasets, **server_flags.get_flags())
+    lit_demo = dev_server.Server(models, datasets, metrics=metrics, **server_flags.get_flags())
     return lit_demo.serve()
 
 
