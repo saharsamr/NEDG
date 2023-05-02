@@ -1,4 +1,4 @@
-from lit_nlp.components import SimpleMetrics
+from lit_nlp.api import components as lit_components
 from lit_nlp.api import types as lit_types
 
 from typing import Sequence, Optional, Dict, Text
@@ -7,7 +7,7 @@ import numpy as np
 from datasets import load_metric
 
 
-class BertScore(SimpleMetrics):
+class BertScore(lit_components.SimpleMetrics):
 
     def __init__(self):
 
