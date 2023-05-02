@@ -1,44 +1,9 @@
-from lit_nlp.api import dataset as lit_dataset
 from lit_nlp.api import model as lit_model
 from lit_nlp.api import types as lit_types
 from lit_nlp.lib import utils
-from lit_nlp import dev_server
-from lit_nlp import server_flags
-
-import sys
-from typing import Optional, Sequence
-
-from absl import app
-from absl import flags
-from absl import logging
 
 import torch
 from transformers import BartTokenizerFast, BartForConditionalGeneration
-
-import pandas as pd
-
-INPUT_GENERATION_MAX_LENGTH = 600
-FLAGS = flags.FLAGS
-
-
-class WikiDataset(lit_dataset.Dataset):
-
-    def __init__(self, file_path):
-
-        data = pd.read_csv(file_path, delimiter='\1', header=None, names=['title', 'context', 'description'])[:100]
-        self._examples = [{
-            "title": row['title'],
-            "context": row['context'],
-            "description": row['description']
-        } for _, row in data.iterrows()]
-
-    def spec(self) -> lit_types.Spec:
-
-        return {
-            "title": lit_types.TextSegment(),
-            "context": lit_types.TextSegment(),
-            "description": lit_types.TextSegment()
-        }
 
 
 class BartModel(lit_model.Model):
@@ -47,11 +12,9 @@ class BartModel(lit_model.Model):
 
         super().__init__()
         self.tokenizer = BartTokenizerFast.from_pretrained(
-            model_name, model_max_length=INPUT_GENERATION_MAX_LENGTH, padding=True, truncation=True,
+            model_name, model_max_length=600, padding=True, truncation=True,
         )
         self.model = BartForConditionalGeneration.from_pretrained(model_path)
-
-        self.enc_layers, self.dec_layers = None, None
 
     def predict_minibatch(self, inputs):
 
@@ -121,31 +84,3 @@ class BartModel(lit_model.Model):
         }
 
         return spec
-
-
-def get_wsgi_app() -> Optional[dev_server.LitServerType]:
-
-    FLAGS.set_default("server_type", "default")
-    FLAGS.set_default("host", "0.0.0.0")
-    FLAGS.set_default("demo_mode", True)
-
-    unused = flags.FLAGS(sys.argv, known_only=True)
-    if unused:
-        logging.info(
-            "quickstart_sst_demo:get_wsgi_app() called with unused "
-            "args: %s", unused)
-
-    return main([])
-
-
-def main(argv: Sequence[str]) -> Optional[dev_server.LitServerType]:
-
-    datasets = {'wiki_dataset': WikiDataset('../data/HumanConcatenated/test_human_masked_ne_with_context.csv')}
-    models = {"bart": BartModel('../results/ConcatedCME', 'facebook/bart-large-cnn')}
-
-    lit_demo = dev_server.Server(models, datasets, **server_flags.get_flags())
-    return lit_demo.serve()
-
-
-if __name__ == "__main__":
-    app.run(main)
