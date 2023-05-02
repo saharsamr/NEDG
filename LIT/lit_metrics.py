@@ -4,7 +4,7 @@ from lit_nlp.api import types as lit_types
 from typing import Sequence, Optional, Dict, Text
 import numpy as np
 
-from lit_datasets import load_metric
+from datasets import load_metric
 
 
 class BertScore(lit_components.SimpleMetrics):
