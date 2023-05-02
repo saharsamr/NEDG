@@ -8,9 +8,9 @@ from absl import app
 from absl import flags
 from absl import logging
 
-from datasets import WikiDataset
-from models import BartModel
-from metrics import BertScore
+from lit_datasets import WikiDataset
+from lit_models import BartModel
+from lit_metrics import BertScore
 
 
 FLAGS = flags.FLAGS

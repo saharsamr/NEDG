@@ -15,7 +15,7 @@ from absl import logging
 
 import torch
 import transformers
-from datasets import load_dataset
+from lit_datasets import load_dataset
 from transformers import AutoTokenizer
 from transformers import AutoModelForSequenceClassification
 
