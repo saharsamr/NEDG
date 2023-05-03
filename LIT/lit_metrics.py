@@ -1,4 +1,4 @@
-from lit_nlp.api import components as lit_components
+from lit_nlp.components.metrics import SimpleMetrics
 from lit_nlp.api import types as lit_types
 
 from typing import Sequence, Optional, Dict, Text
@@ -7,19 +7,29 @@ import numpy as np
 from datasets import load_metric
 
 
-class BertScore(lit_components.SimpleMetrics):
+class BertScore(SimpleMetrics):
 
     def __init__(self):
 
         super().__init__()
         self.metric = load_metric('bertscore')
 
-    def is_compatible(self, pred_spec: lit_types.LitType, parent_spec: lit_types.LitType) -> bool:
+    def is_compatible(self, model, dataset) -> bool:
+        print('======================================================')
+        print('======================================================')
+        print('======================================================')
 
-        is_pred_compatible = isinstance(pred_spec, lit_types.GeneratedText)
-        is_parent_compatible = isinstance(parent_spec, lit_types.TextSegment)
+        # is_pred_compatible = isinstance(pred_spec, lit_types.GeneratedText)
+        # is_parent_compatible = isinstance(parent_spec, lit_types.TextSegment)
+        #
+        # return is_pred_compatible and is_parent_compatible
+        return True
 
-        return is_pred_compatible and is_parent_compatible
+    def meta_spec(self):
+        return {
+            "description": lit_types.TextSegment(),
+            "output_text": lit_types.GeneratedText(parent="description")
+        }
 
     def compute(self,
                 labels: Sequence[lit_types.TextSegment],

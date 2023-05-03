@@ -76,6 +76,7 @@ class BartModel(lit_model.Model):
     def output_spec(self) -> lit_types.Spec:
 
         spec = {
+            "target_text": lit_types.TextSegment(),
             "input_tokens": lit_types.Tokens(),
             "target_tokens": lit_types.Tokens(),
             "output_text": lit_types.GeneratedText(parent="description"),
