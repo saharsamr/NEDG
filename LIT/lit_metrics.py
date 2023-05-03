@@ -3,7 +3,7 @@ from typing import Any, Optional, Sequence
 from lit_nlp.api import components as lit_components
 from lit_nlp.api import dataset as lit_dataset
 from lit_nlp.api import model as lit_model
-from lit_nlp.api import lit_types
+from lit_nlp.api import types as lit_types
 import numpy as np
 
 from datasets import load_metric
