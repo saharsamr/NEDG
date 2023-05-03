@@ -1,44 +1,122 @@
-from lit_nlp.components.metrics import SimpleMetrics
-from lit_nlp.api import types as lit_types
+from typing import Any, Optional, Sequence
 
-from typing import Sequence, Optional, Dict, Text
+from lit_nlp.api import components as lit_components
+from lit_nlp.api import dataset as lit_dataset
+from lit_nlp.api import model as lit_model
+from lit_nlp.api import lit_types
 import numpy as np
 
 from datasets import load_metric
 
 
-class BertScore(SimpleMetrics):
+JsonDict = lit_types.JsonDict
+IndexedInput = lit_types.IndexedInput
+LitType = lit_types.LitType
+Spec = lit_types.Spec
+MetricsDict = dict[str, float]
+
+
+def map_pred_keys():
+    return {
+        'output_text': 'description'
+    }
+
+
+def nan_to_none(metrics: dict[str, float]) -> dict[str, Optional[float]]:
+    return {k: (v if not np.isnan(v) else None) for k, v in metrics.items()}
+
+
+class BertScore(lit_components.Metrics):
 
     def __init__(self):
+        super(BertScore, self).__init__()
+        self.bertscore = load_metric('bertscore')
 
-        super().__init__()
-        self.metric = load_metric('bertscore')
-
-    def is_compatible(self, model, dataset) -> bool:
-        print('======================================================')
-        print('======================================================')
-        print('======================================================')
-
-        # is_pred_compatible = isinstance(pred_spec, lit_types.GeneratedText)
-        # is_parent_compatible = isinstance(parent_spec, lit_types.TextSegment)
-        #
-        # return is_pred_compatible and is_parent_compatible
+    def is_compatible(self, model: lit_model.Model,
+                    dataset: lit_dataset.Dataset) -> bool:
         return True
 
     def meta_spec(self):
         return {
-            "description": lit_types.TextSegment(),
-            "output_text": lit_types.GeneratedText(parent="description")
+            'bertscore-f1': lit_types.MetricResult(
+                best_value=lit_types.MetricBestValue.ONE,
+                description='Similarity between the reference and the generated output'
+                            ', calculated using BERT-embeddings'),
         }
 
-    def compute(self,
-                labels: Sequence[lit_types.TextSegment],
-                preds: Sequence[lit_types.GeneratedText],
-                label_spec: lit_types.TextSegment,
-                pred_spec: lit_types.GeneratedText,
-                config: Optional[lit_types.JsonDict] = None) -> Dict[Text, float]:
+    def run(
+      self,
+      inputs: Sequence[JsonDict],
+      model: lit_model.Model,
+      dataset: lit_dataset.Dataset,
+      model_outputs: Optional[list[JsonDict]] = None,
+      config: Optional[JsonDict] = None) -> list[JsonDict]:
 
-        bertscore_output = self.metric.compute(
+        if model_outputs is None:
+            model_outputs = list(model.predict(inputs))
+
+        spec = model.spec()
+        field_map = map_pred_keys()
+
+        ret = []
+        for pred_key, label_key in field_map.items():
+            labels = [ex[label_key] for ex in inputs]
+            preds = [mo[pred_key] for mo in model_outputs]
+            # Compute metrics, as dict(str -> float)
+            metrics = self.compute(
+                labels,
+                preds,
+                label_spec=dataset.spec()[label_key],
+                pred_spec=spec.output[pred_key],
+                config=config.get(pred_key) if config else None)
+            # Format for frontend.
+            ret.append({
+                'pred_key': pred_key,
+                'label_key': label_key,
+                'metrics': nan_to_none(metrics)
+            })
+        return ret
+
+    def run_with_metadata(
+      self,
+      indexed_inputs: Sequence[IndexedInput],
+      model: lit_model.Model,
+      dataset: lit_dataset.IndexedDataset,
+      model_outputs: Optional[list[JsonDict]] = None,
+      config: Optional[JsonDict] = None) -> list[JsonDict]:
+        inputs = [inp['data'] for inp in indexed_inputs]
+        return self.run(inputs, model, dataset, model_outputs, config)
+
+
+    def is_field_compatible(
+      self,
+      pred_spec: lit_types.LitType,
+      parent_spec: Optional[lit_types.LitType]) -> bool:
+        return True
+
+    def compute(
+      self,
+      labels: Sequence[Any],
+      preds: Sequence[Any],
+      label_spec: lit_types.LitType,
+      pred_spec: lit_types.LitType,
+      config: Optional[JsonDict] = None) -> MetricsDict:
+
+        bertscore_output = self.bertscore.compute(
             predictions=preds, references=labels, lang='en', model_type='bert-large-uncased'
         )
-        return {'bert-f1': np.mean(bertscore_output['f1'])}
+        return {'bertscore-f1': np.mean(bertscore_output['f1'])}
+
+    def compute_with_metadata(
+      self,
+      labels: Sequence[Any],
+      preds: Sequence[Any],
+      label_spec: lit_types.LitType,
+      pred_spec: lit_types.LitType,
+      indices: Sequence[lit_types.ExampleId],
+      metas: Sequence[JsonDict],
+      config: Optional[JsonDict] = None) -> MetricsDict:
+
+        del indices, metas  # unused by Metrics base class
+        return self.compute(labels, preds, label_spec, pred_spec, config)
+
