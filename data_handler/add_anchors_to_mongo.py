@@ -60,7 +60,7 @@ for i in tqdm(range(0, total_documents, batch_size)):
                 dictionary[decoded_link].append(i)
         # Add the list to the mongo json
         # collection.update_one({"_id": document["_id"]}, {"$set": {"anchors": dictionary}})
-        updates.append(UpdateOne({'_id': document._id}, {'$set' : {"anchors": dictionary}}))
+        updates.append(UpdateOne({'_id': document['_id']}, {'$set' : {"anchors": dictionary}}))
     # Update all the documents in the batch with the new anchors
     # try:
     #     collection.update_many({"_id": {"$in": [doc["_id"] for doc in documents]}}, {"$set": {"anchors": dictionary}})
