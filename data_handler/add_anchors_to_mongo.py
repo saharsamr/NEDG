@@ -1,4 +1,4 @@
-
+from tqdm import tqdm
 import pymongo
 import re
 import urllib.parse
@@ -42,9 +42,9 @@ total_documents = collection.count_documents({})
 
 
 # Process documents in batches
-for i in range(0, total_documents, batch_size):
+for i in tqdm(range(0, total_documents, batch_size)):
     documents = collection.find().skip(i).limit(batch_size)
-    for document in documents:
+    for document in tqdm(documents):
         # Extract the text
         context = document["text"]
         paragraphs = context.split('\n')
