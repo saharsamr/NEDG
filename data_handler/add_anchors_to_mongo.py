@@ -50,7 +50,7 @@ for i in range(0, total_documents, batch_size):
         paragraphs = context.split('\n')
         # Find anchors and add them to list
         for i, par in enumerate(paragraphs):
-            links = re.findall(r'<a href=(.*?)&gl', par)
+            links = re.findall(r'&lt;a href=(.*?)&gt;', par)
             for link in links:
                 decoded_link = urllib.parse.unquote(link)
                 dictionary[decoded_link].append(i)
