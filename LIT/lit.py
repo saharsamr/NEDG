@@ -32,8 +32,13 @@ def get_wsgi_app() -> Optional[dev_server.LitServerType]:
 
 def main(argv: Sequence[str]) -> Optional[dev_server.LitServerType]:
 
-    datasets = {'wiki_dataset': WikiDataset('../data/HumanConcatenated/test_human_masked_ne_with_context.csv')}
-    models = {"bart": BartModel('../results/ConcatedCME', 'facebook/bart-large-cnn')}
+    datasets = {
+        'wiki_dataset': WikiDataset('../data/HumanNoConcat/test_human_ne_with_context.csv')
+    }
+    models = {
+        "bart_CME": BartModel('../results/NoConcatCME', 'facebook/bart-large-cnn'),
+        "bart_CPE": BartModel('../results/NoConcatCPE', 'facebook/bart-large-cnn')
+    }
 
     lit_demo = dev_server.Server(models, datasets, **server_flags.get_flags())
     return lit_demo.serve()
