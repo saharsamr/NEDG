@@ -88,6 +88,7 @@ class BartModel(lit_model.Model):
         spec = {
             "target_text": lit_types.TextSegment(),
             "input_tokens": lit_types.Tokens(),
+            "input_gradients": lit_types.TokenGradients(align="input_tokens"),
             "target_tokens": lit_types.Tokens(),
             "output_text": lit_types.GeneratedText(parent="description"),
             "encoder_layer_1_attention": lit_types.AttentionHeads(align_in="input_tokens", align_out="input_tokens"),
