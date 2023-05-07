@@ -18,8 +18,8 @@ def masking_entities(tokenizer, input_ids_list, attention_mask_list):
     new_input_ids_list, new_attention_mask_list = [], []
     for input_ids, attention_mask in zip(input_ids_list, attention_mask_list):
 
-        new_input_ids = input_ids
-        new_attention_mask = attention_mask
+        new_input_ids = input_ids.tolist()
+        new_attention_mask = attention_mask.tolist()
 
         entity_start_token_id = tokenizer.convert_tokens_to_ids('<NE>')
         entity_end_token_id = tokenizer.convert_tokens_to_ids('</NE>')
@@ -28,8 +28,8 @@ def masking_entities(tokenizer, input_ids_list, attention_mask_list):
         entity_end_token_indices = [i for i, tok_id in enumerate(new_input_ids) if tok_id == entity_end_token_id]
 
         for st, et in zip(entity_start_token_indices, entity_end_token_indices):
-            new_input_ids[st+1:et] = [tokenizer.convert_tokens_to_ids('<mask>') for _ in range(st+1,et)]
-            new_attention_mask[st+1:et] = [0 for _ in range(st+1,et)]
+            new_input_ids[st+1:et] = [tokenizer.convert_tokens_to_ids('<mask>') for _ in range(st+1, et)]
+            new_attention_mask[st+1:et] = [0 for _ in range(st+1, et)]
 
         new_input_ids_list.append(new_input_ids)
         new_attention_mask_list.append(new_attention_mask)
@@ -45,7 +45,10 @@ class BartModel(lit_model.Model):
         self.tokenizer = BartTokenizerFast.from_pretrained(
             model_name, model_max_length=600, padding=True, truncation=True,
         )
+        self.tokenizer.add_special_tokens({'additional_special_tokens': ['<NE>', '</NE>', '<CNTXT>', '</CNTXT>']})
         self.model = BartForConditionalGeneration.from_pretrained(model_path)
+        self.model.resize_token_embeddings(len(self.tokenizer))
+        
         self.mask_entity = mask_entity
 
     def predict_minibatch(self, inputs):
@@ -83,7 +86,7 @@ class BartModel(lit_model.Model):
             out = self.model(**encoded_input, output_attentions=True, output_hidden_states=True)
             ids = self.model.generate(encoded_input['input_ids'])
 
-        encoded_input['attention_mask'] = old_masks
+        encoded_input['attention_mask'] = old_masks.cuda()
 
         batched_outputs = {
             "probas": torch.nn.functional.softmax(out.logits, dim=-1),
