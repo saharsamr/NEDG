@@ -36,7 +36,7 @@ def main(argv: Sequence[str]) -> Optional[dev_server.LitServerType]:
         'wiki_dataset': WikiDataset('../data/HumanNoConcat/test_human_ne_with_context.csv')
     }
     models = {
-        "bart_CME": BartModel('../results/NoConcatCME', 'facebook/bart-large-cnn'),
+        "bart_CME": BartModel('../results/NoConcatCME', 'facebook/bart-large-cnn', mask_entity=True),
         "bart_CPE": BartModel('../results/NoConcatCPE', 'facebook/bart-large-cnn')
     }
 
