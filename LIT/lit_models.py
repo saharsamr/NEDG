@@ -13,15 +13,40 @@ def masked_token_mean(vectors, masks):
     return feat
 
 
+def masking_entities(tokenizer, input_ids_list, attention_mask_list):
+
+    new_input_ids_list, new_attention_mask_list = [], []
+    for input_ids, attention_mask in zip(input_ids_list, attention_mask_list):
+
+        new_input_ids = input_ids
+        new_attention_mask = attention_mask
+
+        entity_start_token_id = tokenizer.convert_tokens_to_ids('<NE>')
+        entity_end_token_id = tokenizer.convert_tokens_to_ids('</NE>')
+
+        entity_start_token_indices = [i for i, tok_id in enumerate(new_input_ids) if tok_id == entity_start_token_id]
+        entity_end_token_indices = [i for i, tok_id in enumerate(new_input_ids) if tok_id == entity_end_token_id]
+
+        for st, et in zip(entity_start_token_indices, entity_end_token_indices):
+            new_input_ids[st+1:et] = [tokenizer.convert_tokens_to_ids('<mask>') for _ in range(st+1,et)]
+            new_attention_mask[st+1:et] = [0 for _ in range(st+1,et)]
+
+        new_input_ids_list.append(new_input_ids)
+        new_attention_mask_list.append(new_attention_mask)
+
+    return torch.tensor(new_input_ids_list), torch.tensor(new_attention_mask_list)
+
+
 class BartModel(lit_model.Model):
 
-    def __init__(self, model_path, model_name):
+    def __init__(self, model_path, model_name, mask_entity=False):
 
         super().__init__()
         self.tokenizer = BartTokenizerFast.from_pretrained(
             model_name, model_max_length=600, padding=True, truncation=True,
         )
         self.model = BartForConditionalGeneration.from_pretrained(model_path)
+        self.mask_entity = mask_entity
 
     def predict_minibatch(self, inputs):
 
@@ -40,6 +65,11 @@ class BartModel(lit_model.Model):
             truncation=True
         )
 
+        old_masks = encoded_input['attention_mask']
+        if self.mask_entity:
+            encoded_input['input_ids'], encoded_input['attention_mask'] = \
+                masking_entities(self.tokenizer, encoded_input['input_ids'], encoded_input['attention_mask'])
+
         if torch.cuda.is_available():
             self.model.cuda()
             for tensor in encoded_input:
@@ -52,6 +82,8 @@ class BartModel(lit_model.Model):
         with torch.torch.set_grad_enabled(True):  # remove this if you need gradients.
             out = self.model(**encoded_input, output_attentions=True, output_hidden_states=True)
             ids = self.model.generate(encoded_input['input_ids'])
+
+        encoded_input['attention_mask'] = old_masks
 
         batched_outputs = {
             "probas": torch.nn.functional.softmax(out.logits, dim=-1),
