@@ -8,7 +8,7 @@ class WikiDataset(lit_dataset.Dataset):
 
     def __init__(self, file_path):
 
-        data = pd.read_csv(file_path, delimiter='\1', header=None, names=['title', 'context', 'description'])[:100]
+        data = pd.read_csv(file_path, delimiter='\1', header=None, names=['title', 'context', 'description'])
         self._examples = [{
             "title": row['title'],
             "context": row['context'],
