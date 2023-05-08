@@ -1,3 +1,4 @@
+import numpy as np
 from lit_nlp.api import model as lit_model
 from lit_nlp.api import types as lit_types
 from lit_nlp.lib import utils
@@ -113,3 +114,64 @@ class BartModel(lit_model.Model):
         }
 
         return spec
+
+    def attention_weights_last_layer(self, input_text: str, **kwargs):
+        with torch.no_grad():
+            encoded_input = self.tokenizer.encode_plus(
+                input_text,
+                return_tensors="pt",
+                max_length=600,
+                padding="longest",
+                truncation=True
+            )
+            if torch.cuda.is_available():
+                self.model.cuda()
+                encoded_input = {k: v.cuda() for k, v in encoded_input.items()}
+            outputs = self.model(
+                encoded_input['input_ids'],
+                attention_mask=encoded_input['attention_mask'],
+                output_attentions=True,
+                **kwargs
+            )
+            encoder_attentions = outputs.encoder_attentions
+            decoder_attentions = outputs.decoder_attentions
+            return encoder_attentions[-1], decoder_attentions[-1]
+
+    def attention_weights(self, input_text: str, **kwargs):
+        with torch.no_grad():
+            encoded_input = self.tokenizer.encode_plus(
+                input_text,
+                return_tensors="pt",
+                max_length=600,
+                padding="longest",
+                truncation=True
+            )
+            if torch.cuda.is_available():
+                self.model.cuda()
+                encoded_input = {k: v.cuda() for k, v in encoded_input.items()}
+            outputs = self.model(
+                encoded_input['input_ids'],
+                attention_mask=encoded_input['attention_mask'],
+                output_attentions=True,
+                **kwargs
+            )
+            encoder_attentions = outputs.encoder_attentions
+            decoder_attentions = outputs.decoder_attentions
+            return encoder_attentions, decoder_attentions
+        
+    def Pearson_correlation(self, compareModel):
+        # Example input
+        att_input = ''
+
+        # Get attention weights for each model
+        encoder_att1, decoder_att1 = self.attention_weights(att_input, return_dict=True)
+        encoder_att2, decoder_att2 = compareModel.attention_weights(att_input, return_dict=True)
+
+        # Flatten attention weights into 1D arrays
+        att1_flat = np.ravel(encoder_att1.numpy())
+        att2_flat = np.ravel(encoder_att2.numpy())
+
+        # Compute Pearson correlation coefficient
+        corr_coef, p_value = np.corrcoef(att1_flat, att2_flat)
+
+        return corr_coef
