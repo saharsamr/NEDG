@@ -1,3 +1,4 @@
+import numpy as np
 from lit_nlp.api import dataset as lit_dataset
 from lit_nlp.api import model as lit_model
 from lit_nlp.api import types as lit_types
@@ -69,11 +70,11 @@ class GenerativeModel(lit_model.Model):
         self.tokenizer = BartTokenizerFast.from_pretrained(
             model_name, model_max_length=INPUT_GENERATION_MAX_LENGTH, padding=True, truncation=True,
         )
-        self.model = BartForConditionalGeneration.from_pretrained(model_path)
+        self.model_1 = BartForConditionalGeneration.from_pretrained(model_path)
 
     @property
     def num_layers(self):
-        return self.model.config.num_layers
+        return self.model_1.config.num_layers
 
     def _encode_texts(self, texts: List[str]):
         return self.tokenizer.batch_encode_plus(
@@ -117,8 +118,8 @@ class GenerativeModel(lit_model.Model):
         decoder_input_ids = torch.tensor(encoded_targets["input_ids"]).cuda()
         decoder_attention_mask = torch.tensor(encoded_targets["attention_mask"]).cuda()
 
-        self.model.cuda()
-        results = self.model(
+        self.model_1.cuda()
+        results = self.model_1(
             input_ids=input_ids,
             decoder_input_ids=decoder_input_ids,
             attention_mask=attention_mask,
@@ -197,8 +198,8 @@ class GenerativeModel(lit_model.Model):
             [ex.get("description", "") for ex in inputs])
 
         batched_outputs = self._force_decode(encoded_inputs, encoded_targets)
-        self.model.config.output_hidden_states = False
-        generated_ids = self.model.generate(
+        self.model_1.config.output_hidden_states = False
+        generated_ids = self.model_1.generate(
             encoded_inputs.input_ids,
             num_beams=self.config.beam_size,
             attention_mask=encoded_inputs.attention_mask,
@@ -208,7 +209,7 @@ class GenerativeModel(lit_model.Model):
         batched_outputs["generated_ids"] = tf.reshape(
             generated_ids,
             [-1, self.config.num_to_generate, generated_ids.shape[-1]])
-        self.model.config.output_hidden_states = True
+        self.model_1.config.output_hidden_states = True
 
         detached_outputs = {k: v.numpy() for k, v in batched_outputs.items()}
         unbatched_outputs = utils.unbatch_preds(detached_outputs)
@@ -280,17 +281,28 @@ class GenerativeModel(lit_model.Model):
                 truncation=True
             )
             if torch.cuda.is_available():
-                self.model.cuda()
+                self.model_1.cuda()
+                self.model_2.cuda()
                 encoded_input = {k: v.cuda() for k, v in encoded_input.items()}
-            outputs = self.model(
+            outputs_1 = self.model_1(
                 encoded_input['input_ids'],
                 attention_mask=encoded_input['attention_mask'],
                 output_attentions=True,
                 **kwargs
             )
-            encoder_attentions = outputs.encoder_attentions
-            decoder_attentions = outputs.decoder_attentions
-            return encoder_attentions[i], decoder_attentions[i]
+            encoder_attentions_1 = outputs_1.encoder_attentions
+            decoder_attentions_1 = outputs_1.decoder_attentions
+
+            outputs2 = self.model_2(  # generate outputs from second model
+                encoded_input['input_ids'],
+                attention_mask=encoded_input['attention_mask'],
+                output_attentions=True,
+                **kwargs
+            )
+            encoder_attentions_2 = outputs2.encoder_attentions
+            decoder_attentions_2 = outputs2.decoder_attentions
+
+            return encoder_attentions_1[i], decoder_attentions_1[i], encoder_attentions_2[i], decoder_attentions_2[i]
 
     def attention_weights(self, input_text: str, **kwargs):
         with torch.no_grad():
@@ -302,22 +314,33 @@ class GenerativeModel(lit_model.Model):
                 truncation=True
             )
             if torch.cuda.is_available():
-                self.model.cuda()
+                self.model_1.cuda()
+                self.model_2.cuda()
                 encoded_input = {k: v.cuda() for k, v in encoded_input.items()}
-            outputs = self.model(
+            outputs_1 = self.model_1(
                 encoded_input['input_ids'],
                 attention_mask=encoded_input['attention_mask'],
                 output_attentions=True,
                 **kwargs
             )
-            encoder_attentions = outputs.encoder_attentions
-            decoder_attentions = outputs.decoder_attentions
-            return encoder_attentions, decoder_attentions
+            encoder_attentions_1 = outputs_1.encoder_attentions
+            decoder_attentions_1 = outputs_1.decoder_attentions
+
+            outputs2 = self.model_2(  # generate outputs from second model
+                encoded_input['input_ids'],
+                attention_mask=encoded_input['attention_mask'],
+                output_attentions=True,
+                **kwargs
+            )
+            encoder_attentions_2 = outputs2.encoder_attentions
+            decoder_attentions_2 = outputs2.decoder_attentions
+
+            return encoder_attentions_1, decoder_attentions_1, encoder_attentions_2, decoder_attentions_2
 
     def Pearson_correlation(self, compareModel):
         # Get attention weights for each model
-        encoder_att1, decoder_att1 = self.attention_weights(compareModel.attention_weights, return_dict=True)
-        encoder_att2, decoder_att2 = compareModel.attention_weights(compareModel.attention_weights, return_dict=True)
+        encoder_att1, decoder_att1 = self.model_2.attention_weights(self.model_1.attention_weights, return_dict=True)
+        encoder_att2, decoder_att2 = self.model_1.attention_weights(self.model_2.attention_weights, return_dict=True)
 
         # Flatten attention weights into 1D arrays
         att1_flat = np.ravel(encoder_att1.numpy())
