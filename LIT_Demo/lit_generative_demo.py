@@ -270,6 +270,63 @@ class GenerativeModel(lit_model.Model):
         #             align_in="target_tokens", align_out="target_tokens")
         return spec
 
+    def attention_weights_specific_layer(self, input_text: str, i, **kwargs):
+        with torch.no_grad():
+            encoded_input = self.tokenizer.encode_plus(
+                input_text,
+                return_tensors="pt",
+                max_length=600,
+                padding="longest",
+                truncation=True
+            )
+            if torch.cuda.is_available():
+                self.model.cuda()
+                encoded_input = {k: v.cuda() for k, v in encoded_input.items()}
+            outputs = self.model(
+                encoded_input['input_ids'],
+                attention_mask=encoded_input['attention_mask'],
+                output_attentions=True,
+                **kwargs
+            )
+            encoder_attentions = outputs.encoder_attentions
+            decoder_attentions = outputs.decoder_attentions
+            return encoder_attentions[i], decoder_attentions[i]
+
+    def attention_weights(self, input_text: str, **kwargs):
+        with torch.no_grad():
+            encoded_input = self.tokenizer.encode_plus(
+                input_text,
+                return_tensors="pt",
+                max_length=600,
+                padding="longest",
+                truncation=True
+            )
+            if torch.cuda.is_available():
+                self.model.cuda()
+                encoded_input = {k: v.cuda() for k, v in encoded_input.items()}
+            outputs = self.model(
+                encoded_input['input_ids'],
+                attention_mask=encoded_input['attention_mask'],
+                output_attentions=True,
+                **kwargs
+            )
+            encoder_attentions = outputs.encoder_attentions
+            decoder_attentions = outputs.decoder_attentions
+            return encoder_attentions, decoder_attentions
+
+    def Pearson_correlation(self, compareModel):
+        # Get attention weights for each model
+        encoder_att1, decoder_att1 = self.attention_weights(compareModel.attention_weights, return_dict=True)
+        encoder_att2, decoder_att2 = compareModel.attention_weights(compareModel.attention_weights, return_dict=True)
+
+        # Flatten attention weights into 1D arrays
+        att1_flat = np.ravel(encoder_att1.numpy())
+        att2_flat = np.ravel(encoder_att2.numpy())
+
+        # Compute Pearson correlation coefficient
+        corr_coef, p_value = np.corrcoef(att1_flat, att2_flat)
+
+        return corr_coef
 
 def get_wsgi_app() -> Optional[dev_server.LitServerType]:
 
