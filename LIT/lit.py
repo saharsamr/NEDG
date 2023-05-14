@@ -10,6 +10,7 @@ from absl import logging
 
 from lit_datasets import WikiDataset
 from lit_models import BartModel
+from comparision_models import ModelComparison
 
 
 FLAGS = flags.FLAGS
@@ -36,8 +37,9 @@ def main(argv: Sequence[str]) -> Optional[dev_server.LitServerType]:
         'wiki_dataset': WikiDataset('../data/HumanNoConcat/test_human_ne_with_context.csv')
     }
     models = {
-        "bart_CME": BartModel('../results/NoConcatCME', 'facebook/bart-large-cnn', mask_entity=True),
-        "bart_CPE": BartModel('../results/NoConcatCPE', 'facebook/bart-large-cnn')
+        # "bart_CME": BartModel('../results/NoConcatCME', 'facebook/bart-large-cnn', mask_entity=True),
+        # "bart_CPE": BartModel('../results/NoConcatCPE', 'facebook/bart-large-cnn')
+        "model_comparison": ModelComparison('../results/NoConcatCPE', '../results/NoConcatCME', 'facebook/bart-large-cnn')
     }
 
     lit_demo = dev_server.Server(models, datasets, **server_flags.get_flags())
