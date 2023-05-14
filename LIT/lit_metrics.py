@@ -133,3 +133,97 @@ class BertScore(lit_components.Metrics):
 
         del indices, metas  # unused by Metrics base class
         return self.compute(labels, preds, label_spec, pred_spec, config)
+
+
+class Correlations(lit_components.Metrics):
+
+    def __init__(self):
+        super(Correlations, self).__init__()
+
+    def is_compatible(self, model: lit_model.Model,
+                      dataset: lit_dataset.Dataset) -> bool:
+        return True
+
+    def meta_spec(self):
+        return {
+            'pearson-correlation': lit_types.MetricResult(
+                best_value=lit_types.MetricBestValue.NONE,
+                description='Similarity between the reference and the generated output'
+                            ', calculated using BERT-embeddings'),
+        }
+
+    def pearson_correlation(self, cpe_attention, cme_attention):
+
+        cpe_att_flat = np.ravel(cpe_attention.numpy())
+        cme_att_flat = np.ravel(cme_attention.numpy())
+
+        corr_coef, p_value = np.corrcoef(cpe_att_flat, cme_att_flat)
+
+        return corr_coef
+
+    def run(
+            self,
+            inputs: Sequence[JsonDict],
+            model: lit_model.Model,
+            dataset: lit_dataset.Dataset,
+            model_outputs: Optional[list[JsonDict]] = None,
+            config: Optional[JsonDict] = None) -> list[JsonDict]:
+
+        if model_outputs is None:
+            model_outputs = list(model.predict(inputs))
+
+        ret = []
+        cpe_attentions = [ex['encoder_layer_1_attention_cpe'] for ex in model_outputs]
+        cme_attentions = [ex['encoder_layer_1_attention_cme'] for ex in model_outputs]
+
+        correlation = self.compute(
+            cpe_attentions,
+            cme_attentions
+        )
+        ret.append({
+            'pred_key': 'encoder_layer_1_attention_cpe',
+            'label_key': 'encoder_layer_1_attention_cme',
+            'metrics': nan_to_none(correlation)
+        })
+        return ret
+
+    def run_with_metadata(
+            self,
+            indexed_inputs: Sequence[IndexedInput],
+            model: lit_model.Model,
+            dataset: lit_dataset.IndexedDataset,
+            model_outputs: Optional[list[JsonDict]] = None,
+            config: Optional[JsonDict] = None) -> list[JsonDict]:
+        inputs = [inp['data'] for inp in indexed_inputs]
+        return self.run(inputs, model, dataset, model_outputs, config)
+
+    def is_field_compatible(
+            self,
+            pred_spec: lit_types.LitType,
+            parent_spec: Optional[lit_types.LitType]) -> bool:
+        return True
+
+    def compute(
+            self,
+            labels: Sequence[Any],
+            preds: Sequence[Any],
+            label_spec: lit_types.LitType,
+            pred_spec: lit_types.LitType,
+            config: Optional[JsonDict] = None) -> MetricsDict:
+
+        correlation = self.pearson_correlation(labels, preds)
+
+        return {'pearson_correlation': correlation}
+
+    def compute_with_metadata(
+            self,
+            labels: Sequence[Any],
+            preds: Sequence[Any],
+            label_spec: lit_types.LitType,
+            pred_spec: lit_types.LitType,
+            indices: Sequence[lit_types.ExampleId],
+            metas: Sequence[JsonDict],
+            config: Optional[JsonDict] = None) -> MetricsDict:
+
+        del indices, metas  # unused by Metrics base class
+        return self.compute(labels, preds, label_spec, pred_spec, config)
