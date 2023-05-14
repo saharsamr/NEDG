@@ -95,7 +95,7 @@ class ModelComparison(lit_model.Model):
 
         with torch.torch.set_grad_enabled(True):
             out_cpe = self.model_cpe(**encoded_cpe_input, output_attentions=True, output_hidden_states=True)
-            ids_cpe = self.model.generate(encoded_cpe_input['input_ids'])
+            ids_cpe = self.model_cpe.generate(encoded_cpe_input['input_ids'])
 
             out_cme = self.model_cme(**encoded_cme_input, output_attentions=True, output_hidden_states=True)
             ids_cme = self.model_cme.generate(encoded_cme_input['input_ids'])
