@@ -4,6 +4,7 @@ from typing import Any, Optional, Sequence, Callable
 from lit_nlp.api import components as lit_components
 from lit_nlp.api import dataset as lit_dataset
 from lit_nlp.api import model as lit_model
+from scipy import stats as scipy_stats
 import numpy as np
 from absl import logging
 
@@ -145,21 +146,27 @@ class Correlations(lit_components.Metrics):
         return True
 
     def meta_spec(self):
-        return {
-            'pearson-correlation': lit_types.MetricResult(
-                best_value=lit_types.MetricBestValue.NONE,
-                description='Similarity between the reference and the generated output'
-                            ', calculated using BERT-embeddings'),
-        }
+        spec = {}
+        for i in range(1,17):
+            spec[f'correlation_head_{i}'] = lit_types.MetricResult()
+            spec[f'pvalue_head_{i}'] = lit_types.MetricResult()
+
+        return spec
 
     def pearson_correlation(self, cpe_attention, cme_attention):
 
-        cpe_att_flat = np.ravel(cpe_attention.numpy())
-        cme_att_flat = np.ravel(cme_attention.numpy())
+        heads_correlations, heads_pvalues = [], []
+        for cpe, cme in zip(cpe_attention, cme_attention):
 
-        corr_coef, p_value = np.corrcoef(cpe_att_flat, cme_att_flat)
+            cpe_att_flat = np.ravel(np.array(cpe))
+            cme_att_flat = np.ravel(np.array(cme))
 
-        return corr_coef
+            res = scipy_stats.spearmanr(cpe_att_flat, cme_att_flat)
+            corr_coef, p_value = res
+            heads_correlations.append(corr_coef)
+            heads_pvalues.append(p_value)
+
+        return heads_correlations, heads_pvalues
 
     def run(
             self,
@@ -168,7 +175,6 @@ class Correlations(lit_components.Metrics):
             dataset: lit_dataset.Dataset,
             model_outputs: Optional[list[JsonDict]] = None,
             config: Optional[JsonDict] = None) -> list[JsonDict]:
-
         if model_outputs is None:
             model_outputs = list(model.predict(inputs))
 
@@ -176,15 +182,19 @@ class Correlations(lit_components.Metrics):
         cpe_attentions = [ex['encoder_layer_1_attention_cpe'] for ex in model_outputs]
         cme_attentions = [ex['encoder_layer_1_attention_cme'] for ex in model_outputs]
 
-        correlation = self.compute(
-            cpe_attentions,
-            cme_attentions
-        )
-        ret.append({
-            'pred_key': 'encoder_layer_1_attention_cpe',
-            'label_key': 'encoder_layer_1_attention_cme',
-            'metrics': nan_to_none(correlation)
-        })
+        for cpe_att, cme_att in zip(cpe_attentions, cme_attentions):
+
+            correlation = self.compute(
+                cpe_att,
+                cme_att,
+                label_spec=model.output_spec()['encoder_layer_1_attention_cpe'],
+                pred_spec=model.output_spec()['encoder_layer_1_attention_cme']
+            )
+            ret.append({
+                'pred_key': 'attention-pearson-correlation',
+                'label_key': '',
+                'metrics': nan_to_none(correlation)
+            })
         return ret
 
     def run_with_metadata(
@@ -211,9 +221,12 @@ class Correlations(lit_components.Metrics):
             pred_spec: lit_types.LitType,
             config: Optional[JsonDict] = None) -> MetricsDict:
 
-        correlation = self.pearson_correlation(labels, preds)
-
-        return {'pearson_correlation': correlation}
+        correlations, pvalues = self.pearson_correlation(labels, preds)
+        result = {}
+        for i, (corr_coef, pval) in enumerate(zip(correlations, pvalues)):
+            result[f'correlation_head_{i+1}'] = corr_coef
+            result[f'pvalue_head_{i+1}'] = pval
+        return result
 
     def compute_with_metadata(
             self,
@@ -224,6 +237,5 @@ class Correlations(lit_components.Metrics):
             indices: Sequence[lit_types.ExampleId],
             metas: Sequence[JsonDict],
             config: Optional[JsonDict] = None) -> MetricsDict:
-
         del indices, metas  # unused by Metrics base class
         return self.compute(labels, preds, label_spec, pred_spec, config)
