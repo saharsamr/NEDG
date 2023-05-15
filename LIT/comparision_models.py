@@ -3,6 +3,7 @@ from lit_nlp.api import types as lit_types
 from lit_nlp.lib import utils
 
 import torch
+import numpy as np
 from transformers import BartTokenizerFast, BartForConditionalGeneration
 
 
@@ -135,7 +136,7 @@ class ModelComparison(lit_model.Model):
             output_ntok_cpe = output.pop("target_ntok_cpe")
             output["target_tokens_cpe"] = self.tokenizer.convert_ids_to_tokens(
                 output.pop("target_ids_cpe")[1:output_ntok_cpe - 1])
-            output['encoder_layer_1_attention_cpe'] = output['encoder_layer_1_attention_cpe'][:, 1:input_ntok_cpe - 1]
+            output['encoder_layer_1_attention_cpe'] = output['encoder_layer_1_attention_cpe'][:, 1:input_ntok_cpe - 1, 1:input_ntok_cpe - 1]
 
             input_ntok_cme = output.pop("input_ntok_cme")
             output["input_tokens_cme"] = self.tokenizer.convert_ids_to_tokens(
@@ -143,7 +144,7 @@ class ModelComparison(lit_model.Model):
             output_ntok_cme = output.pop("target_ntok_cme")
             output["target_tokens_cme"] = self.tokenizer.convert_ids_to_tokens(
                 output.pop("target_ids_cme")[1:output_ntok_cme - 1])
-            output['encoder_layer_1_attention_cme'] = output['encoder_layer_1_attention_cme'][:, 1:input_ntok_cme - 1]
+            output['encoder_layer_1_attention_cme'] = output['encoder_layer_1_attention_cme'][:, 1:input_ntok_cme - 1, 1:input_ntok_cme - 1]
 
             yield output
 
