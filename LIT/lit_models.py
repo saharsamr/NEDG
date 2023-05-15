@@ -44,7 +44,7 @@ class BartModel(lit_model.Model):
 
         super().__init__()
         self.tokenizer = BartTokenizerFast.from_pretrained(
-            model_name, model_max_length=600, padding=True, truncation=True,
+            model_name, model_max_length=200, padding=True, truncation=True,
         )
         self.tokenizer.add_special_tokens({'additional_special_tokens': ['<NE>', '</NE>', '<CNTXT>', '</CNTXT>']})
         self.model = BartForConditionalGeneration.from_pretrained(model_path)
@@ -158,7 +158,7 @@ class BartModel(lit_model.Model):
             encoded_input = self.tokenizer.encode_plus(
                 input_text,
                 return_tensors="pt",
-                max_length=600,
+                max_length=200,
                 padding="longest",
                 truncation=True
             )

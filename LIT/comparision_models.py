@@ -55,14 +55,14 @@ class ModelComparison(lit_model.Model):
         encoded_cpe_input = self.tokenizer.batch_encode_plus(
             [ex["context"] for ex in inputs],
             return_tensors="pt",
-            max_length=600,
+            max_length=200,
             padding="longest",
             truncation=True
         )
         encoded_cme_input = self.tokenizer.batch_encode_plus(
             [ex["context"] for ex in inputs],
             return_tensors="pt",
-            max_length=600,
+            max_length=200,
             padding="longest",
             truncation=True
         )
