@@ -29,7 +29,7 @@ documents_cursor.close()
 
 updates = []
 for anchor, ids in anchor_to_ids.items():
-    updates.append(UpdateOne({'title': anchor}, {'$set': {"anchor_to_wikipage_ids": ids}}))
+    updates.append(UpdateOne({'title': anchor}, {'$set': {"context_ids": ids}}))
     if len(updates) > MONGODB_WRITE_BATCH_SIZE:
         collection.bulk_write(updates)
         updates = []
