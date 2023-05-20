@@ -10,6 +10,7 @@ from absl import logging
 
 from datasets import load_metric
 
+
 JsonDict = lit_types.JsonDict
 IndexedInput = lit_types.IndexedInput
 LitType = lit_types.LitType
@@ -136,10 +137,10 @@ class BertScore(lit_components.Metrics):
         return self.compute(labels, preds, label_spec, pred_spec, config)
 
 
-class Correlations(lit_components.Metrics):
+class InputGradientCorrelations(lit_components.Metrics):
 
     def __init__(self):
-        super(Correlations, self).__init__()
+        super(InputGradientCorrelations, self).__init__()
 
     def is_compatible(self, model: lit_model.Model,
                       dataset: lit_dataset.Dataset) -> bool:
