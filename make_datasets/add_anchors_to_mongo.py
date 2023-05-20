@@ -3,71 +3,33 @@ import pymongo
 import re
 import urllib.parse
 from collections import defaultdict
-from pprint import pprint
 from pymongo import InsertOne, DeleteMany, ReplaceOne, UpdateOne
-
-# Establishing a connection with MongoDB
-client = pymongo.MongoClient('mongodb://localhost:27017/', username='user', password='pass')
-
-# Creating a database
-db = client['wikipedia']
-
-# Creating a collection
-collection = db['dump']
+from config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
+    MONGODB_COLLECTION, MONGODB_READ_BATCH_SIZE, MONGODB_WRITE_BATCH_SIZE, \
+    MONGODB_PASSWORD, MONGODB_USERNAME
 
 
+client = pymongo.MongoClient(f'{MONGODB_LINK}:{MONGODB_PORT}/', username=MONGODB_USERNAME, password=MONGODB_PASSWORD)
+db = client[MONGODB_DATABASE]
+collection = db[MONGODB_COLLECTION]
 
-# Set batch size
-batch_size = 2000
-
-# Get total number of documents
 total_documents = collection.count_documents({})
+documents_cursor = collection.find(batch_size=MONGODB_READ_BATCH_SIZE)
+updates = []
 
-# open each json
-# for document in collection.find():
-# extract the text
-# context = document["text"]
-# paragraphs = context.split('\n')
-# find anchors and add them to list
-# for i, par in enumerate(paragraphs):
-#     links = re.findall(r'<a href=(.*?)&gl', par)
-#     for link in links:
-#         decoded_link = urllib.parse.unquote(link)
-#         dictionary[decoded_link].append(i)
-# link_list.extend(links)
-# dictionary = list(set(links))  # remove duplicates
+for document in tqdm(documents_cursor, total=total_documents):
 
-# decode the links
-# decoded_anchors = [urllib.parse.unquote(link) for link in dictionary]
-# add the list to the mongo json
-# collection.update_one({"_id": document["_id"]}, {"$set": {"anchors": dictionary}})
+    dictionary = defaultdict(list)
+    context = document["text"]
+    paragraphs = context.split('\n')
 
+    for i, par in enumerate(paragraphs):
+        links = re.findall(r'&lt;a href=(.*?)&gt;', par)
+        for link in links:
+            decoded_link = urllib.parse.unquote(link)
+            dictionary[decoded_link].append(i)
+    updates.append(UpdateOne({'_id': document['_id']}, {'$set': {"anchors": dictionary}}))
 
-# Process documents in batches
-for i in tqdm(range(0, total_documents, batch_size)):
-    documents = collection.find().skip(i).limit(batch_size)
-    updates = []
-    for document in tqdm(documents):
-        dictionary = defaultdict(list)
-        # Extract the text
-        context = document["text"]
-        paragraphs = context.split('\n')
-        # Find anchors and add them to list
-        for i, par in enumerate(paragraphs):
-            links = re.findall(r'&lt;a href=(.*?)&gt;', par)
-            for link in links:
-                decoded_link = urllib.parse.unquote(link)
-                dictionary[decoded_link].append(i)
-        # Add the list to the mongo json
-        # collection.update_one({"_id": document["_id"]}, {"$set": {"anchors": dictionary}})
-        updates.append(UpdateOne({'_id': document['_id']}, {'$set' : {"anchors": dictionary}}))
-    # Update all the documents in the batch with the new anchors
-    # try:
-    #     collection.update_many({"_id": {"$in": [doc["_id"] for doc in documents]}}, {"$set": {"anchors": dictionary}})
-    # except Exception as e:
-    #     print(e)
-    collection.bulk_write(updates)
-
-
-# Create an index on the anchors field
-# collection.create_index([("anchors", pymongo.ASCENDING)])
+    if len(updates) > MONGODB_WRITE_BATCH_SIZE:
+        collection.bulk_write(updates)
+        updates = []

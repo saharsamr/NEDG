@@ -1,4 +1,4 @@
-MONGODB_LINK = 'mongodb://localhost:27017/'
+MONGODB_LINK = 'mongodb://localhost'
 MONGODB_PORT = 27017
 MONGODB_DATABASE = 'wikipedia'
 MONGODB_COLLECTION = 'dump'
@@ -6,3 +6,5 @@ MONGODB_READ_BATCH_SIZE = 4000
 MONGODB_WRITE_BATCH_SIZE = 2000
 MONGODB_USERNAME = 'user'
 MONGODB_PASSWORD = 'pass'
+
+WIKI_JSONS_PATH = '../../wikipedia/text'
