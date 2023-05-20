@@ -146,27 +146,21 @@ class Correlations(lit_components.Metrics):
         return True
 
     def meta_spec(self):
-        spec = {}
-        for i in range(1,17):
-            spec[f'correlation_head_{i}'] = lit_types.MetricResult()
-            spec[f'pvalue_head_{i}'] = lit_types.MetricResult()
 
-        return spec
+        return {
+            'correlation': lit_types.MetricResult(),
+            'p-value': lit_types.MetricResult()
+        }
 
-    def pearson_correlation(self, cpe_attention, cme_attention):
+    def spearman_correlation(self, cpe_grad, cme_grad):
 
-        heads_correlations, heads_pvalues = [], []
-        for cpe, cme in zip(cpe_attention, cme_attention):
+        cpe = [np.mean(word_grad) for word_grad in cpe_grad]
+        cme = [np.mean(word_grad) for word_grad in cme_grad]
 
-            cpe_att_flat = np.ravel(np.array(cpe))
-            cme_att_flat = np.ravel(np.array(cme))
+        res = scipy_stats.spearmanr(cpe, cme)
+        corr_coef, p_value = res
 
-            res = scipy_stats.spearmanr(cpe_att_flat, cme_att_flat)
-            corr_coef, p_value = res
-            heads_correlations.append(corr_coef)
-            heads_pvalues.append(p_value)
-
-        return heads_correlations, heads_pvalues
+        return corr_coef, p_value
 
     def run(
             self,
@@ -179,19 +173,19 @@ class Correlations(lit_components.Metrics):
             model_outputs = list(model.predict(inputs))
 
         ret = []
-        cpe_attentions = [ex['encoder_layer_1_attention_cpe'] for ex in model_outputs]
-        cme_attentions = [ex['encoder_layer_1_attention_cme'] for ex in model_outputs]
+        cpe_grads = [ex['token_grad_sentence_cpe'] for ex in model_outputs]
+        cme_grads = [ex['token_grad_sentence_cme'] for ex in model_outputs]
 
-        for cpe_att, cme_att in zip(cpe_attentions, cme_attentions):
+        for cpe_grad, cme_grad in zip(cpe_grads, cme_grads):
 
             correlation = self.compute(
-                cpe_att,
-                cme_att,
-                label_spec=model.output_spec()['encoder_layer_1_attention_cpe'],
-                pred_spec=model.output_spec()['encoder_layer_1_attention_cme']
+                cpe_grad,
+                cme_grad,
+                label_spec=model.output_spec()['token_grad_sentence_cpe'],
+                pred_spec=model.output_spec()['token_grad_sentence_cme']
             )
             ret.append({
-                'pred_key': 'attention-pearson-correlation',
+                'pred_key': 'token-gradient-pearson-correlation',
                 'label_key': '',
                 'metrics': nan_to_none(correlation)
             })
@@ -222,11 +216,10 @@ class Correlations(lit_components.Metrics):
             config: Optional[JsonDict] = None) -> MetricsDict:
 
         correlations, pvalues = self.pearson_correlation(labels, preds)
-        result = {}
-        for i, (corr_coef, pval) in enumerate(zip(correlations, pvalues)):
-            result[f'correlation_head_{i+1}'] = corr_coef
-            result[f'pvalue_head_{i+1}'] = pval
-        return result
+        return {
+            'correlation': correlations,
+            'p-value': pvalues
+        }
 
     def compute_with_metadata(
             self,
