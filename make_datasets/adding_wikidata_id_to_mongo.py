@@ -5,7 +5,9 @@ from config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
     MONGODB_COLLECTION, MONGODB_READ_BATCH_SIZE, MONGODB_WRITE_BATCH_SIZE, \
     MONGODB_PASSWORD, MONGODB_USERNAME
 from pymongo import MongoClient
+import pickle
 
+misses = []
 
 def get_wikidata_info(article_title):
 
@@ -24,6 +26,7 @@ def get_wikidata_info(article_title):
                     'description': entity_info['descriptions'],
                 }
         except:
+            misses.append(article_title)
             print(article_title, ': Description not found.')
     return None
 
@@ -36,7 +39,8 @@ collection = db[MONGODB_COLLECTION]
 documents_cursor = collection.find({'context_ids': {'$exists': True}}, batch_size=MONGODB_READ_BATCH_SIZE)
 updates = []
 print("Scanning documents...")
-for doc in tqdm(documents_cursor):
+total_count = collection.find({'context_ids': {'$exists': True}}).count()
+for doc in tqdm(documents_cursor, total_count):
 
     title = doc['title']
     wikidata_info = get_wikidata_info(title)
@@ -48,3 +52,7 @@ for doc in tqdm(documents_cursor):
         updates = []
 
 documents_cursor.close()
+
+print(len(misses))
+with open(f'./misses.pkl', 'wb') as f:
+    pickle.dump(misses, f)
