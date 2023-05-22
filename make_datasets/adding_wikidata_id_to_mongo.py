@@ -39,7 +39,7 @@ collection = db[MONGODB_COLLECTION]
 documents_cursor = collection.find({'context_ids': {'$exists': True}}, batch_size=MONGODB_READ_BATCH_SIZE)
 updates = []
 print("Scanning documents...")
-total_count = collection.find({'context_ids': {'$exists': True}}).count()
+total_count = collection.count_documents({'context_ids': {'$exists': True}})
 for doc in tqdm(documents_cursor, total_count):
 
     title = doc['title']
