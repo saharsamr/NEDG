@@ -1,34 +1,37 @@
 from pymongo import InsertOne, DeleteMany, ReplaceOne, UpdateOne
 from tqdm import tqdm
 import requests
+from collections import defaultdict
 from config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
     MONGODB_COLLECTION, MONGODB_READ_BATCH_SIZE, MONGODB_WRITE_BATCH_SIZE, \
     MONGODB_PASSWORD, MONGODB_USERNAME
 from pymongo import MongoClient
 import pickle
 
+
 misses = []
 
-def get_wikidata_info(article_title):
 
-    url = f'https://www.wikidata.org/w/api.php?action=wbgetentities&sites=enwiki&titles={article_title}&format=json'
-    headers = {
-        "accept": "application/json"
-    }
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        try:
-            response = response.json()
-            entities = response['entities']
-            for entity_id, entity_info in entities.items():
-                return {
-                    'entity_id': entity_id,
-                    'description': entity_info['descriptions'],
+def batch_get_requests(article_titles):
+
+    batch_responses = defaultdict(dict)
+    url = 'https://www.wikidata.org/w/api.php?action=wbgetentities&sites=enwiki&titles='
+    titles = '|'.join(article_titles)
+    r = requests.get(url + titles + '&format=json')
+    r = r.json()
+    entities = r['entities']
+    for entity_id, entity_value in entities.items():
+        if 'missing' in entity_value:
+            misses.append(entity_value['title'])
+        else:
+            if entity_value['labels']['en']['value'] not in article_titles:
+                print('== wrong label ==')
+            else:
+                batch_responses[entity_value['labels']['en']['value']] = {
+                    'wikidata_id': entity_id,
+                    'description': entity_value['descriptions']
                 }
-        except:
-            misses.append(article_title)
-            print(article_title, ': Description not found.')
-    return None
+    return batch_responses
 
 
 print("Connecting to MongoDB...")
@@ -37,19 +40,20 @@ db = client[MONGODB_DATABASE]
 collection = db[MONGODB_COLLECTION]
 
 documents_cursor = collection.find({'context_ids': {'$exists': True}}, batch_size=MONGODB_READ_BATCH_SIZE)
-updates = []
+updates, titles = [], []
 print("Scanning documents...")
 total_count = collection.count_documents({'context_ids': {'$exists': True}})
 for doc in tqdm(documents_cursor, total=total_count):
 
-    title = doc['title']
-    wikidata_info = get_wikidata_info(title)
-    if wikidata_info:
-        updates.append(UpdateOne({'_id': doc['_id']}, {'$set': {"wikidata_info": wikidata_info}}))
+    if len(titles) > MONGODB_WRITE_BATCH_SIZE:
+        wikidata_info = batch_get_requests(titles)
+        for title, info in wikidata_info.items():
+            updates.append(UpdateOne({'title': title}, {'$set': {"wikidata_info": info}}))
 
-    if len(updates) > MONGODB_WRITE_BATCH_SIZE:
         collection.bulk_write(updates)
-        updates = []
+        updates, titles = [], []
+
+    titles.append(doc['title'])
 
 documents_cursor.close()
 
