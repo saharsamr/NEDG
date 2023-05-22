@@ -40,7 +40,7 @@ documents_cursor = collection.find({'context_ids': {'$exists': True}}, batch_siz
 updates = []
 print("Scanning documents...")
 total_count = collection.count_documents({'context_ids': {'$exists': True}})
-for doc in tqdm(documents_cursor, total_count):
+for doc in tqdm(documents_cursor, total=total_count):
 
     title = doc['title']
     wikidata_info = get_wikidata_info(title)
