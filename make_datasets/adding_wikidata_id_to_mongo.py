@@ -15,13 +15,16 @@ def get_wikidata_info(article_title):
     }
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
-        response = response.json()
-        entities = response['entities']
-        for entity_id, entity_info in entities.items():
-            return {
-                'entity_id': entity_id,
-                'description': entity_info['descriptions']['en']['value'],
-            }
+        try:
+            response = response.json()
+            entities = response['entities']
+            for entity_id, entity_info in entities.items():
+                return {
+                    'entity_id': entity_id,
+                    'description': entity_info['descriptions'],
+                }
+        except:
+            print(article_title, ': Description not found.')
     return None
 
 
