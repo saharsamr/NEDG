@@ -1,7 +1,9 @@
 from pymongo import MongoClient
 from tqdm import tqdm
+import urllib.parse
 import nltk
 import json
+import re
 
 from config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
     MONGODB_COLLECTION, MONGODB_READ_BATCH_SIZE, MONGODB_PASSWORD, \
@@ -36,9 +38,25 @@ def get_wikidata_description(wikidata_info):
 
 
 def is_proper_contexts(context):
+
     if context.contains('BULLET'):
         return True
     return len(context.split()) < MIN_CONTEXT_LENGTH
+
+
+def tag_entity_in_context_and_clean(context, entity_name):
+
+    anchors = re.findall(r'&lt;a href=(.*?)&gt;(.*?)&lt;/a&gt;', context)
+    for (anchor_link, anchor_name) in anchors:
+        print(anchor_link, anchor_name)
+        print(urllib.parse.unquote(anchor_link))
+        if urllib.parse.unquote(anchor_link)[1:-1] == entity_name:
+            context = context.replace(f'&lt;a href={anchor_link}&gt;{anchor_name}&lt;/a&gt;',
+                                      f'{"<NE>"+anchor_name+"</NE>"}')
+        else:
+            context = context.replace(f'&lt;a href={anchor_link}&gt;{anchor_name}&lt;/a&gt;', anchor_name)
+
+    return context, context.contains('<NE>') and context.contains('</NE>')
 
 
 def has_long_entity_name(entity_name):
@@ -57,7 +75,11 @@ def get_contexts(mongo_collection, title, context_ids):
                 for par_id in par_ids:
                     context = remove_special_characters(paragraphs[par_id])
                     if is_proper_contexts(context):
-                        contexts.append(context)
+                        context, is_tagged = tag_entity_in_context_and_clean(context, title)
+                        if is_tagged:
+                            contexts.append(context)
+                        else:
+                            print('entity not found!')
                 break
 
     return contexts
