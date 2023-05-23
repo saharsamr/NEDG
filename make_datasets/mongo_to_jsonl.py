@@ -25,7 +25,11 @@ def get_wikipedia_description(text):
     sentences = nltk.sent_tokenize(text)
     if not len(sentences):
         return None
-    return remove_special_characters(sentences[0])
+    description = sentences[0]
+    anchors = re.findall(r'&lt;a href=(.*?)&gt;(.*?)&lt;/a&gt;', description)
+    for (anchor_link, anchor_name) in anchors:
+        description = description.replace(f'&lt;a href={anchor_link}&gt;{anchor_name}&lt;/a&gt;', anchor_name)
+    return remove_special_characters(description)
 
 
 def get_wikidata_description(wikidata_info):
