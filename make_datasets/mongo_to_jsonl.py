@@ -144,6 +144,7 @@ with open(WIKI_DUMP_JSONL_PATH, 'w+') as f:
                 print('writing to jsonl file.')
                 if len(doc_data['contexts']):
                     f.write(json.dumps(doc_data)+'\n')
+            docs_batch = {}
 
     print(f'found {long_name_entities_count} entities which their name '
           f'has more than {MAX_ENTITY_NAME_LENGTH} words or tokens.')
