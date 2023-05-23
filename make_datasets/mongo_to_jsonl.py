@@ -4,7 +4,7 @@ import nltk
 
 from config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
     MONGODB_COLLECTION, MONGODB_READ_BATCH_SIZE, MONGODB_PASSWORD, \
-    MONGODB_USERNAME, MIN_CONTEXT_LENGTH, MAX_ENTITY_NAME_LENGTH
+    MONGODB_USERNAME, MIN_CONTEXT_LENGTH, MAX_ENTITY_NAME_LENGTH, WIKI_DUMP_JSONL_PATH
 
 
 def remove_special_characters(text):
@@ -72,7 +72,7 @@ documents_cursor = collection.find({'context_ids': {'$exists': True}, 'wikidata_
                                    batch_size=MONGODB_READ_BATCH_SIZE)
 total_count = collection.count_documents({'context_ids': {'$exists': True}, 'wikidata_info': {'$exists': False}})
 
-with open('wiki_dump.jsonl', 'w+') as f:
+with open(WIKI_DUMP_JSONL_PATH, 'w+') as f:
     for doc in tqdm(documents_cursor, total=total_count):
         if not has_long_entity_name(doc['title']):
             doc_data = {
