@@ -47,8 +47,6 @@ def tag_entity_in_context_and_clean(context, entity_name):
 
     anchors = re.findall(r'&lt;a href=(.*?)&gt;(.*?)&lt;/a&gt;', context)
     for (anchor_link, anchor_name) in anchors:
-        print(anchor_link, anchor_name)
-        print(urllib.parse.unquote(anchor_link))
         if urllib.parse.unquote(anchor_link)[1:-1] == entity_name:
             context = context.replace(f'&lt;a href={anchor_link}&gt;{anchor_name}&lt;/a&gt;',
                                       f'{"<NE>"+anchor_name+"</NE>"}')
