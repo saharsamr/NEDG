@@ -8,3 +8,7 @@ MONGODB_USERNAME = 'user'
 MONGODB_PASSWORD = 'pass'
 
 WIKI_JSONS_PATH = '../../wikipedia/text'
+
+MAX_ENTITY_NAME_LENGTH = 4
+MIN_CONTEXT_LENGTH = 15
+
