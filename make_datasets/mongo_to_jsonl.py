@@ -91,8 +91,7 @@ db = client[MONGODB_DATABASE]
 collection = db[MONGODB_COLLECTION]
 
 print("Scanning documents...")
-documents_cursor = collection.find({'context_ids': {'$exists': True}, 'wikidata_info': {'$exists': False}},
-                                   batch_size=MONGODB_READ_BATCH_SIZE)
+documents_cursor = collection.find({'context_ids': {'$exists': True}}, batch_size=MONGODB_READ_BATCH_SIZE)
 total_count = collection.count_documents({'context_ids': {'$exists': True}, 'wikidata_info': {'$exists': False}})
 
 with open(WIKI_DUMP_JSONL_PATH, 'w+') as f:
