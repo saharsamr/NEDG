@@ -142,8 +142,9 @@ with open(WIKI_DUMP_JSONL_PATH, 'w+') as f:
             docs_batch = get_batch_contexts(collection, docs_batch)
             print('writing to jsonl file.')
             for doc_title, doc_info in docs_batch.items():
-                if len(doc_data['contexts']):
-                    f.write(json.dumps(doc_data)+'\n')
+                if len(doc_info['contexts']):
+                    doc_info.pop('context_ids')
+                    f.write(json.dumps(doc_info)+'\n')
             docs_batch = {}
 
     print(f'found {long_name_entities_count} entities which their name '
