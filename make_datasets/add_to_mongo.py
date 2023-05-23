@@ -16,14 +16,10 @@ from config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
 def batch_get_requests(article_titles):
 
     url = f'https://www.wikidata.org/w/api.php?action=wbgetentities&sites=enwiki&titles={"|".join(article_titles)}&format=json'
-    res = requests.get(url)
-
-    if res.status_code != 200:
-        print(res.status_code)
-        return None
+    res = requests.get(url).json()
 
     try:
-        entities = res.json()['entities']
+        entities = res['entities']
     except:
         return None
 
@@ -48,9 +44,7 @@ def batch_get_requests(article_titles):
     return batch_responses
 
 
-total_updates = 0
 def process_batch(titles_and_map):
-    global total_updates
 
     titles, title_id_map = titles_and_map
 
@@ -59,10 +53,8 @@ def process_batch(titles_and_map):
     if wikidata_info:
         for title, info in wikidata_info.items():
             updates.append(UpdateOne({'_id': title_id_map[title.lower()]}, {'$set': {"wikidata_info": info}}))
-    if len(updates):
-        collection.bulk_write(updates)
-        total_updates += len(updates)
-        print(total_updates)
+    collection.bulk_write(updates)
+    # return updates
 
 
 print("Connecting to MongoDB...")
@@ -70,21 +62,31 @@ client = MongoClient(f'{MONGODB_LINK}:{MONGODB_PORT}/', username=MONGODB_USERNAM
 db = client[MONGODB_DATABASE]
 collection = db[MONGODB_COLLECTION]
 
-pool = Pool(processes=os.cpu_count())
+pool = Pool(processes=100)
 
 print("Scanning documents...")
-documents_cursor = collection.find({'context_ids': {'$exists': True}, 'wikidata_info': {'$exists': False}},
-                                   batch_size=MONGODB_READ_BATCH_SIZE)
-total_count = collection.count_documents({'context_ids': {'$exists': True}, 'wikidata_info': {'$exists': False}})
+documents_cursor = collection.find({'context_ids': {'$exists': True}}, batch_size=MONGODB_READ_BATCH_SIZE)
+total_count = collection.count_documents({'context_ids': {'$exists': True}})
 
 updates, titles = [], []
 title_id_map = {}
 for doc in tqdm(documents_cursor, total=total_count):
 
+    # if len(titles) == 50:
+    #     results = pool.map(process_batch, [[titles, title_id_map]])
+    #     print(len(results))
+    #     for result in results:
+    #         updates.extend(result)
+    #     titles, title_id_map = [], {}
+    #
+    # if len(updates) > MONGODB_WRITE_BATCH_SIZE:
+    #     collection.bulk_write(updates)
+    #     updates = []
+
     titles.append(doc['title'])
     title_id_map[doc['title'].lower()] = doc['_id']
 
-pool.map(process_batch, [(titles[i:i+50], title_id_map) for i in range(0, len(titles), 50)])
+results = pool.map(process_batch, [(titles[i:i+50], title_id_map) for i in range(0, len(titles)-50, 50)])
 
 pool.close()
 pool.join()
