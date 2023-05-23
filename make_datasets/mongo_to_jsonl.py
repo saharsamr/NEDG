@@ -55,7 +55,7 @@ def tag_entity_in_context_and_clean(context, entity_name):
         else:
             context = context.replace(f'&lt;a href={anchor_link}&gt;{anchor_name}&lt;/a&gt;', anchor_name)
 
-    return context, context.contains('<NE>') and context.contains('</NE>')
+    return context, '<NE>' in context and '</NE>' in context
 
 
 def has_long_entity_name(entity_name):
@@ -92,7 +92,7 @@ collection = db[MONGODB_COLLECTION]
 
 print("Scanning documents...")
 documents_cursor = collection.find({'context_ids': {'$exists': True}}, batch_size=MONGODB_READ_BATCH_SIZE)
-total_count = collection.count_documents({'context_ids': {'$exists': True}, 'wikidata_info': {'$exists': False}})
+total_count = collection.count_documents({'context_ids': {'$exists': True}})
 
 with open(WIKI_DUMP_JSONL_PATH, 'w+') as f:
     for doc in tqdm(documents_cursor, total=total_count):
