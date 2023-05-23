@@ -12,9 +12,8 @@ from config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
 
 def remove_special_characters(text):
 
-    special_chars_regexp = '[^a-z|A-Z| |\.|\!|\?|0-9|(|)|-|\'|`|\"]'
-    text = text.replace(special_chars_regexp, '', regex=True)
-    text = text.replace('^=+\s+.*\s+=+$', '', regex=True)
+    text = re.sub(r'^=+\s+.*\s+=+$', '', text)
+    text = re.sub(r'[^a-z|A-Z| |\.|\!|\?|0-9|(|)|-|\'|`|\"]', '', text)
     text = text.replace('\1', '')
     return text
 
@@ -73,10 +72,11 @@ def get_contexts(mongo_collection, title, context_ids):
             if anchor_name[1:-1] == title:
                 paragraphs = page['text'].split('\n')
                 for par_id in par_ids:
-                    context = remove_special_characters(paragraphs[par_id])
+                    context = paragraphs[par_id]
                     if is_proper_contexts(context):
                         context, is_tagged = tag_entity_in_context_and_clean(context, title)
                         if is_tagged:
+                            context = remove_special_characters(context)
                             contexts.append(context)
                         else:
                             print('entity not found!')
@@ -105,4 +105,5 @@ with open(WIKI_DUMP_JSONL_PATH, 'w+') as f:
                 'wikidata_description': get_wikidata_description(doc.get('wikidata_info')),
                 'contexts': get_contexts(collection, doc['title'], doc['context_ids'])
             }
-            f.write(json.dumps(doc_data)+'\n')
+            if len(doc_data['contexts']):
+                f.write(json.dumps(doc_data)+'\n')
