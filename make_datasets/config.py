@@ -9,7 +9,7 @@ MONGODB_PASSWORD = 'pass'
 
 WIKI_JSONS_PATH = '../../wikipedia/text'
 
-MAX_ENTITY_NAME_LENGTH = 4
+MAX_ENTITY_NAME_LENGTH = 5
 MIN_CONTEXT_LENGTH = 20
 WIKI_DUMP_JSONL_PATH = '../data/wikipedia/wiki_dump.jsonl'
 

@@ -68,7 +68,7 @@ def aggregates_context_ids_and_query(mongo_collection, batch_data):
         context_ids_list.extend(doc_info['context_ids'])
 
     contexts_docs = mongo_collection.find(
-        {'_id': {'$in': set(context_ids_list)}},
+        {'_id': {'$in': list(set(context_ids_list))}},
         {'text': 1, 'anchors': 1, '_id': 1}
     )
     context_id_to_doc_map = {}
@@ -90,7 +90,7 @@ def get_batch_contexts(mongo_collection, docs_batch):
     for title, doc_info in docs_batch.items():
         contexts = []
         linked_wiki_pages = title_to_contexts_map[title]
-        for page_id, page_info in linked_wiki_pages:
+        for page_id, page_info in linked_wiki_pages.items():
             anchors = page_info['anchors']
             for anchor_name, par_ids in anchors.items():
                 if anchor_name[1:-1] == title:
@@ -124,6 +124,7 @@ total_count = collection.count_documents({'context_ids': {'$exists': True}})
 with open(WIKI_DUMP_JSONL_PATH, 'w+') as f:
 
     docs_batch = {}
+    long_name_entities_count = 0
     for doc in tqdm(documents_cursor, total=total_count):
         if not has_long_entity_name(doc['title']):
             doc_data = {
@@ -135,10 +136,13 @@ with open(WIKI_DUMP_JSONL_PATH, 'w+') as f:
             }
             docs_batch[doc['title']] = doc_data
         else:
-            print('improper title!')
+            long_name_entities_count += 1
 
         if len(docs_batch) == MONGODB_READ_BATCH_SIZE:
             docs_batch = get_batch_contexts(collection, docs_batch)
             for doc_title, doc_info in docs_batch.items():
                 if len(doc_data['contexts']):
                     f.write(json.dumps(doc_data)+'\n')
+
+    print(f'found {long_name_entities_count} entities which their name '
+          f'has more than {MAX_ENTITY_NAME_LENGTH} words or tokens.')
