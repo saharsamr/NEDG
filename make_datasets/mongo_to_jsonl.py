@@ -38,7 +38,7 @@ def get_wikidata_description(wikidata_info):
 
 def is_proper_contexts(context):
 
-    if context.contains('BULLET'):
+    if 'BULLET' in context:
         return True
     return len(context.split()) < MIN_CONTEXT_LENGTH
 
