@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 from tqdm import tqdm
 import nltk
+import json
 
 from config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
     MONGODB_COLLECTION, MONGODB_READ_BATCH_SIZE, MONGODB_PASSWORD, \
@@ -82,3 +83,4 @@ with open(WIKI_DUMP_JSONL_PATH, 'w+') as f:
                 'wikidata_description': get_wikidata_description(doc.get('wikidata_info')),
                 'contexts': get_contexts(collection, doc['title'], doc['context_ids'])
             }
+            f.write(json.dumps(doc_data)+'\n')
