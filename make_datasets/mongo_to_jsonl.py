@@ -13,7 +13,7 @@ from config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
 def remove_special_characters(text):
 
     text = re.sub(r'^=+\s+.*\s+=+$', '', text)
-    text = re.sub(r'[^a-z|A-Z| |\.|\!|\?|0-9|(|)|-|\'|`|\"]', '', text)
+    text = re.sub(r'[^a-z|A-Z| |\.|\!|\?|0-9|(|)|-|\'|`|\"|<|>|\/|]', '', text)
     text = text.replace('\1', '')
     return text
 
