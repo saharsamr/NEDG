@@ -141,6 +141,7 @@ with open(WIKI_DUMP_JSONL_PATH, 'w+') as f:
         if len(docs_batch) == MONGODB_READ_BATCH_SIZE:
             docs_batch = get_batch_contexts(collection, docs_batch)
             for doc_title, doc_info in docs_batch.items():
+                print('writing to jsonl file.')
                 if len(doc_data['contexts']):
                     f.write(json.dumps(doc_data)+'\n')
 
