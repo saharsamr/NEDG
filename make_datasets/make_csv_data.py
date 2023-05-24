@@ -1,9 +1,10 @@
 import csv
 import json
 import random
-from config import FINAL_MIN_CONTEXT_LEN, MAX_CONTEXT_NUMBER, \
+from tqdm import tqdm
+from config import MAX_CONTEXT_NUMBER, \
     TRAIN_JSONL_PATH, TEST_JSONL_PATH, VAL_JSONL_PATH,\
-    CSVS_PATH, SOURCE_DEFINITION
+    CSVS_PATH, SOURCE_DEFINITION, FINAL_MIN_CONTEXT_LEN
 
 
 def making_csv(jsonl_path, max_context_number, definition_source, data_split):
@@ -15,7 +16,7 @@ def making_csv(jsonl_path, max_context_number, definition_source, data_split):
         writer = csv.writer(csv_f, delimiter='\1')
         writer.writerow(['entity_name', 'contexts', 'entity_description'])
 
-        for line in jsonl_f.readlines():
+        for line in tqdm(jsonl_f.readlines()):
             json_obj = json.loads(line)
 
             entity_name = json_obj['wikipedia_title']
@@ -37,4 +38,4 @@ def making_csv(jsonl_path, max_context_number, definition_source, data_split):
 
 making_csv(TRAIN_JSONL_PATH, MAX_CONTEXT_NUMBER, SOURCE_DEFINITION, 'train')
 making_csv(TEST_JSONL_PATH, MAX_CONTEXT_NUMBER, SOURCE_DEFINITION, 'test')
-making_csv(VAL_JSONL_PATH, MAX_CONTEXT_NUMBER, SOURCE_DEFINITION, 'train')
+making_csv(VAL_JSONL_PATH, MAX_CONTEXT_NUMBER, SOURCE_DEFINITION, 'val')
