@@ -76,7 +76,8 @@ class BART:
         with torch.no_grad():
             for batch in tqdm(test_dataloader):
                 ids = self.model.generate(
-                    batch['input_ids'].cuda(), min_length=OUTPUT_GENERATION_MIN_LENGTH, max_length=OUTPUT_GENERATION_MAX_LENGTH
+                    batch['input_ids'].cuda(), min_length=OUTPUT_GENERATION_MIN_LENGTH
+                    , max_length=OUTPUT_GENERATION_MAX_LENGTH
                 )
                 preds = self.tokenizer.batch_decode(ids, skip_special_tokens=True)
                 predictions.extend(preds)

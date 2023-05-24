@@ -12,13 +12,13 @@ from config import \
 
 def generation_main():
 
-    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'description'])
-    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'description'])
-    valid = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'description'])
+    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1').sample(frac=1)
+    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1').sample(frac=1)
+    valid = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1').sample(frac=1)
 
-    train_x, train_y = list(train['context']), list(train['description'])
-    test_x, test_y = list(test['context']), list(test['description'])
-    valid_x, valid_y = list(valid['context']), list(valid['description'])
+    train_x, train_y = list(train['contexts']), list(train['entity_description'])
+    test_x, test_y = list(test['contexts']), list(test['entity_description'])
+    valid_x, valid_y = list(valid['contexts']), list(valid['entity_description'])
 
     training_args = TrainingArguments(
         num_train_epochs=EPOCHS,
