@@ -32,8 +32,12 @@ def making_csv(jsonl_path, max_context_number, definition_source, data_split):
             # entity name, entity description, and contexts
             entity_name = json_obj['wikipedia_title']
             if definition_source == 'wikipedia':
+                if json_obj['wikipedia_description'] is None or json_obj['wikipedia_description'] == '':
+                    continue
                 entity_description = json_obj['wikipedia_description']
             elif definition_source == 'wikidata':
+                if json_obj['wikidata_description'] is None or json_obj['wikidata_description'] == '':
+                    continue
                 entity_description = json_obj['wikidata_description']
             else:
                 raise ValueError('Invalid value for wikipedia_or_wikidata_definition')

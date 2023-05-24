@@ -20,3 +20,5 @@ VAL_JSONL_PATH = '../data/wikipedia/val.jsonl'
 TRAIN_SHARE = 0.8
 TEST_SHARE = 0.1
 VAL_SHARE = 0.1
+
+SOURCE_DEFINITION = 'wikipedia'
