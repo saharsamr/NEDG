@@ -28,7 +28,7 @@ def making_csv(jsonl_path, max_context_number, definition_source, data_split):
                 raise ValueError('Invalid value for source of definition: should be wikipedia or wikidata')
 
             contexts = json_obj['contexts']
-            contexts = [context for context in contexts if len(context) >= FINAL_MIN_CONTEXT_LEN]
+            contexts = [context for context in contexts if len(context.split()) >= FINAL_MIN_CONTEXT_LEN]
             if len(contexts):
                 if len(contexts) > max_context_number:
                     contexts = random.sample(contexts, max_context_number)
