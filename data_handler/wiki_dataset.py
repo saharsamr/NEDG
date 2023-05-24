@@ -29,8 +29,8 @@ class WikiDataset(Dataset):
         entity_end_token_indices = [i for i, tok_id in enumerate(new_input_ids) if tok_id == entity_end_token_id]
 
         for st, et in zip(entity_start_token_indices, entity_end_token_indices):
-            new_input_ids[st+1:et] = [self.tokenizer.convert_tokens_to_ids('<mask>') for _ in range(st+1,et)]
-            new_attention_mask[st+1:et] = [0 for _ in range(st+1,et)]
+            new_input_ids[st+1:et] = [self.tokenizer.convert_tokens_to_ids('<mask>') for _ in range(st+1, et)]
+            new_attention_mask[st+1:et] = [0 for _ in range(st+1, et)]
 
         return new_input_ids, new_attention_mask
 
