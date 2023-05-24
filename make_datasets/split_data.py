@@ -1,5 +1,6 @@
 import random
 import json
+from tqdm import tqdm
 from config import WIKI_DUMP_JSONL_PATH, TRAIN_JSONL_PATH, TEST_JSONL_PATH, \
     VAL_JSONL_PATH, TRAIN_SHARE, TEST_SHARE, SOURCE_DEFINITION
 
@@ -7,7 +8,7 @@ from config import WIKI_DUMP_JSONL_PATH, TRAIN_JSONL_PATH, TEST_JSONL_PATH, \
 with open(WIKI_DUMP_JSONL_PATH, 'r') as data_f:
     with open(TRAIN_JSONL_PATH, 'w+') as train_f, open(TEST_JSONL_PATH, 'w+') as test_f, open(VAL_JSONL_PATH, 'w+') as val_f:
 
-        for entity in data_f.readlines():
+        for entity in tqdm(data_f.readlines()):
             json_obj = json.loads(entity)
 
             if SOURCE_DEFINITION == 'wikipedia':
