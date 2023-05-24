@@ -5,7 +5,7 @@ from config import WIKI_DUMP_JSONL_PATH, TRAIN_JSONL_PATH, TEST_JSONL_PATH, \
 
 
 with open(WIKI_DUMP_JSONL_PATH, 'r') as data_f:
-    with open(TRAIN_JSONL_PATH, 'w+') as train_f, (TEST_JSONL_PATH, 'w+') as test_f, (VAL_JSONL_PATH, 'w+') as val_f:
+    with open(TRAIN_JSONL_PATH, 'w+') as train_f, open(TEST_JSONL_PATH, 'w+') as test_f, open(VAL_JSONL_PATH, 'w+') as val_f:
 
         for entity in data_f.readlines():
             json_obj = json.loads(entity)
