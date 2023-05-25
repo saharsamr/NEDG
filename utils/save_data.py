@@ -1,10 +1,10 @@
 import pickle
-from config import PRED_CLASSIFICATION_FILE_PATH
+from config import PRED_CLASSIFICATION_FILE_PATH, PRED_GENERATION_FILE_PATH
 
 
 def save_generation_predictions(input_, label, prediction, delimiter='~'):
 
-    with open('preds.csv', 'w') as f:
+    with open(PRED_GENERATION_FILE_PATH, 'w+') as f:
         for i, l, p in zip(input_, label, prediction):
             i = i.replace(delimiter, '')
             l = l.replace(delimiter, '')
