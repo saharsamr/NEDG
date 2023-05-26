@@ -14,13 +14,15 @@ def make_classification_dataset(CPE_model_name, CME_model_name, input_file, outp
 
     training_args = TrainingArguments(output_dir=OUTPUT_DIR)
     CPE_model = BART(
-        training_args, input_x, input_y, input_x,
-        input_y, input_x, input_y, load=True,
+        training_args,
+        input_x, input_y, input_x, input_y, input_x, input_y,
+        load=True, model_load_path=CPE_model_name,
         model_name=CPE_model_name, mask_entity=False
     )
     CME_model = BART(
-        training_args, input_x, input_y, input_x,
-        input_y, input_x, input_y, load=True,
+        training_args,
+        input_x, input_y, input_x, input_y, input_x, input_y,
+        load=True, model_load_path=CME_model_name,
         model_name=CME_model_name, mask_entity=True
     )
 

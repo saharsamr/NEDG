@@ -20,6 +20,7 @@ class BART:
       test_x, test_y,
       valid_x, valid_y,
       model_name=MODEL_GENERATION_NAME,
+      model_load_path=MODEL_GENERATION_PATH,
       load=False,
       mask_entity=False
     ):
@@ -30,7 +31,7 @@ class BART:
         )
         self.tokenizer.add_special_tokens({'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS})
         if load:
-            self.model = BartForConditionalGeneration.from_pretrained(MODEL_GENERATION_PATH)
+            self.model = BartForConditionalGeneration.from_pretrained(model_load_path)
         else:
             self.model = BartForConditionalGeneration.from_pretrained(self.model_name)
         self.model.resize_token_embeddings(len(self.tokenizer))
