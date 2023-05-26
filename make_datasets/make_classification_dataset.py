@@ -43,7 +43,7 @@ def make_classification_dataset(CPE_model_name, CME_model_name, input_file, outp
              'CME-context', 'CME-pred', 'CME-bert', 'class-label']
         )
         for label, title, cpe_context, cpe_pred, cpe_bert, cme_context, cme_pred, cme_bert, class_label in \
-            zip(input_y, list(input_data['title']), CPE_inputs, CPE_preds,
+            zip(input_y, list(input_data['entity_name']), CPE_inputs, CPE_preds,
                 CPE_bert, CME_inputs, CME_preds, CME_bert, classification_labels):
             writer.writerow(
                 [label.replace(delimiter, ''), title.replace(delimiter, ''), cpe_context.replace(delimiter, ''),
