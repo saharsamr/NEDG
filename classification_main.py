@@ -14,23 +14,20 @@ import pickle
 
 def classification_main():
 
-    col_names = [
-        'context_we', 'label_we', 'pred_we', 'bert_we', 'context_woe',
-        'label_woe', 'pred_woe', 'bert_woe', 'classification_label',
-        'masked_context', 'entity_name'
-    ]
+    # col_names = ['label', 'title', 'CPE-context', 'CPE-pred', 'CPE-bert',
+    #              'CME-context', 'CME-pred', 'CME-bert', 'class-label']
 
-    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='~', header=None, names=col_names).dropna()
-    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='~', header=None, names=col_names).dropna()
-    valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='~', header=None, names=col_names).dropna()
+    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='\1').dropna()
+    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1').dropna()
+    valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='\1').dropna()
 
-    train['text'] = train['entity_name'] + "[SEP]" + train['pred_we'] + "[SEP]" + train['pred_woe'] + "[SEP]" + train['masked_context']
-    test['text'] = test['entity_name'] + "[SEP]" + test['pred_we'] + "[SEP]" + test['pred_woe'] + "[SEP]" + test['masked_context']
-    valid['text'] = valid['entity_name'] + "[SEP]" + valid['pred_we'] + "[SEP]" + valid['pred_woe'] + "[SEP]" + valid['masked_context']
+    train['text'] = train['title'] + "[SEP]" + train['CPE-pred'] + "[SEP]" + train['CME-pred'] + "[SEP]" + train['CME-context']
+    test['text'] = test['title'] + "[SEP]" + test['CPE-pred'] + "[SEP]" + test['CME-pred'] + "[SEP]" + test['CME-context']
+    valid['text'] = valid['title'] + "[SEP]" + valid['CPE-pred'] + "[SEP]" + valid['CME-pred'] + "[SEP]" + valid['CME-context']
 
-    train_x, train_y = list(train['text']), list(train['classification_label'])
-    test_x, test_y = list(test['text']), list(test['classification_label'])
-    valid_x, valid_y = list(valid['text']), list(valid['classification_label'])
+    train_x, train_y = list(train['text']), list(train['class-label'])
+    test_x, test_y = list(test['text']), list(test['class-label'])
+    valid_x, valid_y = list(valid['text']), list(valid['class-label'])
 
     training_args = TrainingArguments(
         num_train_epochs=EPOCHS,
@@ -66,8 +63,7 @@ def classification_main():
     preds, inputs, labels = model.pred()
     save_classification_prediction(inputs, labels, preds)
     preds = np.array(preds).reshape([-1])
-    test['classification_prediction'] = preds
-    test['selected_prediction'] = np.where(test['classification_prediction'] == 1, test['pred_we'], test['pred_woe'])
+    test['class-pred'] = preds
 
     if EVALUATE_CLASSIFICATION:
         evaluate_classification(test)

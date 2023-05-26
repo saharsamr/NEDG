@@ -2,7 +2,7 @@ import pickle
 from config import PRED_CLASSIFICATION_FILE_PATH, PRED_GENERATION_FILE_PATH
 
 
-def save_generation_predictions(input_, label, prediction, delimiter='~'):
+def save_generation_predictions(input_, label, prediction, delimiter='\1'):
 
     with open(PRED_GENERATION_FILE_PATH, 'w+') as f:
         for i, l, p in zip(input_, label, prediction):
@@ -12,7 +12,7 @@ def save_generation_predictions(input_, label, prediction, delimiter='~'):
             f.write(f'{i}{delimiter}{l}{delimiter}{p}\n')
 
 
-def save_classification_prediction(input_, label, prediction, delimiter='~'):
+def save_classification_prediction(input_, label, prediction, delimiter='\1'):
 
     with open(PRED_CLASSIFICATION_FILE_PATH, 'w') as f:
         for i, l, p in zip(input_, label, prediction):

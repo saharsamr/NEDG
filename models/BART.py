@@ -81,7 +81,7 @@ class BART:
                 )
                 preds = self.tokenizer.batch_decode(ids, skip_special_tokens=True)
                 predictions.extend(preds)
-                input_ = self.tokenizer.batch_decode(batch['input_ids'], skip_special_tokens=True)
+                input_ = self.tokenizer.batch_decode(batch['input_ids'], skip_special_tokens=False)
                 inputs.extend(input_)
                 label = self.tokenizer.batch_decode(batch['labels'], skip_special_tokens=True)
                 labels.extend(label)
