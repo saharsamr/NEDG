@@ -21,9 +21,9 @@ def classification_main():
     test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1').dropna()
     valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='\1').dropna()
 
-    train['text'] = train['CME-context'] + "[SEP]" + train['CME-pred'] + "[SEP]" + train['CPE-pred']
-    test['text'] = test['CME-context'] + "[SEP]" + test['CME-pred'] + "[SEP]" + test['CPE-pred']
-    valid['text'] = valid['CME-context'] + "[SEP]" + valid['CME-pred'] + "[SEP]" + valid['CPE-pred']
+    train['text'] = train['CME-context'] + "[SEC]" + train['CME-pred'] + "[SEC]" + train['CPE-pred']
+    test['text'] = test['CME-context'] + "[SEC]" + test['CME-pred'] + "[SEC]" + test['CPE-pred']
+    valid['text'] = valid['CME-context'] + "[SEC]" + valid['CME-pred'] + "[SEC]" + valid['CPE-pred']
 
     train_x, train_y = list(train['text']), list(train['class-label'])
     test_x, test_y = list(test['text']), list(test['class-label'])

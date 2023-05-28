@@ -9,7 +9,7 @@ import numpy as np
 from tqdm import tqdm
 
 from data_handler.classification_dataset import ClassificationDataset
-from config import ADDITIONAL_SPECIAL_TOKENS, MODEL_CLASSIFICATION_PATH, LEARNING_RATE, \
+from config import CLASSIFICATION_SPECIAL_TOKENS, MODEL_CLASSIFICATION_PATH, LEARNING_RATE, \
     TEST_CLASSIFICATION_BATCH_SIZE, MODEL_CLASSIFICATION_NAME, INPUT_CLASSIFICATION_MAX_LENGTH
 
 
@@ -32,7 +32,7 @@ class BERTBinaryClassification:
 
         self.tokenizer = BertTokenizer.from_pretrained(MODEL_CLASSIFICATION_NAME, problem_type='binary_classification',
                                                        max_lenght=INPUT_CLASSIFICATION_MAX_LENGTH)
-        self.tokenizer.add_special_tokens({'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS})
+        self.tokenizer.add_special_tokens({'additional_special_tokens': CLASSIFICATION_SPECIAL_TOKENS})
         if not load:
             self.model = BertForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_NAME, num_labels=2)
         else:

@@ -9,9 +9,9 @@ from tqdm import tqdm
 import json
 
 
-def evaluate_generation(pred_file, delimiter='~'):
+def evaluate_generation(pred_file, delimiter='\1'):
     pred_data = pd.read_csv(pred_file, names=['context', 'label', 'pred'], header=None, delimiter=delimiter)
-    pred_data.dropna(inplace=True)
+    # pred_data.dropna(inplace=True)
     references = pred_data['label'].values
     predictions = pred_data['pred'].values
 
@@ -48,24 +48,27 @@ def compute_generation_metrics(predictions, references):
 
 def evaluate_classification(test_df):
 
-    print('accuracy: ', accuracy_score(test_df['classification_label'], test_df['classification_prediction']))
-    print('avg precision score: ', average_precision_score(test_df['classification_label'], test_df['classification_prediction']))
-    print('f1 score: ', f1_score(test_df['classification_label'], test_df['classification_prediction']))
-    print('precision_score: ', precision_score(test_df['classification_label'], test_df['classification_prediction']))
-    print('recall_score: ', recall_score(test_df['classification_label'], test_df['classification_prediction']))
-    print('roc auc score: ', roc_auc_score(test_df['classification_label'], test_df['classification_prediction']))
+    print('accuracy: ', accuracy_score(test_df['class-label'], test_df['class-pred']))
+    print('avg precision score: ', average_precision_score(test_df['class-label'], test_df['class-pred']))
+    print('f1 score: ', f1_score(test_df['class-label'], test_df['class-pred']))
+    print('precision_score: ', precision_score(test_df['class-label'], test_df['class-pred']))
+    print('recall_score: ', recall_score(test_df['class-label'], test_df['class-pred']))
+    print('roc auc score: ', roc_auc_score(test_df['class-label'], test_df['class-pred']))
 
-    references = [[word_tokenize(ref)] for ref in test_df['label_we']]
-    predictions_hybrid = [word_tokenize(pred) for pred in test_df['selected_prediction']]
-    predictions_we = [word_tokenize(pred) for pred in test_df['pred_we']]
-    predictions_woe = [word_tokenize(pred) for pred in test_df['pred_woe']]
+    references = [[word_tokenize(ref)] for ref in test_df['label']]
+    predictions_hybrid = [
+        word_tokenize(sample['CPE-pred']) if sample['class-pred'] == 1 else word_tokenize(sample['CME-pred'])
+        for sample in test_df
+    ]
+    predictions_CPE = [word_tokenize(pred) for pred in test_df['CPE-pred']]
+    predictions_CME = [word_tokenize(pred) for pred in test_df['CME-pred']]
 
     print('Hybrid Model Evaluation:')
     compute_generation_metrics(predictions_hybrid, references)
     print('Context With Entity Evaluation:')
-    compute_generation_metrics(predictions_we, references)
+    compute_generation_metrics(predictions_CPE, references)
     print('Context With Masked Entity Evaluation:')
-    compute_generation_metrics(predictions_woe, references)
+    compute_generation_metrics(predictions_CME, references)
 
 
 def compute_metrics(eval_preds):
@@ -160,7 +163,8 @@ def compute_accuracy(preds, labels):
     }
 
 
-def list_lowest_bertscores(file_path, delimiter='~'):
+# TODO: check this one (the delimiter has changed
+def list_lowest_bertscores(file_path, delimiter='\1'):
 
     contexts, preds, labels, bertscore_output = compute_bertscores_from_file(file_path, delimiter=delimiter)
     bertscore_dict = {}
