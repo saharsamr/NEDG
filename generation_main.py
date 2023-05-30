@@ -33,7 +33,7 @@ def generation_main():
         load_best_model_at_end=True,
         evaluation_strategy='steps',
         do_eval=True,
-        eval_steps=1000,
+        eval_steps=500,
         save_strategy='steps',
         save_total_limit=3
     )
