@@ -11,7 +11,9 @@ import json
 
 def evaluate_generation(pred_file, delimiter='\1'):
     pred_data = pd.read_csv(pred_file, names=['context', 'label', 'pred'], header=None, delimiter=delimiter)
-    # pred_data.dropna(inplace=True)
+    print('number of test sample before dropping nan values: ', len(pred_data))
+    pred_data.dropna(inplace=True)
+    print('number of test sample after dropping nan values: ', len(pred_data))
     references = pred_data['label'].values
     predictions = pred_data['pred'].values
 
