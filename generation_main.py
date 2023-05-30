@@ -12,9 +12,9 @@ from config import \
 
 def generation_main():
 
-    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1').sample(frac=1)
-    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1').sample(frac=1)
-    valid = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1').sample(frac=1)
+    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
+    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
+    valid = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
 
     train_x, train_y = list(train['contexts']), list(train['entity_description'])
     test_x, test_y = list(test['contexts']), list(test['entity_description'])

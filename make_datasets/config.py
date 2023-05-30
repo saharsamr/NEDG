@@ -24,4 +24,4 @@ TEST_JSONL_PATH = f'../data/wikipedia/test_{SOURCE_DEFINITION}.jsonl'
 VAL_JSONL_PATH = f'../data/wikipedia/val_{SOURCE_DEFINITION}.jsonl'
 
 CSVS_PATH = '../data/wikipedia/'
-MAX_CONTEXT_NUMBER = 3
+MAX_CONTEXT_NUMBER = 1
