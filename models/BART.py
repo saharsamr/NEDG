@@ -63,7 +63,7 @@ class BART:
             for param in part.embed_positions.parameters():
                 param.requires_grad = False
             for param in part.embed_tokens.parameters():
-                param.requires_grad = False
+                param.requires_grad = True
 
         for param in self.model.get_encoder().parameters():
             param.requires_grad = not freeze_encoder
