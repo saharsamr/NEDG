@@ -44,7 +44,7 @@ PRED_GENERATION_FILE_PATH = f'{MAX_CONTEXT_NUMBER}_contexts_{DEFINITION_SOURCE}_
 
 MASKING_PROBABILITY = 1.0
 
-EPOCHS = 4
+EPOCHS = 1
 # ========================== GENERATION CONFIGS ==========================
 
 # ======================== CLASSIFICATION CONFIGS ========================
