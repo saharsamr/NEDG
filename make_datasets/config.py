@@ -1,3 +1,4 @@
+# ========================== GENERATION DATASETS ==========================
 MONGODB_LINK = 'mongodb://localhost'
 MONGODB_PORT = 27017
 MONGODB_DATABASE = 'wikipedia'
@@ -25,3 +26,17 @@ VAL_JSONL_PATH = f'../data/wikipedia/val_{SOURCE_DEFINITION}.jsonl'
 
 CSVS_PATH = '../data/wikipedia/'
 MAX_CONTEXT_NUMBER = 1
+# ========================== GENERATION DATASETS ==========================
+
+# ========================== CLASSIFICATION DATASETS ==========================
+CPE_MODEL_NAME = '../results/1-context-1epoch-wikidata-CPE'
+CME_MODEL_NAME = '../results/1-context-1epoch-wikidata-CPE'
+
+TRAIN_CSV_PATH = f'../data/wikipedia/train_{SOURCE_DEFINITION}.csv'
+TEST_CSV_PATH = f'../data/wikipedia/test_{SOURCE_DEFINITION}.csv'
+VAL_CSV_PATH = f'../data/wikipedia/val_{SOURCE_DEFINITION}.csv'
+
+TRAIN_CLASSIFICATION_PATH = f'../data/wikipedia/train_{SOURCE_DEFINITION}_classification.csv'
+TEST_CLASSIFICATION_PATH = f'../data/wikipedia/test_{SOURCE_DEFINITION}_classification.csv'
+VAL_CLASSIFICATION_PATH = f'../data/wikipedia/val_{SOURCE_DEFINITION}_classification.csv'
+# ========================== CLASSIFICATION DATASETS ==========================
