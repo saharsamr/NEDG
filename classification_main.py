@@ -21,6 +21,10 @@ def classification_main():
     test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1').dropna()
     valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='\1').dropna()
 
+    train = train.replace({'<pad>': ''}, regex=True)
+    test = test.replace({'<pad>': ''}, regex=True)
+    valid = valid.replace({'<pad>': ''}, regex=True)
+
     train['text'] = train['CME-context'] + "[SEC]" + train['CME-pred'] + "[SEC]" + train['CPE-pred']
     test['text'] = test['CME-context'] + "[SEC]" + test['CME-pred'] + "[SEC]" + test['CPE-pred']
     valid['text'] = valid['CME-context'] + "[SEC]" + valid['CME-pred'] + "[SEC]" + valid['CPE-pred']
