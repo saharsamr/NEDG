@@ -59,8 +59,8 @@ def evaluate_classification(test_df):
 
     references = [[word_tokenize(ref)] for ref in test_df['label']]
     predictions_hybrid = [
-        word_tokenize(sample['CPE-pred']) if sample['class-pred'] == 1 else word_tokenize(sample['CME-pred'])
-        for sample in test_df
+        word_tokenize(cpe_pred) if int(class_pred) == 1 else word_tokenize(cme_pred)
+        for cpe_pred, cme_pred, class_pred in zip(test_df['CPE-pred'], test_df['CME-pred'], test_df['class-pred'])
     ]
     predictions_CPE = [word_tokenize(pred) for pred in test_df['CPE-pred']]
     predictions_CME = [word_tokenize(pred) for pred in test_df['CME-pred']]

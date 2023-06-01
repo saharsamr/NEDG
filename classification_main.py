@@ -70,8 +70,8 @@ def classification_main():
     preds = np.array(preds).reshape([-1])
     test['class-pred'] = preds
 
-    if EVALUATE_CLASSIFICATION:
-        evaluate_classification(test)
-
     with open('test_result_df.pkl', 'wb') as f:
         pickle.dump(test, f)
+
+    if EVALUATE_CLASSIFICATION:
+        evaluate_classification(test)
