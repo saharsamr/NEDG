@@ -1,5 +1,5 @@
 # Make Necessary Datasets
-We need to gather a dataset consisting of entity descriptions along with their respective contexts. To achieve this, we used the **Wikipedia** and **Wikidata** encyclopedias as our sources. We then fine-tuned the **BART** model, as described in [this paper](https://aclanthology.org/2020.acl-main.703/), and employed the predictions from the fine-tuned models to create the classification dataset. Further information is provided below.
+We need to gather a dataset consisting of entity descriptions along with their respective contexts. To achieve this, we used the **Wikipedia** and **Wikidata** encyclopedias as our sources. We then fine-tuned the **BART** model, introduced in [this paper](https://aclanthology.org/2020.acl-main.703/), and employed the predictions from the fine-tuned models to create the classification dataset. Further information is provided below.
 
 ## Description Generation Datasets:
 By running **./make_dataset.sh** file, the following steps will be done (which can take up to several hours!):
@@ -50,7 +50,7 @@ The parameters in the config.py file can be altered. The role of each parameter 
 </p>
 
 ## Classification Dataset
-The objective of the classifier is to select the superior description provided by either the CPE or CME models. To accomplish this, each data split must first be separately fed to the CPE and CME models. The resulting descriptions will then be compared to the golden description, and their BertScore will be calculated. If the CPE's description achieves a higher BertScore, the label will be set to 1, and vice versa.
+The objective of the classifier is to select the superior description provided by either the CPE or CME models. To accomplish this, each data split must first be separately fed to the CPE and CME models. The resulting descriptions will then be compared to the golden description, and their BertScore, introduced in [this paper](https://openreview.net/forum?id=SkeHuCVFDr) will be calculated. If the CPE's description achieves a higher BertScore, the label will be set to 1, and vice versa.
 We use the same train, test, and validation sets as in the description generation dataset, so there will be no data leakage. 
 This code can be run by the following command:
 ```console
