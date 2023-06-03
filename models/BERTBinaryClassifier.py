@@ -61,6 +61,9 @@ class BERTBinaryClassification:
 
         for param in self.model.bert.parameters():
             param.requires_grad = not freeze_encoder
+        for name, param in self.model.bert.named_parameters():
+            if name.startswith('embeddings'):
+                param.requires_grad = True
 
     def train(self):
         self.trainer.train()
