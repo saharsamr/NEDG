@@ -4,7 +4,7 @@ from datasets import load_metric
 import csv
 
 from models.BART import BART
-from config import *
+from make_datasets.config import *
 
 
 def make_classification_dataset(CPE_model_name, CME_model_name, input_file, output_file, delimiter='\1'):
