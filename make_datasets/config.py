@@ -1,3 +1,4 @@
+# ========================== GENERATION DATASETS ==========================
 MONGODB_LINK = 'mongodb://localhost'
 MONGODB_PORT = 27017
 MONGODB_DATABASE = 'wikipedia'
@@ -24,4 +25,19 @@ TEST_JSONL_PATH = f'../data/wikipedia/test_{SOURCE_DEFINITION}.jsonl'
 VAL_JSONL_PATH = f'../data/wikipedia/val_{SOURCE_DEFINITION}.jsonl'
 
 CSVS_PATH = '../data/wikipedia/'
-MAX_CONTEXT_NUMBER = 3
+MAX_CONTEXT_NUMBER = 1
+# ========================== GENERATION DATASETS ==========================
+
+# ========================== CLASSIFICATION DATASETS ==========================
+LOGGING_DIR = '../logs'
+CPE_MODEL_NAME = f'../results/{MAX_CONTEXT_NUMBER}-context-wikidata-CPE'
+CME_MODEL_NAME = f'../results/{MAX_CONTEXT_NUMBER}-context-wikidata-CME'
+
+TRAIN_CSV_PATH = f'../data/wikipedia/{MAX_CONTEXT_NUMBER}_contexts_{SOURCE_DEFINITION}_train.csv'
+TEST_CSV_PATH = f'../data/wikipedia/{MAX_CONTEXT_NUMBER}_contexts_{SOURCE_DEFINITION}_test.csv'
+VAL_CSV_PATH = f'../data/wikipedia/{MAX_CONTEXT_NUMBER}_contexts_{SOURCE_DEFINITION}_val.csv'
+
+TRAIN_CLASSIFICATION_PATH = f'../data/wikipedia/{MAX_CONTEXT_NUMBER}_contexts_{SOURCE_DEFINITION}_classification_train.csv'
+TEST_CLASSIFICATION_PATH = f'../data/wikipedia/{MAX_CONTEXT_NUMBER}_contexts_{SOURCE_DEFINITION}_classification_test.csv'
+VAL_CLASSIFICATION_PATH = f'../data/wikipedia/{MAX_CONTEXT_NUMBER}_contexts_{SOURCE_DEFINITION}_classification_val.csv'
+# ========================== CLASSIFICATION DATASETS ==========================
