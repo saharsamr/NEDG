@@ -4,8 +4,10 @@ from datasets import load_metric
 import csv
 
 from models.BART import BART
-from config import OUTPUT_DIR, CPE_MODEL_NAME, CME_MODEL_NAME, TRAIN_CSV_PATH, TEST_CSV_PATH, VAL_CSV_PATH, \
-    TRAIN_CLASSIFICATION_PATH, TEST_CLASSIFICATION_PATH, VAL_CLASSIFICATION_PATH
+from make_datasets.config import *
+
+import os
+dirname = os.path.dirname(__file__)
 
 
 def make_classification_dataset(CPE_model_name, CME_model_name, input_file, output_file, delimiter='\1'):
@@ -13,7 +15,12 @@ def make_classification_dataset(CPE_model_name, CME_model_name, input_file, outp
     input_data = pd.read_csv(input_file, delimiter=delimiter).sample(frac=0.2, random_state=42).dropna()
     input_x, input_y = list(input_data['contexts']), list(input_data['entity_description'])
 
-    training_args = TrainingArguments(output_dir=OUTPUT_DIR)
+    training_args = TrainingArguments(
+        output_dir=f'{dirname}/../results',
+        logging_dir=LOGGING_DIR,
+        logging_strategy='steps',
+        logging_steps=100,
+    )
     CPE_model = BART(
         training_args,
         input_x, input_y, input_x, input_y, input_x, input_y,
