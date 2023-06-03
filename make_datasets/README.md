@@ -7,15 +7,16 @@ By running **./make_dataset.sh** file, the following steps will be done (which c
 ./make_datasets/make_dataset.sh
 ```
 - Downloading the latest Wikipedia dump
-- Using the [WikiExtractor](https://github.com/attardi/wikiextractor), each page in the dump will be stored as a JSON file in some directories
-- The extracted pages of the previous step will be imported to a MongoDB instance
-- A MongoDB instance using the provided docker-compose.yaml file will be up for future uses
-- For each entry in [MongoDB](https://www.mongodb.com), the anchors will be found using the annotations available in the Wikipedia dump so that each entry will have a list of anchor names and their corresponding paragraph index.
-- For each entry in MongoDB, a query will run to find the id of entries that have an anchor to that specific entry; so each entry will have a list containing the id of the pages that contain a paragraph capable of being used as the context of the first entry
-- For each entry that some contexts have been found, a request will be sent to Wikidata API so that the Wikidata information of those are retrieved
-- Entries having contexts will be exported to a JSONL file in which we will extract the contexts for each entry using the id of documents containing its context and the anchor list of each entry that was created in the previous steps
-- The will be split into three different sets, train, test, and validation, based on entity names and the source of the definition, Wikipedia or Wikidata, so that we can prevent data leakage
-- Converting JSONL files to CSV
+- Using the [WikiExtractor](https://github.com/attardi/wikiextractor), every page from the dump will be saved as a JSON file within specific directories
+- The pages extracted from the previous stage will be imported into a MongoDB instance
+- A MongoDB instance will be set up using the provided docker-compose.yaml file for future use
+- For each entry in [MongoDB](https://www.mongodb.com), the anchors will be located using the annotations available in the Wikipedia dump, resulting in a list of anchor names and their corresponding paragraph indices for each entry
+- For each MongoDB entry a query will be executed to identify the IDs of entries containing an anchor to the specific entry, creating a list of page IDs with paragraphs that can serve as the context for the initial entry
+- For entries with identified contexts, a request will be sent to the Wikidata API to retrieve the corresponding Wikidata information
+- Entries with contexts will be exported to a JSONL file, from which the contexts for each entry will be extracted using the document IDs containing the context and the previously created anchor list
+- 
+- The data will be split into three different sets, train, test, and validation, based on entity names and the definition source, Wikipedia or Wikidata, to prevent data leakage
+- Converting JSONL files to CSV format
 
 The parameters in the config.py file can be altered. The role of each parameter can be found in the table below. This table is limited to the scope of the description generation dataset.
 
@@ -34,9 +35,9 @@ The parameters in the config.py file can be altered. The role of each parameter 
 | MONGODB_PASSWORD               | Password for connecting to the database/collection on MongoDB     |
 | WIKI_JSONS_PATH                | Path to JSON files created by WikiExtractor                       |
 | MAX_ENTITY_NAME_LENGTH         | The upper limit for the length of entity names in terms of words   |
-| MIN_CONTEXT_LENGTH             | The lower limit for the length of contexts in terms of words       |
-| FINAL_MIN_CONTEXT_LENGTH       | The lower limit for the length of contexts after preprocessing     |
-| WIKI_DUMP_JSONL_PATH           | The path to export MongoDB entries                                |
+| MIN_CONTEXT_LENGTH             | The lower limit for the length of contexts in terms of words      |
+| FINAL_MIN_CONTEXT_LENGTH       | The lower limit for the length of contexts after preprocessing    |
+| WIKI_DUMP_JSONL_PATH           | The path to export MongoDB entries as a JSONL                     |
 | TRAIN_SHARE                    | The share of the train split                                      |
 | TEST_SHARE                     | The share of the test split                                       |
 | VALID_SHARE                    | The share of the validation split                                 |
