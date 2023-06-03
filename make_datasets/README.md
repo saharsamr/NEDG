@@ -1,5 +1,5 @@
 # Make Necessary Datasets
-We must collect a dataset of entity descriptions and some contexts containing those entities. For that, we used the **Wikipedia** and **Wikidata** encyclopedias. After fine-tuning **BART**, introduced in [this paper](https://aclanthology.org/2020.acl-main.703/), we used the prediction of fine-tuned models to make the classification dataset. More details can be found below.
+We need to gather a dataset consisting of entity descriptions along with their respective contexts. To achieve this, we used the **Wikipedia** and **Wikidata** encyclopedias as our sources. We then fine-tuned the **BART** model, as described in [this paper](https://aclanthology.org/2020.acl-main.703/), and employed the predictions from the fine-tuned models to create the classification dataset. Further information is provided below.
 
 ## Description Generation Datasets:
 By running **./make_dataset.sh** file, the following steps will be done (which can take up to several hours!):
