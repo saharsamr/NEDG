@@ -17,13 +17,21 @@ def classification_main():
     # col_names = ['label', 'title', 'CPE-context', 'CPE-pred', 'CPE-bert',
     #              'CME-context', 'CME-pred', 'CME-bert', 'class-label']
 
-    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='\1').dropna()
-    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1').dropna()
-    valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='\1').dropna()
+    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='\1')
+    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1')
+    valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='\1')
 
     train = train.replace({'<pad>': ''}, regex=True)
     test = test.replace({'<pad>': ''}, regex=True)
     valid = valid.replace({'<pad>': ''}, regex=True)
+
+    train['CME-pred'] = train['CME-pred'].fillna('')
+    test['CME-pred'] = test['CME-pred'].fillna('')
+    valid['CME-pred'] = valid['CME-pred'].fillna('')
+
+    train['CPE-pred'] = train['CPE-pred'].fillna('')
+    test['CPE-pred'] = test['CPE-pred'].fillna('')
+    valid['CPE-pred'] = valid['CPE-pred'].fillna('')
 
     train['text'] = train['CME-context'] + "[SEC]" + train['CME-pred'] + "[SEC]" + train['CPE-pred']
     test['text'] = test['CME-context'] + "[SEC]" + test['CME-pred'] + "[SEC]" + test['CPE-pred']
@@ -48,7 +56,7 @@ def classification_main():
         eval_steps=500,
         load_best_model_at_end=True,
         save_strategy='steps',
-        save_total_limit=3
+        save_total_limit=5
     )
 
     print('Initialing the model...')
