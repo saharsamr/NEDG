@@ -21,7 +21,7 @@ TRAIN_SHARE = 0.8
 TEST_SHARE = 0.1
 VAL_SHARE = 0.1
 
-SOURCE_DEFINITION = 'wikipedia'
+SOURCE_DEFINITION = 'wikidata'
 TRAIN_JSONL_PATH = f'{dirname}/../data/wikipedia/train_{SOURCE_DEFINITION}.jsonl'
 TEST_JSONL_PATH = f'{dirname}/../data/wikipedia/test_{SOURCE_DEFINITION}.jsonl'
 VAL_JSONL_PATH = f'{dirname}/../data/wikipedia/val_{SOURCE_DEFINITION}.jsonl'
