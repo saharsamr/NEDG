@@ -6,6 +6,9 @@ import csv
 from models.BART import BART
 from make_datasets.config import *
 
+import os
+dirname = os.path.dirname(__file__)
+
 
 def make_classification_dataset(CPE_model_name, CME_model_name, input_file, output_file, delimiter='\1'):
 
@@ -13,6 +16,7 @@ def make_classification_dataset(CPE_model_name, CME_model_name, input_file, outp
     input_x, input_y = list(input_data['contexts']), list(input_data['entity_description'])
 
     training_args = TrainingArguments(
+        output_dir=f'{dirname}/../results',
         logging_dir=LOGGING_DIR,
         logging_strategy='steps',
         logging_steps=100,
