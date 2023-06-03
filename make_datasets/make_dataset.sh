@@ -11,6 +11,8 @@ wget https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.
 echo 'Use WikiExtractor to get the json format of Wikipedia articles...'
 python -m wikiextractor.WikiExtractor --json -l enwiki-latest-pages-articles.xml --no-template
 
+echo 'Running MongoDB...'
+sudo docker compose up -d
 echo 'Import Wikipedia pages to MongoDB...'
 python import_dump_to_mongo.py
 echo 'Extracting text anchors in Wikipedia pages and store the results in MongoDB...'
