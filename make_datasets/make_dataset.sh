@@ -1,4 +1,5 @@
 #! /bin/bash
+set -ex
 
 echo '*** Be Patient! The Whole Process May Take Several Hours! ***'
 
