@@ -64,7 +64,7 @@ class BART:
         for param in self.model.get_decoder().parameters():
             param.requires_grad = not freeze_decoder
 
-        for part in [self.model.get_encoder(), self.model.get_decoder()]:
+        for part in [self.model.get_encoder()]:
             for param in part.embed_positions.parameters():
                 param.requires_grad = False
             for param in part.embed_tokens.parameters():
