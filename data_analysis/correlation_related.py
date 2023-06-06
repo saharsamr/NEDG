@@ -15,8 +15,6 @@ def entity_popularity_check(path):
     db = client[MONGODB_DATABASE]
     collection = db[MONGODB_COLLECTION]
 
-    total_documents = collection.count_documents({"context_id": {"$exists": True}})
-
     documents_cursor = collection.find({"context_id": {"$exists": True}}, batch_size=MONGODB_READ_BATCH_SIZE)
     title_to_popularity = defaultdict(int)
 
