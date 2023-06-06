@@ -2,14 +2,6 @@ import json
 
 import matplotlib.pyplot as plt
 from pymongo import InsertOne, DeleteMany, ReplaceOne, UpdateOne
-from tqdm import tqdm
-from collections import defaultdict
-
-from config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
-    MONGODB_COLLECTION, MONGODB_READ_BATCH_SIZE, MONGODB_WRITE_BATCH_SIZE, \
-    MONGODB_PASSWORD, MONGODB_USERNAME
-from pymongo import MongoClient
-import pickle
 
 
 def count_words(sentence):
@@ -20,7 +12,7 @@ def count_words(sentence):
 def distribution_of_entity_context_number(path):
     with open(path, 'r') as f:
         number_of_contexts = []
-        for line in f:
+        for line in f.readlines():
             data = json.loads(line)
             number_of_contexts.append(len(data['contexts']))
         plt.hist(number_of_contexts, bins=20)
@@ -33,7 +25,7 @@ def distribution_of_entity_context_number(path):
 def distribution_of_contexts_length_in_json(path):
     with open(path, 'r') as f:
         context_lengths = []
-        for line in f:
+        for line in f.readlines():
             data = json.loads(line)
             for context in data['contexts']:
                 context_lengths.append(count_words(context))
@@ -48,7 +40,7 @@ def files_distribution_of_descriptions_length(path):
     with open(path, 'r') as f:
         wikipedia_description_lengths = []
         wikidata_description_lengths = []
-        for line in f:
+        for line in f.readlines():
             data = json.loads(line)
             wikipedia_description_lengths.append(count_words(data['wikipedia_description']))
             wikidata_description_lengths.append(count_words(data['wikidata_description']))
@@ -61,29 +53,3 @@ def files_distribution_of_descriptions_length(path):
         plt.show()
 
 
-def entity_popularity_check(path):
-    print("Connecting to MongoDB...")
-    client = MongoClient(f'{MONGODB_LINK}:{MONGODB_PORT}/', username=MONGODB_USERNAME, password=MONGODB_PASSWORD)
-    db = client[MONGODB_DATABASE]
-    collection = db[MONGODB_COLLECTION]
-
-    total_documents = collection.count_documents({})
-
-    documents_cursor = collection.find(batch_size=MONGODB_READ_BATCH_SIZE)
-    title_to_popularity = defaultdict(list)
-
-    print("Scanning documents...")
-    for doc in tqdm(documents_cursor, total=total_documents):
-        context_ids = doc['context_ids']
-        title = doc['title']
-        wikipedia_description = doc['wikidata_info']['descriptions']['en']
-        if len(context_ids) == 0 or wikipedia_description == '' or wikipedia_description is None:
-            continue
-        title_to_popularity[title].append(len(context_ids))
-
-    #     save the dictionary in the path
-    print("Saving dictionary to file...")
-    with open(path, 'wb') as file:
-        pickle.dump(title_to_popularity, file)
-
-    print("Dictionary saved successfully.")
