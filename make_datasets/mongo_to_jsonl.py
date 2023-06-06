@@ -44,8 +44,8 @@ def get_wikidata_description(wikidata_info):
 def is_proper_contexts(context):
 
     if 'BULLET' in context:
-        return True
-    return len(context.split()) < MIN_CONTEXT_LENGTH
+        return False
+    return len(context.split()) > MIN_CONTEXT_LENGTH
 
 
 def tag_entity_in_context_and_clean(context, entity_name):

@@ -12,9 +12,19 @@ from config import \
 
 def generation_main():
 
-    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1').sample(frac=1)
-    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1').sample(frac=1)
-    valid = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1').sample(frac=1)
+    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
+    print('train size before dropping NaNs: ', len(train))
+    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
+    print('test size before dropping NaNs: ', len(test))
+    valid = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
+    print('valid size before dropping NaNs: ', len(valid))
+
+    train = train.dropna()
+    print('train size after dropping NaNs: ', len(train))
+    test = test.dropna()
+    print('test size after dropping NaNs: ', len(test))
+    valid = valid.dropna()
+    print('valid size after dropping NaNs: ', len(valid))
 
     train_x, train_y = list(train['contexts']), list(train['entity_description'])
     test_x, test_y = list(test['contexts']), list(test['entity_description'])
@@ -35,7 +45,7 @@ def generation_main():
         do_eval=True,
         eval_steps=500,
         save_strategy='steps',
-        save_total_limit=3
+        save_total_limit=5
     )
 
     print('Initialing the model...')

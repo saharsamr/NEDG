@@ -17,13 +17,25 @@ def classification_main():
     # col_names = ['label', 'title', 'CPE-context', 'CPE-pred', 'CPE-bert',
     #              'CME-context', 'CME-pred', 'CME-bert', 'class-label']
 
-    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='\1').dropna()
-    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1').dropna()
-    valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='\1').dropna()
+    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='\1')
+    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1')
+    valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='\1')
 
-    train['text'] = train['title'] + "[SEP]" + train['CPE-pred'] + "[SEP]" + train['CME-pred'] + "[SEP]" + train['CME-context']
-    test['text'] = test['title'] + "[SEP]" + test['CPE-pred'] + "[SEP]" + test['CME-pred'] + "[SEP]" + test['CME-context']
-    valid['text'] = valid['title'] + "[SEP]" + valid['CPE-pred'] + "[SEP]" + valid['CME-pred'] + "[SEP]" + valid['CME-context']
+    train = train.replace({'<pad>': ''}, regex=True)
+    test = test.replace({'<pad>': ''}, regex=True)
+    valid = valid.replace({'<pad>': ''}, regex=True)
+
+    train['CME-pred'] = train['CME-pred'].fillna('')
+    test['CME-pred'] = test['CME-pred'].fillna('')
+    valid['CME-pred'] = valid['CME-pred'].fillna('')
+
+    train['CPE-pred'] = train['CPE-pred'].fillna('')
+    test['CPE-pred'] = test['CPE-pred'].fillna('')
+    valid['CPE-pred'] = valid['CPE-pred'].fillna('')
+
+    train['text'] = train['CME-context'] + "[SEC]" + train['CME-pred'] + "[SEC]" + train['CPE-pred']
+    test['text'] = test['CME-context'] + "[SEC]" + test['CME-pred'] + "[SEC]" + test['CPE-pred']
+    valid['text'] = valid['CME-context'] + "[SEC]" + valid['CME-pred'] + "[SEC]" + valid['CPE-pred']
 
     train_x, train_y = list(train['text']), list(train['class-label'])
     test_x, test_y = list(test['text']), list(test['class-label'])
@@ -41,9 +53,10 @@ def classification_main():
         logging_steps=100,
         evaluation_strategy='steps',
         do_eval=True,
-        eval_steps=100,
-        disable_tqdm=True,
-        load_best_model_at_end=True
+        eval_steps=500,
+        load_best_model_at_end=True,
+        save_strategy='steps',
+        save_total_limit=5
     )
 
     print('Initialing the model...')
@@ -65,8 +78,8 @@ def classification_main():
     preds = np.array(preds).reshape([-1])
     test['class-pred'] = preds
 
-    if EVALUATE_CLASSIFICATION:
-        evaluate_classification(test)
-
     with open('test_result_df.pkl', 'wb') as f:
         pickle.dump(test, f)
+
+    if EVALUATE_CLASSIFICATION:
+        evaluate_classification(test)

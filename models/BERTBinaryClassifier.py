@@ -1,14 +1,16 @@
 from transformers import Trainer
 from transformers import BertTokenizer, BertForSequenceClassification
-from data_handler.classification_dataset import ClassificationDataset
-from config import ADDITIONAL_SPECIAL_TOKENS, MODEL_CLASSIFICATION_PATH, LEARNING_RATE, \
-    TEST_CLASSIFICATION_BATCH_SIZE
 from datasets import load_metric
 from transformers.optimization import AdamW
 from torch.utils.data import DataLoader
-from tqdm import tqdm
 import torch
 import numpy as np
+
+from tqdm import tqdm
+
+from data_handler.classification_dataset import ClassificationDataset
+from config import CLASSIFICATION_SPECIAL_TOKENS, MODEL_CLASSIFICATION_PATH, LEARNING_RATE, \
+    TEST_CLASSIFICATION_BATCH_SIZE, MODEL_CLASSIFICATION_NAME, INPUT_CLASSIFICATION_MAX_LENGTH
 
 
 def compute_metrics(eval_preds):
@@ -28,15 +30,15 @@ class BERTBinaryClassification:
       load=False
     ):
 
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', problem_type='binary_classification',
-                                                       max_lenght=512, do_lower_case=True)
-        self.tokenizer.add_special_tokens({'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS})
+        self.tokenizer = BertTokenizer.from_pretrained(MODEL_CLASSIFICATION_NAME, problem_type='binary_classification',
+                                                       max_lenght=INPUT_CLASSIFICATION_MAX_LENGTH)
+        self.tokenizer.add_special_tokens({'additional_special_tokens': CLASSIFICATION_SPECIAL_TOKENS})
         if not load:
-            self.model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
+            self.model = BertForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_NAME, num_labels=2)
         else:
             self.model = BertForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_PATH, num_labels=2)
         self.model.resize_token_embeddings(len(self.tokenizer))
-        self.model.model_max_length = 512
+        self.model.model_max_length = INPUT_CLASSIFICATION_MAX_LENGTH
         self.model.cuda()
 
         print('Making datasets')
@@ -59,6 +61,9 @@ class BERTBinaryClassification:
 
         for param in self.model.bert.parameters():
             param.requires_grad = not freeze_encoder
+        for name, param in self.model.bert.named_parameters():
+            if name.startswith('embeddings'):
+                param.requires_grad = True
 
     def train(self):
         self.trainer.train()
