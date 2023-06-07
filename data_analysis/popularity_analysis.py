@@ -1,14 +1,9 @@
 import json
-
-from tqdm import tqdm
-from pymongo import MongoClient
 from collections import defaultdict
 import pickle
 
 import matplotlib.pyplot as plt
 
-from make_datasets.config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
-    MONGODB_COLLECTION, MONGODB_READ_BATCH_SIZE, MONGODB_PASSWORD, MONGODB_USERNAME
 from data_analysis.config import ENTITY_POPULARITY_PATH, CLASSIFICATION_RESULT_PATH, JSONL_PATH
 from data_analysis.utils import compute_metrics, compute_correlation
 
