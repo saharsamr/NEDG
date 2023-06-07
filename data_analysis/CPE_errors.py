@@ -12,9 +12,12 @@ def compare_lowest_bertscores():
         classification_result = pickle.load(file)
 
     cpe_bertscores, cme_bertscores = [], []
-    for i in range(1, 11):
+    for i in np.arange(0.1, 1.1, 0.1):
+
         classification_result.sort_values(by='CPE-bert', inplace=True, ascending=True)
-        classification_result_to_analyze = classification_result[:len(classification_result) // i]
+        classification_result = classification_result[classification_result['CPE-bert'] != 0]
+        classification_result = classification_result[classification_result['CME-bert'] != 0]
+        classification_result_to_analyze = classification_result[:int(i*len(classification_result))]
 
         cpe_bert = np.mean(classification_result_to_analyze["CPE-bert"].values)
         cme_bert = np.mean(classification_result_to_analyze["CME-bert"].values)
@@ -26,16 +29,18 @@ def compare_lowest_bertscores():
             f'and the t-test results:\n'
             f'{stats.ttest_ind(classification_result_to_analyze["CPE-bert"].values, classification_result_to_analyze["CME-bert"].values)}'
         )
+        print('-------------------------')
 
         cpe_bertscores.append(cpe_bert)
         cme_bertscores.append(cme_bert)
 
-    plt.plot(cpe_bertscores, label='CPE')
-    plt.plot(cme_bertscores, label='CME')
+    plt.plot(np.arange(0.1, 1.1, 0.1), cme_bertscores, 'o-', label='CME')
+    plt.plot(np.arange(0.1, 1.1, 0.1), cpe_bertscores, 'o-', label='CPE')
+    plt.xticks(np.arange(0.1, 1.1, 0.1))
     plt.legend()
-    plt.xlabel('Percentage of lowest CPE bertscores')
-    plt.ylabel('Mean of bertscores')
-    plt.savefig('bertscores.png')
+    plt.xlabel('Percentage of whole data selected based on lowest Bertscore on CPE')
+    plt.ylabel('Bertscore')
+    plt.savefig('bertscores.svg')
 
 
 compare_lowest_bertscores()
