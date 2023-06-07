@@ -9,15 +9,15 @@ import matplotlib.pyplot as plt
 
 from make_datasets.config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
     MONGODB_COLLECTION, MONGODB_READ_BATCH_SIZE, MONGODB_PASSWORD, MONGODB_USERNAME
-from data_analysis.config import ENTITY_POPULARITY_PATH, CLASSIFICATION_RESULT_PATH
+from data_analysis.config import ENTITY_POPULARITY_PATH, CLASSIFICATION_RESULT_PATH, JSONL_PATH
 from data_analysis.utils import compute_metrics, compute_correlation
 
 
-def find_entity_popularity(path):
+def find_entity_popularity():
 
     title_to_popularity = defaultdict(int)
 
-    with open(path, 'r') as f:
+    with open(JSONL_PATH, 'r') as f:
         for line in f.readlines():
             data = json.loads(line)
             title_to_popularity[data['title']] = len(data['contexts'])
