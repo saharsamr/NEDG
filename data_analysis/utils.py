@@ -25,9 +25,9 @@ def compute_metrics(classification_result):
     cpe_preds = [word_tokenize(pred) for pred in cpe_data['CPE-pred']]
     cpe_labels = [[word_tokenize(label)] for label in cpe_data['label']]
     metrics['CPE'] = {
-        'bertscore': compute_bertscore(cpe_preds, cpe_labels),
+        # 'bertscore': compute_bertscore(cpe_preds, cpe_labels),
         'bleu': [
-            compute_bleu([cpe_pred], [cpe_label], 1)['bleu'] for
+            compute_bleu([cpe_pred], [cpe_label], 1) for
             cpe_pred, cpe_label in tqdm(zip(cpe_preds, cpe_labels), total=len(cpe_preds)) if len(cpe_label)],
         'popularity': cpe_data['popularity'].values,
     }
@@ -68,7 +68,7 @@ def compute_bleu(preds, labels, max_order):
         predictions=preds, references=labels, max_order=max_order
     )
 
-    return bleu_output
+    return bleu_output['bleu']
 
 
 def compute_rouge(preds, labels):
@@ -85,4 +85,4 @@ def compute_bertscore(preds, labels):
         predictions=preds, references=labels, lang='en', model_type='bert-base-uncased'
     )
 
-    return bertscore_output['bleu']
+    return bertscore_output

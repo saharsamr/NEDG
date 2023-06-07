@@ -59,10 +59,10 @@ def popularity_and_performance_correlation():
     # print(compute_correlation(metrics['CME']['bleu'], metrics['CME']['popularity']))
     # print(compute_correlation(metrics['Hybrid']['bleu'], metrics['Hybrid']['popularity']))
 
-    plot_correlation(metrics['CPE']['popularity'], metrics['CPE']['bleu'], 'popularity', 'CPE-bertscore')
+    plot_correlation(metrics['CPE']['popularity'], metrics['CPE']['bleu'], 'popularity', 'CPE-bleu')
     # plot_correlation(metrics['CME']['popularity'], metrics['CME']['bleu'], 'popularity', 'CME-bertscore')
     # plot_correlation(metrics['Hybrid']['popularity'], metrics['Hybrid']['bleu'], 'popularity', 'Hybrid-bertscore')
 
 
-find_entity_popularity()
+# find_entity_popularity()
 popularity_and_performance_correlation()
