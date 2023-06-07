@@ -15,7 +15,7 @@ def find_entity_popularity():
     with open(JSONL_PATH, 'r') as f:
         for line in f.readlines():
             data = json.loads(line)
-            title_to_popularity[data['title']] = len(data['contexts'])
+            title_to_popularity[data['wikipedia_title']] = len(data['contexts'])
 
     # save the dictionary in the path
     print("Saving dictionary to file...")
@@ -63,5 +63,5 @@ def popularity_and_performance_correlation():
     # plot_correlation(metrics['Hybrid']['popularity'], metrics['Hybrid']['bleu'], 'popularity', 'Hybrid-bertscore')
 
 
-# find_entity_popularity()
+find_entity_popularity()
 popularity_and_performance_correlation()
