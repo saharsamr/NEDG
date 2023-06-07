@@ -1,3 +1,5 @@
+import json
+
 from tqdm import tqdm
 from pymongo import MongoClient
 from collections import defaultdict
@@ -11,22 +13,14 @@ from data_analysis.config import ENTITY_POPULARITY_PATH, CLASSIFICATION_RESULT_P
 from data_analysis.utils import compute_metrics, compute_correlation
 
 
-def find_entity_popularity():
+def find_entity_popularity(path):
 
-    print("Connecting to MongoDB...")
-    client = MongoClient(f'{MONGODB_LINK}:{MONGODB_PORT}/', username=MONGODB_USERNAME, password=MONGODB_PASSWORD)
-    db = client[MONGODB_DATABASE]
-    collection = db[MONGODB_COLLECTION]
-
-    documents_cursor = collection.find({"context_ids": {"$exists": True}}, batch_size=MONGODB_READ_BATCH_SIZE)
     title_to_popularity = defaultdict(int)
 
-    total_documents = collection.count_documents({"context_ids": {"$exists": True}})
-    print("Scanning documents...")
-    for doc in tqdm(documents_cursor, total=total_documents):
-        context_ids = doc['context_ids']
-        title = doc['title']
-        title_to_popularity[title] = len(context_ids)
+    with open(path, 'r') as f:
+        for line in f.readlines():
+            data = json.loads(line)
+            title_to_popularity[data['title']] = len(data['contexts'])
 
     # save the dictionary in the path
     print("Saving dictionary to file...")
