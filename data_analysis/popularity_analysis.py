@@ -1,5 +1,6 @@
 import json
 from collections import defaultdict
+from tqdm import tqdm
 import pickle
 
 import matplotlib.pyplot as plt
@@ -13,7 +14,7 @@ def find_entity_popularity():
     title_to_popularity = defaultdict(int)
 
     with open(JSONL_PATH, 'r') as f:
-        for line in f.readlines():
+        for line in tqdm(f.readlines()):
             data = json.loads(line)
             title_to_popularity[data['wikipedia_title']] = len(data['contexts'])
 
