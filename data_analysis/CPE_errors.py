@@ -38,7 +38,7 @@ def compare_lowest_bertscores():
     plt.plot(np.arange(10, 110, 10), cpe_bertscores, 'o-', label='CPE')
     plt.xticks(np.arange(10, 110, 10))
     plt.legend()
-    plt.xlabel('Percentage of whole data selected based on lowest Bertscore on CPE')
+    plt.xlabel('Percentage of data')
     plt.ylabel('Bertscore')
     plt.savefig('bertscores.svg')
 
