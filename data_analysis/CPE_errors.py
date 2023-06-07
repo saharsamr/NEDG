@@ -1,7 +1,7 @@
 import pickle
 import numpy as np
 from scipy import stats
-from matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 from data_analysis.config import CLASSIFICATION_RESULT_PATH
 
