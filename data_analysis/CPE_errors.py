@@ -19,3 +19,6 @@ def compare_lowest_bertscores():
         f'and the t-test results:\n'
         f'{stats.ttest_ind(classification_result_to_analyze["CPE-bert"].values, classification_result_to_analyze["CME-bert"].values)}'
     )
+
+
+compare_lowest_bertscores()
