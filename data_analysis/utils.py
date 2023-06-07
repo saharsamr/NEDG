@@ -77,7 +77,7 @@ def compute_rouge(preds, labels):
         rouge_types=['rouge1', 'rouge2', 'rouge3', 'rouge4', 'rougeL', 'rougeLsum']
     )
 
-    return rouge_output
+    return rouge_output['rougeL'][1][2]
 
 
 def compute_bertscore(preds, labels):
