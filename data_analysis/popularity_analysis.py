@@ -100,7 +100,7 @@ def compare_highest_popularity():
 
     plt.plot(np.arange(10, 110, 10), cme_bertscores, 'o-', label='CME')
     plt.plot(np.arange(10, 110, 10), cpe_bertscores, 'o-', label='CPE')
-    plt.xticks(['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'])
+    plt.xticks(np.arange(10, 110, 10), ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'])
     plt.legend()
     plt.xlabel('Decile of data')
     plt.ylabel('Bertscore')
