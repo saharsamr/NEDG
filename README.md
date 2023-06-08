@@ -8,11 +8,11 @@ Generating named entity descriptions (GNED) is the task of describing a target e
 ## Repository Structure
 This repository is organized as follows:
 
-1. **make_datasets:** This directory contains the code for creating the necessary datasets for the generation and classification parts of the hybrid framework.
+1. **make_datasets:** This directory contains the code for creating the necessary datasets for the generation and classification parts of the hybrid framework. For more information, visit this [link](https://github.com/saharsamr/NED/tree/master/make_datasets#readme)
 
-2. **GNED:** The GNED directory contains the code for training, evaluating, and testing all three models: Context with the Plain Entity (CPE), Context with Masked Entity (CME), and the classifier. These models form the core components of the hybrid framework.
+2. **GNED:** The GNED directory contains the code for training, evaluating, and testing all three models: Context with the Plain Entity (CPE), Context with Masked Entity (CME), and the classifier. These models form the core components of the hybrid framework. For more information, visit this [link](https://github.com/saharsamr/NED/tree/master/GNED#readme)
 
-3. **data_analysis:** The data_analysis directory includes the code for comparing the performance of the CPE and CME models on the worst results of the CPE, along with other analysis tasks.
+3. **data_analysis:** The data_analysis directory includes the code for comparing the performance of the CPE and CME models on the worst results of the CPE, along with other analysis tasks. For more information visit this [link](https://github.com/saharsamr/NED/tree/master/data_analysis#readme)
 
 Each directory mentioned above has its own README file with detailed instructions on how to use the code and resources provided.
 
