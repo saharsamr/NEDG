@@ -1,15 +1,16 @@
 from transformers import TrainingArguments
-from utils.save_data import save_classification_prediction
-from models.BERTBinaryClassifier import BERTBinaryClassification
-from utils.metrics import evaluate_classification
 import pandas as pd
 import numpy as np
-from config import \
+import pickle
+
+from GNED.utils.save_data import save_classification_prediction
+from GNED.models.BERTBinaryClassifier import BERTBinaryClassification
+from GNED.utils.metrics import evaluate_classification
+from GNED.config import \
     TRAIN_CLASSIFICATION_FILE, TEST_CLASSIFICATION_FILE, VALID_CLASSIFICATION_FILE,\
     EPOCHS, TRAIN_CLASSIFICATION_BATCH_SIZE, EVAL_CLASSIFICATION_BATCH_SIZE, \
     WARMUP_STEPS, WEIGHT_DECAY, LOGGING_DIR, \
     OUTPUT_DIR, LOAD_CLASSIFICATION_MODEL, EVALUATE_CLASSIFICATION
-import pickle
 
 
 def classification_main():

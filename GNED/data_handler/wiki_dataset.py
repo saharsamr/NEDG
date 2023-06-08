@@ -1,6 +1,7 @@
 from torch.utils.data import Dataset
 import torch
-from config import INPUT_GENERATION_MAX_LENGTH, OUTPUT_GENERATION_MAX_LENGTH
+
+from GNED.config import INPUT_GENERATION_MAX_LENGTH, OUTPUT_GENERATION_MAX_LENGTH
 
 
 class WikiDataset(Dataset):

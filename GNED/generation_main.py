@@ -1,9 +1,10 @@
 from transformers import TrainingArguments
-from utils.save_data import save_generation_predictions
-from utils.metrics import evaluate_generation
-from models.BART import BART
 import pandas as pd
-from config import \
+
+from GNED.utils.save_data import save_generation_predictions
+from GNED.utils.metrics import evaluate_generation
+from GNED.models.BART import BART
+from GNED.config import \
     TRAIN_GENERATION_FILE, TEST_GENERATION_FILE, VALID_GENERATION_FILE, \
     EPOCHS, TRAIN_GENERATION_BATCH_SIZE, EVAL_GENERATION_BATCH_SIZE, \
     WARMUP_STEPS, WEIGHT_DECAY, LOGGING_DIR, \

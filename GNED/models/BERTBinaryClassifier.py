@@ -5,11 +5,10 @@ from transformers.optimization import AdamW
 from torch.utils.data import DataLoader
 import torch
 import numpy as np
-
 from tqdm import tqdm
 
-from data_handler.classification_dataset import ClassificationDataset
-from config import CLASSIFICATION_SPECIAL_TOKENS, MODEL_CLASSIFICATION_PATH, LEARNING_RATE, \
+from GNED.data_handler.classification_dataset import ClassificationDataset
+from GNED.config import CLASSIFICATION_SPECIAL_TOKENS, MODEL_CLASSIFICATION_PATH, LEARNING_RATE, \
     TEST_CLASSIFICATION_BATCH_SIZE, MODEL_CLASSIFICATION_NAME, INPUT_CLASSIFICATION_MAX_LENGTH
 
 

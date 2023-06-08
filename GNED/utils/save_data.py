@@ -1,5 +1,6 @@
 import pickle
-from config import PRED_CLASSIFICATION_FILE_PATH, PRED_GENERATION_FILE_PATH
+
+from GNED.config import PRED_CLASSIFICATION_FILE_PATH, PRED_GENERATION_FILE_PATH
 
 
 def save_generation_predictions(input_, label, prediction, delimiter='\1'):
