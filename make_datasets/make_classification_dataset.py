@@ -3,7 +3,7 @@ from transformers import TrainingArguments
 from datasets import load_metric
 import csv
 
-from models.BART import BART
+from GNED.models.BART import BART
 from make_datasets.config import *
 
 import os

@@ -1,11 +1,12 @@
 from pymongo import InsertOne, DeleteMany, ReplaceOne, UpdateOne
 from tqdm import tqdm
+from pymongo import MongoClient
 from collections import defaultdict
 
-from config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
+from make_datasets.config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
     MONGODB_COLLECTION, MONGODB_READ_BATCH_SIZE, MONGODB_WRITE_BATCH_SIZE, \
     MONGODB_PASSWORD, MONGODB_USERNAME
-from pymongo import MongoClient
+
 
 print("Connecting to MongoDB...")
 client = MongoClient(f'{MONGODB_LINK}:{MONGODB_PORT}/', username=MONGODB_USERNAME, password=MONGODB_PASSWORD)

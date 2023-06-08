@@ -2,7 +2,8 @@ import csv
 import json
 import random
 from tqdm import tqdm
-from config import MAX_CONTEXT_NUMBER, \
+
+from make_datasets.config import MAX_CONTEXT_NUMBER, \
     TRAIN_JSONL_PATH, TEST_JSONL_PATH, VAL_JSONL_PATH,\
     CSVS_PATH, SOURCE_DEFINITION, FINAL_MIN_CONTEXT_LEN
 

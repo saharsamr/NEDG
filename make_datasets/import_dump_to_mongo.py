@@ -2,7 +2,8 @@ import os
 import json
 from pymongo import MongoClient
 from tqdm import tqdm
-from config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
+
+from make_datasets.config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
     MONGODB_COLLECTION, MONGODB_PASSWORD, MONGODB_USERNAME, WIKI_JSONS_PATH
 
 

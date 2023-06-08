@@ -1,14 +1,12 @@
 from pymongo import MongoClient
 from pymongo import InsertOne, DeleteMany, ReplaceOne, UpdateOne
-
 import requests
 from tqdm import tqdm
 from collections import defaultdict
-
 from multiprocessing import Pool
 import os
 
-from config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
+from make_datasets.config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
     MONGODB_COLLECTION, MONGODB_READ_BATCH_SIZE, MONGODB_WRITE_BATCH_SIZE, \
     MONGODB_PASSWORD, MONGODB_USERNAME
 

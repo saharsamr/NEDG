@@ -1,7 +1,8 @@
 import random
 import json
 from tqdm import tqdm
-from config import WIKI_DUMP_JSONL_PATH, TRAIN_JSONL_PATH, TEST_JSONL_PATH, \
+
+from make_datasets.config import WIKI_DUMP_JSONL_PATH, TRAIN_JSONL_PATH, TEST_JSONL_PATH, \
     VAL_JSONL_PATH, TRAIN_SHARE, TEST_SHARE, SOURCE_DEFINITION
 
 

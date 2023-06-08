@@ -4,7 +4,8 @@ import re
 import urllib.parse
 from collections import defaultdict
 from pymongo import InsertOne, DeleteMany, ReplaceOne, UpdateOne
-from config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
+
+from make_datasets.config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
     MONGODB_COLLECTION, MONGODB_READ_BATCH_SIZE, MONGODB_WRITE_BATCH_SIZE, \
     MONGODB_PASSWORD, MONGODB_USERNAME
 
