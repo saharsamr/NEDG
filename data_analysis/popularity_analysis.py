@@ -3,12 +3,13 @@ from collections import defaultdict
 from tqdm import tqdm
 import pickle
 
-import matplotlib.pyplot as plt
 from scipy import stats
 import numpy as np
 
 from data_analysis.config import ENTITY_POPULARITY_PATH, CLASSIFICATION_RESULT_PATH, JSONL_PATH
-from data_analysis.utils import compute_metrics, compute_correlation
+from data_analysis.utils import compute_metrics, compute_correlation, \
+    add_bleu_rouge_to_df, remove_empty_preds, compute_metrics_for_every_fraction
+from data_analysis.data_plots import plot_metrics, plot_correlation
 
 
 def find_entity_popularity():
@@ -38,14 +39,6 @@ def map_metric_to_popularity(title_to_popularity, classification_result):
     return classification_result
 
 
-def plot_correlation(first, second, x_label, y_label):
-
-      plt.scatter(first, second)
-      plt.xlabel(x_label)
-      plt.ylabel(y_label)
-      plt.savefig(y_label)
-
-
 def popularity_and_performance_correlation():
 
     with open(ENTITY_POPULARITY_PATH, 'rb') as file:
@@ -58,12 +51,12 @@ def popularity_and_performance_correlation():
     metrics = compute_metrics(classification_result)
 
     print(compute_correlation(metrics['CPE']['bleu'], metrics['CPE']['popularity']))
-    # print(compute_correlation(metrics['CME']['bleu'], metrics['CME']['popularity']))
-    # print(compute_correlation(metrics['Hybrid']['bleu'], metrics['Hybrid']['popularity']))
+    print(compute_correlation(metrics['CME']['bleu'], metrics['CME']['popularity']))
+    print(compute_correlation(metrics['Hybrid']['bleu'], metrics['Hybrid']['popularity']))
 
     plot_correlation(metrics['CPE']['popularity'], metrics['CPE']['bleu'], 'popularity', 'CPE-bleu')
-    # plot_correlation(metrics['CME']['popularity'], metrics['CME']['bleu'], 'popularity', 'CME-bertscore')
-    # plot_correlation(metrics['Hybrid']['popularity'], metrics['Hybrid']['bleu'], 'popularity', 'Hybrid-bertscore')
+    plot_correlation(metrics['CME']['popularity'], metrics['CME']['bleu'], 'popularity', 'CME-bertscore')
+    plot_correlation(metrics['Hybrid']['popularity'], metrics['Hybrid']['bleu'], 'popularity', 'Hybrid-bertscore')
 
 
 def compare_highest_popularity():
@@ -75,16 +68,19 @@ def compare_highest_popularity():
 
     classification_result = map_metric_to_popularity(title_to_popularity, classification_result)
 
+    classification_result = remove_empty_preds(classification_result)
+    classification_result = add_bleu_rouge_to_df(classification_result)
+
     cpe_bertscores, cme_bertscores = [], []
+    cpe_bleus, cme_bleus = [], []
+    cpe_rouges, cme_rouges = [], []
     for i in np.arange(0.1, 1.1, 0.1):
 
-        classification_result.sort_values(by='CPE-bert', inplace=True, ascending=False)
-        classification_result = classification_result[classification_result['CPE-bert'] != 0]
-        classification_result = classification_result[classification_result['CME-bert'] != 0]
+        classification_result.sort_values(by='popularity', inplace=True, ascending=False)
         classification_result_to_analyze = classification_result[int((i-0.1)*len(classification_result)):int(i*len(classification_result))]
 
-        cpe_bert = np.mean(classification_result_to_analyze["CPE-bert"].values)
-        cme_bert = np.mean(classification_result_to_analyze["CME-bert"].values)
+        cpe_bert, cme_bert, cpe_bleu, cme_bleu, cpe_rouge, cme_rouge = \
+            compute_metrics_for_every_fraction(classification_result_to_analyze)
 
         print(
             f'For the {int(i * 10)}th 10 percent of the most popular entities, we have:\n'
@@ -92,21 +88,29 @@ def compare_highest_popularity():
             f'and in CME:{cme_bert}\n'
             f'and the t-test results:\n'
             f'{stats.ttest_ind(classification_result_to_analyze["CPE-bert"].values, classification_result_to_analyze["CME-bert"].values)}'
+            f'mean of bleu in CPE: {cpe_bleu}\n'
+            f'and in CME:{cme_bleu}\n'
+            f'and the t-test results:\n'
+            f'{stats.ttest_ind(cpe_bleu, cme_bleu)}'
+            f'mean of rouge in CPE: {cpe_rouge}\n'
+            f'and in CME:{cme_rouge}\n'
+            f'and the t-test results:\n'
+            f'{stats.ttest_ind(cpe_rouge, cme_rouge)}'
         )
         print('-------------------------')
 
         cpe_bertscores.append(cpe_bert)
         cme_bertscores.append(cme_bert)
+        cpe_bleus.append(cpe_bleu)
+        cme_bleus.append(cme_bleu)
+        cpe_rouges.append(cpe_rouge)
+        cme_rouges.append(cme_rouge)
 
-    plt.plot(np.arange(10, 110, 10), cme_bertscores, 'o-', label='CME')
-    plt.plot(np.arange(10, 110, 10), cpe_bertscores, 'o-', label='CPE')
-    plt.xticks(np.arange(10, 110, 10), ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'])
-    plt.legend()
-    plt.xlabel('Decile of data')
-    plt.ylabel('Bertscore')
-    plt.savefig('decile-popularity.svg')
+    plot_metrics(
+        cpe_bertscores, cme_bertscores, cpe_bleus, cme_bleus, cpe_rouges,
+        cme_rouges, x_label='Decile of Data', decile=True, plot_name='popularity')
 
 
-# find_entity_popularity()
-# popularity_and_performance_correlation()
+find_entity_popularity()
+popularity_and_performance_correlation()
 compare_highest_popularity()

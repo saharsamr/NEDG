@@ -1,7 +1,7 @@
 import json
 
 import matplotlib.pyplot as plt
-from pymongo import InsertOne, DeleteMany, ReplaceOne, UpdateOne
+import numpy as np
 
 
 def count_words(sentence):
@@ -51,5 +51,47 @@ def files_distribution_of_descriptions_length(path):
         plt.ylabel('Frequency')
         plt.legend()
         plt.show()
+
+
+def plot_metrics(
+  cpe_bertscores, cme_bertscores, cpe_bleus, cme_bleus, cpe_rouges, cme_rouges, x_label, decile, plot_name):
+
+    plt.figure(figsize=(17, 4.5))
+
+    plt.subplot(1, 3, 1)
+    plt.plot(np.arange(10, 110, 10), cme_bertscores, 'o-', label='CME')
+    plt.plot(np.arange(10, 110, 10), cpe_bertscores, 'o-', label='CPE')
+    plt.xticks(np.arange(10, 110, 10),
+               ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'] if decile else None)
+    plt.legend()
+    plt.xlabel(x_label)
+    plt.ylabel('Bertscore')
+
+    plt.subplot(1, 3, 2)
+    plt.plot(np.arange(10, 110, 10), cme_bleus, 'o-', label='CME')
+    plt.plot(np.arange(10, 110, 10), cpe_bleus, 'o-', label='CPE')
+    plt.xticks(np.arange(10, 110, 10),
+               ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'] if decile else None)
+    plt.legend()
+    plt.xlabel(x_label)
+    plt.ylabel('BLEU')
+
+    plt.subplot(1, 3, 3)
+    plt.plot(np.arange(10, 110, 10), cme_rouges, 'o-', label='CME')
+    plt.plot(np.arange(10, 110, 10), cpe_rouges, 'o-', label='CPE')
+    plt.xticks(np.arange(10, 110, 10),
+               ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'] if decile else None)
+    plt.legend()
+    plt.xlabel(x_label)
+    plt.ylabel('ROUGE')
+
+    plt.savefig(f'{plot_name}{"-decile" if decile else ""}.svg')
+
+
+def plot_correlation(first, second, x_label, y_label):
+    plt.scatter(first, second)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.savefig(y_label)
 
 
