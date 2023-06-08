@@ -1,7 +1,7 @@
 from torch.utils.data import Dataset
 import torch
 
-from config import INPUT_CLASSIFICATION_MAX_LENGTH
+from GNED.config import INPUT_CLASSIFICATION_MAX_LENGTH
 
 
 class ClassificationDataset(Dataset):

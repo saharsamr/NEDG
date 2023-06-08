@@ -1,15 +1,16 @@
 from transformers import BartTokenizerFast, BartForConditionalGeneration
 from transformers.optimization import AdamW
-from data_handler.wiki_dataset import WikiDataset
-from utils.metrics import compute_metrics
 from transformers import EarlyStoppingCallback
 from transformers import Trainer
 from torch.utils.data import DataLoader
 import torch
-from config import MODEL_GENERATION_NAME, ADDITIONAL_SPECIAL_TOKENS, \
+from tqdm import tqdm
+
+from GNED.data_handler.wiki_dataset import WikiDataset
+from GNED.utils.metrics import compute_metrics
+from GNED.config import MODEL_GENERATION_NAME, ADDITIONAL_SPECIAL_TOKENS, \
     MODEL_GENERATION_PATH, OUTPUT_GENERATION_MAX_LENGTH, LEARNING_RATE, INPUT_GENERATION_MAX_LENGTH, \
     OUTPUT_GENERATION_MIN_LENGTH, TEST_GENERATION_BATCH_SIZE
-from tqdm import tqdm
 
 
 class BART:
