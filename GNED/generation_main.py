@@ -1,9 +1,10 @@
 from transformers import TrainingArguments
-from utils.save_data import save_generation_predictions
-from utils.metrics import evaluate_generation
-from models.BART import BART
 import pandas as pd
-from config import \
+
+from GNED.utils.save_data import save_generation_predictions
+from GNED.utils.metrics import evaluate_generation
+from GNED.models.BART import BART
+from GNED.config import \
     TRAIN_GENERATION_FILE, TEST_GENERATION_FILE, VALID_GENERATION_FILE, \
     EPOCHS, TRAIN_GENERATION_BATCH_SIZE, EVAL_GENERATION_BATCH_SIZE, \
     WARMUP_STEPS, WEIGHT_DECAY, LOGGING_DIR, \
@@ -12,13 +13,23 @@ from config import \
 
 def generation_main():
 
-    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'description'])
-    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'description'])
-    valid = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1', header=None, names=['title', 'context', 'description'])
+    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
+    print('train size before dropping NaNs: ', len(train))
+    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
+    print('test size before dropping NaNs: ', len(test))
+    valid = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
+    print('valid size before dropping NaNs: ', len(valid))
 
-    train_x, train_y = list(train['context']), list(train['description'])
-    test_x, test_y = list(test['context']), list(test['description'])
-    valid_x, valid_y = list(valid['context']), list(valid['description'])
+    train = train.dropna()
+    print('train size after dropping NaNs: ', len(train))
+    test = test.dropna()
+    print('test size after dropping NaNs: ', len(test))
+    valid = valid.dropna()
+    print('valid size after dropping NaNs: ', len(valid))
+
+    train_x, train_y = list(train['contexts']), list(train['entity_description'])
+    test_x, test_y = list(test['contexts']), list(test['entity_description'])
+    valid_x, valid_y = list(valid['contexts']), list(valid['entity_description'])
 
     training_args = TrainingArguments(
         num_train_epochs=EPOCHS,
@@ -35,7 +46,7 @@ def generation_main():
         do_eval=True,
         eval_steps=500,
         save_strategy='steps',
-        save_total_limit=3
+        save_total_limit=5
     )
 
     print('Initialing the model...')

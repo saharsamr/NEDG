@@ -1,15 +1,16 @@
 from transformers import BartTokenizerFast, BartForConditionalGeneration
 from transformers.optimization import AdamW
-from data_handler.wiki_dataset import WikiDataset
-from utils.metrics import compute_metrics
 from transformers import EarlyStoppingCallback
 from transformers import Trainer
 from torch.utils.data import DataLoader
 import torch
-from config import MODEL_GENERATION_NAME, ADDITIONAL_SPECIAL_TOKENS, \
+from tqdm import tqdm
+
+from GNED.data_handler.wiki_dataset import WikiDataset
+from GNED.utils.metrics import compute_metrics
+from GNED.config import MODEL_GENERATION_NAME, ADDITIONAL_SPECIAL_TOKENS, \
     MODEL_GENERATION_PATH, OUTPUT_GENERATION_MAX_LENGTH, LEARNING_RATE, INPUT_GENERATION_MAX_LENGTH, \
     OUTPUT_GENERATION_MIN_LENGTH, TEST_GENERATION_BATCH_SIZE
-from tqdm import tqdm
 
 
 class BART:
@@ -20,6 +21,7 @@ class BART:
       test_x, test_y,
       valid_x, valid_y,
       model_name=MODEL_GENERATION_NAME,
+      model_load_path=MODEL_GENERATION_PATH,
       load=False,
       mask_entity=False
     ):
@@ -30,7 +32,7 @@ class BART:
         )
         self.tokenizer.add_special_tokens({'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS})
         if load:
-            self.model = BartForConditionalGeneration.from_pretrained(MODEL_GENERATION_PATH)
+            self.model = BartForConditionalGeneration.from_pretrained(model_load_path)
         else:
             self.model = BartForConditionalGeneration.from_pretrained(self.model_name)
         self.model.resize_token_embeddings(len(self.tokenizer))
@@ -58,16 +60,16 @@ class BART:
 
     def set_learnable_params(self, freeze_encoder=True, freeze_decoder=True):
 
-        for part in [self.model.get_encoder(), self.model.get_decoder()]:
-            for param in part.embed_positions.parameters():
-                param.requires_grad = False
-            for param in part.embed_tokens.parameters():
-                param.requires_grad = False
-
         for param in self.model.get_encoder().parameters():
             param.requires_grad = not freeze_encoder
         for param in self.model.get_decoder().parameters():
             param.requires_grad = not freeze_decoder
+
+        for part in [self.model.get_encoder()]:
+            for param in part.embed_positions.parameters():
+                param.requires_grad = False
+            for param in part.embed_tokens.parameters():
+                param.requires_grad = True
 
     def pred(self):
 
@@ -76,11 +78,12 @@ class BART:
         with torch.no_grad():
             for batch in tqdm(test_dataloader):
                 ids = self.model.generate(
-                    batch['input_ids'].cuda(), min_length=OUTPUT_GENERATION_MIN_LENGTH, max_length=OUTPUT_GENERATION_MAX_LENGTH
+                    batch['input_ids'].cuda(), min_length=OUTPUT_GENERATION_MIN_LENGTH
+                    , max_length=OUTPUT_GENERATION_MAX_LENGTH
                 )
                 preds = self.tokenizer.batch_decode(ids, skip_special_tokens=True)
                 predictions.extend(preds)
-                input_ = self.tokenizer.batch_decode(batch['input_ids'], skip_special_tokens=True)
+                input_ = self.tokenizer.batch_decode(batch['input_ids'], skip_special_tokens=False)
                 inputs.extend(input_)
                 label = self.tokenizer.batch_decode(batch['labels'], skip_special_tokens=True)
                 labels.extend(label)

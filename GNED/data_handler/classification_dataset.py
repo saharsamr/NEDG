@@ -1,10 +1,12 @@
 from torch.utils.data import Dataset
 import torch
 
+from GNED.config import INPUT_CLASSIFICATION_MAX_LENGTH
+
 
 class ClassificationDataset(Dataset):
 
-    def __init__(self, tokenizer, inputs, labels=None, max_length=512):
+    def __init__(self, tokenizer, inputs, labels=None, max_length=INPUT_CLASSIFICATION_MAX_LENGTH):
 
         self.inputs = inputs
         self.labels = labels
