@@ -6,6 +6,9 @@ import torch
 from transformers import BartTokenizerFast, BartForConditionalGeneration
 
 
+batch_counter = 0
+
+
 def masked_token_mean(vectors, masks):
 
     denom = torch.sum(masks, -1, keepdim=True)
@@ -43,7 +46,7 @@ class ModelComparison(lit_model.Model):
 
         super().__init__()
         self.tokenizer = BartTokenizerFast.from_pretrained(
-            model_name, model_max_length=600, padding=True, truncation=True,
+            model_name, model_max_length=300, padding=True, truncation=True,
         )
         self.tokenizer.add_special_tokens({'additional_special_tokens': ['<NE>', '</NE>', '<CNTXT>', '</CNTXT>']})
         self.model_cpe = BartForConditionalGeneration.from_pretrained(model_path_cpe)
@@ -52,21 +55,25 @@ class ModelComparison(lit_model.Model):
         self.model_cme.resize_token_embeddings(len(self.tokenizer))
 
     def max_minibatch_size(self):
-        return 12
+        return 4
 
     def predict_minibatch(self, inputs):
+
+        global batch_counter
+        print("Batch number: ", batch_counter)
+        batch_counter += 1
 
         encoded_cpe_input = self.tokenizer.batch_encode_plus(
             [ex["context"] for ex in inputs],
             return_tensors="pt",
-            max_length=200,
+            max_length=300,
             padding="longest",
             truncation=True
         )
         encoded_output = self.tokenizer.batch_encode_plus(
             [ex["description"] for ex in inputs],
             return_tensors="pt",
-            max_length=20,
+            max_length=300,
             padding="longest",
             truncation=True
         )
@@ -109,26 +116,26 @@ class ModelComparison(lit_model.Model):
             "input_ntok_cpe": torch.sum(encoded_cpe_input["attention_mask"], dim=1),
             "target_ids_cpe": encoded_output["input_ids"],
             "target_ntok_cpe": torch.sum(encoded_output["attention_mask"], dim=1),
-            "decoder_layer_1_attention_cpe": out_cpe.decoder_attentions[0],
-            "encoder_layer_1_attention_cpe": out_cpe.encoder_attentions[0],
+            # "decoder_layer_1_attention_cpe": out_cpe.decoder_attentions[0],
+            # "encoder_layer_1_attention_cpe": out_cpe.encoder_attentions[0],
             "encoder_final_embedding_cpe": masked_token_mean(
                 out_cpe.encoder_last_hidden_state, encoded_cpe_input["attention_mask"]),
             'token_embeddings_cpe': out_cpe.encoder_last_hidden_state,
-            'encoder_attentions_cpe': out_cpe.encoder_attentions,
-            'decoder_attentions_cpe': out_cpe.decoder_attentions,
+            # 'encoder_attentions_cpe': out_cpe.encoder_attentions,
+            # 'decoder_attentions_cpe': out_cpe.decoder_attentions,
 
             "probas_cme": torch.nn.functional.softmax(out_cme.logits, dim=-1),
             "input_ids_cme": encoded_cpe_input["input_ids"],
             "input_ntok_cme": torch.sum(encoded_cpe_input["attention_mask"], dim=1),
             "target_ids_cme": encoded_output["input_ids"],
             "target_ntok_cme": torch.sum(encoded_output["attention_mask"], dim=1),
-            "decoder_layer_1_attention_cme": out_cme.decoder_attentions[0],
-            "encoder_layer_1_attention_cme": out_cme.encoder_attentions[0],
+            # "decoder_layer_1_attention_cme": out_cme.decoder_attentions[0],
+            # "encoder_layer_1_attention_cme": out_cme.encoder_attentions[0],
             "encoder_final_embedding_cme": masked_token_mean(
                 out_cme.encoder_last_hidden_state, encoded_cme_input["attention_mask"]),
             'token_embeddings_cme': out_cme.encoder_last_hidden_state,
-            'encoder_attentions_cme': out_cme.encoder_attentions,
-            'decoder_attentions_cme': out_cme.decoder_attentions
+            # 'encoder_attentions_cme': out_cme.encoder_attentions,
+            # 'decoder_attentions_cme': out_cme.decoder_attentions
         }
 
         # TODO: check if this is the right gradient to take
@@ -146,7 +153,7 @@ class ModelComparison(lit_model.Model):
             out_cme.encoder_last_hidden_state,
             grad_outputs=torch.ones_like(scalar_pred_for_gradients_cme))[0]
 
-        detached_outputs = {k: v.detach().cpu().numpy() if type(v) != list else torch.tensor(v).cpu().numpy() for k, v
+        detached_outputs = {k: v.detach().cpu().numpy() if type(v) != list and type(v) != tuple else torch.tensor(v).cpu().numpy() for k, v
                             in
                             batched_outputs.items()}
 
@@ -163,8 +170,8 @@ class ModelComparison(lit_model.Model):
                 output.pop("target_ids_cpe")[1:output_ntok_cpe - 1])
             output["token_grad_sentence_cpe"] = output["input_emb_grad_cpe"][1:input_ntok_cpe - 1]
             output['input_token_embedding_cpe'] = output['token_embeddings_cpe'][1:input_ntok_cpe - 1]
-            output['encoder_layer_1_attention_cpe'] = \
-                output['encoder_layer_1_attention_cpe'][:, 1:input_ntok_cpe - 1, 1:input_ntok_cpe - 1]
+            # output['encoder_layer_1_attention_cpe'] = \
+            #     output['encoder_layer_1_attention_cpe'][:, 1:input_ntok_cpe - 1, 1:input_ntok_cpe - 1]
 
             input_ntok_cme = output.pop("input_ntok_cme")
             output["input_tokens_cme"] = self.tokenizer.convert_ids_to_tokens(
@@ -174,8 +181,8 @@ class ModelComparison(lit_model.Model):
                 output.pop("target_ids_cme")[1:output_ntok_cme - 1])
             output["token_grad_sentence_cme"] = output["input_emb_grad_cme"][1:input_ntok_cme - 1]
             output['input_token_embedding_cme'] = output['token_embeddings_cme'][1:input_ntok_cme - 1]
-            output['encoder_layer_1_attention_cme'] = \
-                output['encoder_layer_1_attention_cme'][:, 1:input_ntok_cme - 1, 1:input_ntok_cme - 1]
+            # output['encoder_layer_1_attention_cme'] = \
+            #     output['encoder_layer_1_attention_cme'][:, 1:input_ntok_cme - 1, 1:input_ntok_cme - 1]
 
             yield output
 
@@ -197,11 +204,11 @@ class ModelComparison(lit_model.Model):
             "token_grad_sentence_cpe": lit_types.TokenGradients(align="input_tokens_cpe",
                                                                 grad_for='input_token_embedding_cpe'),
             "output_text_cpe": lit_types.GeneratedText(parent="description"),
-            "encoder_layer_1_attention_cpe": lit_types.AttentionHeads(align_in="input_tokens_cpe",
-                                                                      align_out="input_tokens_cpe"),
-            "decoder_layer_1_attention_cpe": lit_types.AttentionHeads(align_in="target_tokens_cpe",
-                                                                      align_out="target_tokens_cpe"),
-            "encoder_final_embedding_cpe": lit_types.Embeddings(),
+            # "encoder_layer_1_attention_cpe": lit_types.AttentionHeads(align_in="input_tokens_cpe",
+            #                                                           align_out="input_tokens_cpe"),
+            # "decoder_layer_1_attention_cpe": lit_types.AttentionHeads(align_in="target_tokens_cpe",
+            #                                                           align_out="target_tokens_cpe"),
+            # "encoder_final_embedding_cpe": lit_types.Embeddings(),
 
             "target_text_cme": lit_types.TextSegment(),
             "input_tokens_cme": lit_types.Tokens(),
@@ -210,11 +217,11 @@ class ModelComparison(lit_model.Model):
             "token_grad_sentence_cme": lit_types.TokenGradients(align="input_tokens_cme",
                                                                 grad_for='input_token_embedding_cme'),
             "output_text_cme": lit_types.GeneratedText(parent="description"),
-            "encoder_layer_1_attention_cme": lit_types.AttentionHeads(align_in="input_tokens_cme",
-                                                                      align_out="input_tokens_cme"),
-            "decoder_layer_1_attention_cme": lit_types.AttentionHeads(align_in="target_tokens_cme",
-                                                                      align_out="target_tokens_cme"),
-            "encoder_final_embedding_cme": lit_types.Embeddings()
+            # "encoder_layer_1_attention_cme": lit_types.AttentionHeads(align_in="input_tokens_cme",
+            #                                                           align_out="input_tokens_cme"),
+            # "decoder_layer_1_attention_cme": lit_types.AttentionHeads(align_in="target_tokens_cme",
+            #                                                           align_out="target_tokens_cme"),
+            # "encoder_final_embedding_cme": lit_types.Embeddings()
         }
 
         return spec
