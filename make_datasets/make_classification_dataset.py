@@ -10,7 +10,7 @@ import os
 dirname = os.path.dirname(__file__)
 
 
-def make_classification_dataset(CPE_model_name, CME_model_name, input_file, output_file, delimiter='\1'):
+def make_classification_dataset(CPE_model_name, CME_model_name, input_file, output_file, split, delimiter='\1'):
 
     input_data = pd.read_csv(input_file, delimiter=delimiter).sample(frac=0.2, random_state=42).dropna()
     input_x, input_y = list(input_data['contexts']), list(input_data['entity_description'])
@@ -44,22 +44,48 @@ def make_classification_dataset(CPE_model_name, CME_model_name, input_file, outp
         predictions=CME_preds, references=CME_labels, lang='en', model_type='bert-large-uncased')['f1']
     classification_labels = [1 if cpe >= cme else 0 for cpe, cme in zip(CPE_bert, CME_bert)]
 
-    with open(output_file, 'w') as f:
+    with open(output_file, 'w') as f, open(f'{DATA_PATH}/{split}_classification_t1.csv') as f1, \
+      open(f'{DATA_PATH}/{split}_classification_t2.csv') as f2, open(f'{DATA_PATH}/{split}_classification_t3.csv') as f3, \
+      open(f'{DATA_PATH}/{split}_classification_t4.csv') as f4, open(f'{DATA_PATH}/{split}_classification_t5.csv') as f5:
+
+        columns = ['label', 'title', 'CPE-context', 'CPE-pred', 'CPE-bert',
+                   'CME-context', 'CME-pred', 'CME-bert', 'class-label']
+
         writer = csv.writer(f, delimiter=delimiter)
-        writer.writerow(
-            ['label', 'title', 'CPE-context', 'CPE-pred', 'CPE-bert',
-             'CME-context', 'CME-pred', 'CME-bert', 'class-label']
-        )
+        writer.writerow(columns)
+
+        writer1 = csv.writer(f1, delimiter=delimiter)
+        writer1.writerow(columns)
+        writer2 = csv.writer(f2, delimiter=delimiter)
+        writer2.writerow(columns)
+        writer3 = csv.writer(f3, delimiter=delimiter)
+        writer3.writerow(columns)
+        writer4 = csv.writer(f4, delimiter=delimiter)
+        writer4.writerow(columns)
+        writer5 = csv.writer(f5, delimiter=delimiter)
+        writer5.writerow(columns)
+
         for label, title, cpe_context, cpe_pred, cpe_bert, cme_context, cme_pred, cme_bert, class_label in \
             zip(input_y, list(input_data['entity_name']), CPE_inputs, CPE_preds,
                 CPE_bert, CME_inputs, CME_preds, CME_bert, classification_labels):
-            writer.writerow(
-                [label.replace(delimiter, ''), title.replace(delimiter, ''), cpe_context.replace(delimiter, ''),
-                 cpe_pred.replace(delimiter, ''), cpe_bert, cme_context.replace(delimiter, ''),
-                 cme_pred.replace(delimiter, ''), cme_bert, class_label]
-            )
+
+            row = [label.replace(delimiter, ''), title.replace(delimiter, ''), cpe_context.replace(delimiter, ''),
+                   cpe_pred.replace(delimiter, ''), cpe_bert, cme_context.replace(delimiter, ''),
+                   cme_pred.replace(delimiter, ''), cme_bert, class_label]
+            writer.writerow(row)
+
+            if abs(CPE_bert - CME_bert) >= 0.1:
+                writer1.writerow(row)
+            if abs(CPE_bert - CME_bert) >= 0.2:
+                writer2.writerow(row)
+            if abs(CPE_bert - CME_bert) >= 0.3:
+                writer3.writerow(row)
+            if abs(CPE_bert - CME_bert) >= 0.4:
+                writer4.writerow(row)
+            if abs(CPE_bert - CME_bert) >= 0.5:
+                writer5.writerow(row)
 
 
-make_classification_dataset(CPE_MODEL_NAME, CME_MODEL_NAME, TRAIN_CSV_PATH, TRAIN_CLASSIFICATION_PATH)
-make_classification_dataset(CPE_MODEL_NAME, CME_MODEL_NAME, TEST_CSV_PATH, TEST_CLASSIFICATION_PATH)
-make_classification_dataset(CPE_MODEL_NAME, CME_MODEL_NAME, VAL_CSV_PATH, VAL_CLASSIFICATION_PATH)
+make_classification_dataset(CPE_MODEL_NAME, CME_MODEL_NAME, TRAIN_CSV_PATH, TRAIN_CLASSIFICATION_PATH, 'train')
+make_classification_dataset(CPE_MODEL_NAME, CME_MODEL_NAME, TEST_CSV_PATH, TEST_CLASSIFICATION_PATH, 'test')
+make_classification_dataset(CPE_MODEL_NAME, CME_MODEL_NAME, VAL_CSV_PATH, VAL_CLASSIFICATION_PATH, 'val')
