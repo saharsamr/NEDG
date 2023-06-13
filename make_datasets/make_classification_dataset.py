@@ -44,9 +44,12 @@ def make_classification_dataset(CPE_model_name, CME_model_name, input_file, outp
         predictions=CME_preds, references=CME_labels, lang='en', model_type='bert-large-uncased')['f1']
     classification_labels = [1 if cpe >= cme else 0 for cpe, cme in zip(CPE_bert, CME_bert)]
 
-    with open(output_file, 'w') as f, open(f'{DATA_PATH}/{split}_classification_t1.csv') as f1, \
-      open(f'{DATA_PATH}/{split}_classification_t2.csv') as f2, open(f'{DATA_PATH}/{split}_classification_t3.csv') as f3, \
-      open(f'{DATA_PATH}/{split}_classification_t4.csv') as f4, open(f'{DATA_PATH}/{split}_classification_t5.csv') as f5:
+    with open(output_file, 'w') as f, \
+      open(f'{DATA_PATH}/{split}_classification_t1.csv', 'w') as f1, \
+      open(f'{DATA_PATH}/{split}_classification_t2.csv', 'w') as f2, \
+      open(f'{DATA_PATH}/{split}_classification_t3.csv', 'w') as f3, \
+      open(f'{DATA_PATH}/{split}_classification_t4.csv', 'w') as f4, \
+      open(f'{DATA_PATH}/{split}_classification_t5.csv', 'w') as f5:
 
         columns = ['label', 'title', 'CPE-context', 'CPE-pred', 'CPE-bert',
                    'CME-context', 'CME-pred', 'CME-bert', 'class-label']
