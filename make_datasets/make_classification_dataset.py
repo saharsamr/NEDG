@@ -77,15 +77,15 @@ def make_classification_dataset(CPE_model_name, CME_model_name, input_file, outp
                    cme_pred.replace(delimiter, ''), cme_bert, class_label]
             writer.writerow(row)
 
-            if abs(CPE_bert - CME_bert) >= 0.1:
+            if abs(cpe_bert - cme_bert) >= 0.1:
                 writer1.writerow(row)
-            if abs(CPE_bert - CME_bert) >= 0.2:
+            if abs(cpe_bert - cme_bert) >= 0.2:
                 writer2.writerow(row)
-            if abs(CPE_bert - CME_bert) >= 0.3:
+            if abs(cpe_bert - cme_bert) >= 0.3:
                 writer3.writerow(row)
-            if abs(CPE_bert - CME_bert) >= 0.4:
+            if abs(cpe_bert - cme_bert) >= 0.4:
                 writer4.writerow(row)
-            if abs(CPE_bert - CME_bert) >= 0.5:
+            if abs(cpe_bert - cme_bert) >= 0.5:
                 writer5.writerow(row)
 
 
