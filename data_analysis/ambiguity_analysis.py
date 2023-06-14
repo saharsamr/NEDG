@@ -107,15 +107,21 @@ extract_cardinality_and_popularity(
 )
 
 
-def make_cpe_cme_dataset_for_cardinality_analysis(CPE_model_name, CME_model_name, input_file, output_file, delimiter='\1'):
+def make_cpe_cme_dataset_for_cardinality_analysis(CPE_model_name, CME_model_name, input_file, output_file,
+                                                  delimiter='\1'):
     # Read the file cardinality data json path
     with open(ENTITY_NAME_CARDINALITY_PATH, 'r') as file:
         cardinality = json.load(file)
 
-    # Create contexts and descriptions
-    # TODO: i should replace the correct reading data. this is shit
-    input_data = pd.read_csv(input_file, delimiter=delimiter)
-    input_x, input_y = list(input_data['contexts']), list(input_data['entity_description'])
+    # Create input_x and input_y from the contexts and description fields in the cardinality dictionary
+    input_x = []
+    input_y = []
+    for entity_name, entity_dict in cardinality.items():
+        for entity_title, entity_info in entity_dict.items():
+            if 'description' in entity_info:
+                for context in entity_info['contexts']:
+                    input_x.append(context)
+                    input_y.append(entity_info['description'])
 
     # Train CPE and CME models
     training_args = TrainingArguments(
@@ -137,25 +143,58 @@ def make_cpe_cme_dataset_for_cardinality_analysis(CPE_model_name, CME_model_name
         model_name=CME_model_name, mask_entity=True
     )
 
-    # Create a mapping for the context and entity name in a dataframe
-    df = pd.DataFrame(columns=['context', 'entity_name', 'entity_id'])
+    # Create dataframes for the most popular and second most popular entities for each entity name
+    df_most_popular = pd.DataFrame(
+        columns=['context', 'entity_name', 'entity_id', 'masked_description', 'unmasked_description'])
+    df_second_most_popular = pd.DataFrame(
+        columns=['context', 'entity_name', 'entity_id', 'masked_description', 'unmasked_description'])
+    for entity_name, entity_dict in tqdm(cardinality.items()):
+        # Sort the entities by popularity and get the top two
+        entities_sorted = sorted(entity_dict.items(), key=lambda x: x[1]['popularity'], reverse=True)[:2]
+        entity_most_popular, entity_second_most_popular = entities_sorted
 
-    for entity_name, entity_list in tqdm(cardinality.items()):
-        # Get the top two most popular entities for the current entity name
-        # TODO: entity_popularity from where? I should make it or read it
-        entity_list = sorted(entity_list, key=lambda entity: entity_popularity[entity], reverse=True)[:2]
-
+        # Create a dataframe with the context, entity name, entity ID, masked description, and unmasked description
+        # for the most popular entity
+        df_most_popular_entity = pd.DataFrame(
+            columns=['context', 'entity_name', 'entity_id', 'masked_description', 'unmasked_description'])
         for context in input_x:
-            # Replace the entity name in the context with the current entity from the list
-            for entity_id in entity_list:
+            # Replace the entity name in the context with the most popular entity title
+            context_with_entity = context.replace(entity_name, entity_most_popular[0])
 
-                # Use CPE and CME to generate the masked and unmasked descriptions
-                masked_desc = CME_model.predict(context)
-                unmasked_desc = CPE_model.predict(context)
+            # Use CPE and CME to generate the masked and unmasked descriptions
+            masked_desc = CME_model.predict(context_with_entity)
+            unmasked_desc = CPE_model.predict(context_with_entity)
 
-                # Add the context, entity name, and entity ID to the dataframe
-                df = df.append({'context': context, 'entity_name': entity_name, 'entity_id': entity_id,
-                                'masked_description': masked_desc, 'unmasked_description': unmasked_desc}, ignore_index=True)
+            # Add the context, entity name, entity ID, masked description, and unmasked description to the dataframe
+            df_most_popular_entity = df_most_popular_entity.append({'context': context, 'entity_name': entity_name,
+                                                                    'entity_id': entity_most_popular[0],
+                                                                    'masked_description': masked_desc,
+                                                                    'unmasked_description': unmasked_desc},
+                                                                   ignore_index=True)
 
-    # Save the dataframe to a CSV file
-    df.to_csv(output_file, index=False)
+        # Create a dataframe with the context, entity name, entity ID, masked description, and unmasked description
+        # for the second most popular entity
+        df_second_most_popular_entity = pd.DataFrame(
+            columns=['context', 'entity_name', 'entity_id', 'masked_description', 'unmasked_description'])
+        for context in input_x:
+            # Replace the entity name in the context with the second most popular entity title
+            context_with_entity = context.replace(entity_name, entity_second_most_popular[0])
+
+            # Use CPE and CME to generate the masked and unmasked descriptions
+            masked_desc = CME_model.predict(context_with_entity)
+            unmasked_desc = CPE_model.predict(context_with_entity)
+
+            # Add the context, entity name, entity ID, masked description, and unmasked description to the dataframe
+            df_second_most_popular_entity = df_second_most_popular_entity.append(
+                {'context': context, 'entity_name': entity_name,
+                 'entity_id': entity_second_most_popular[0],
+                 'masked_description': masked_desc,
+                 'unmasked_description': unmasked_desc}, ignore_index=True)
+
+        # Add the dataframes to the final dataframes
+        df_most_popular = pd.concat([df_most_popular, df_most_popular_entity], ignore_index=True)
+        df_second_most_popular = pd.concat([df_second_most_popular, df_second_most_popular_entity], ignore_index=True)
+
+    # Write the dataframes to file
+    df_most_popular.to_csv(output_file + '_most_popular.csv', sep=delimiter, index=False)
+    df_second_most_popular.to_csv(output_file + '_second_most_popular.csv', sep=delimiter, index=False)
