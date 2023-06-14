@@ -5,7 +5,13 @@ from tqdm import tqdm
 from pymongo import MongoClient
 import requests
 import pickle
+import pandas as pd
+import csv
 
+from transformers import TrainingArguments
+from datasets import load_metric
+from data_analysis.config import *
+from GNED.models.BART import BART
 
 from make_datasets.config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
     MONGODB_COLLECTION, MONGODB_READ_BATCH_SIZE, MONGODB_PASSWORD, \
@@ -26,7 +32,6 @@ def extract_file_mentions(file, cardinality):
 
 
 def extract_wikidata_ids(cardinality):
-
     title_set = []
     for k, v in tqdm(cardinality.items()):
         title_set.extend(v)
@@ -50,7 +55,6 @@ def extract_wikidata_ids(cardinality):
 
 
 def extract_page_view(title_to_wikidata_id):
-
     title_to_view = {}
     for title, id_ in title_to_wikidata_id.items():
 
@@ -76,7 +80,6 @@ def extract_page_view(title_to_wikidata_id):
 
 
 def extract_cardinality_and_popularity(train_path, test_path, valid_path):
-
     cardinality = defaultdict(set)
     with open(train_path, 'r') as file:
         cardinality = extract_file_mentions(file, cardinality)
@@ -102,3 +105,57 @@ def extract_cardinality_and_popularity(train_path, test_path, valid_path):
 extract_cardinality_and_popularity(
     TRAIN_JSONL_PATH, TEST_JSONL_PATH, VAL_JSONL_PATH
 )
+
+
+def make_cpe_cme_dataset_for_cardinality_analysis(CPE_model_name, CME_model_name, input_file, output_file, delimiter='\1'):
+    # Read the file cardinality data json path
+    with open(ENTITY_NAME_CARDINALITY_PATH, 'r') as file:
+        cardinality = json.load(file)
+
+    # Create contexts and descriptions
+    # TODO: i should replace the correct reading data. this is shit
+    input_data = pd.read_csv(input_file, delimiter=delimiter)
+    input_x, input_y = list(input_data['contexts']), list(input_data['entity_description'])
+
+    # Train CPE and CME models
+    training_args = TrainingArguments(
+        output_dir=f'{dirname}/../results',
+        logging_dir=LOGGING_DIR,
+        logging_strategy='steps',
+        logging_steps=100,
+    )
+    CPE_model = BART(
+        training_args,
+        input_x, input_y, input_x, input_y, input_x, input_y,
+        load=True, model_load_path=CPE_model_name,
+        model_name=CPE_model_name, mask_entity=False
+    )
+    CME_model = BART(
+        training_args,
+        input_x, input_y, input_x, input_y, input_x, input_y,
+        load=True, model_load_path=CME_model_name,
+        model_name=CME_model_name, mask_entity=True
+    )
+
+    # Create a mapping for the context and entity name in a dataframe
+    df = pd.DataFrame(columns=['context', 'entity_name', 'entity_id'])
+
+    for entity_name, entity_list in tqdm(cardinality.items()):
+        # Get the top two most popular entities for the current entity name
+        # TODO: entity_popularity from where? I should make it or read it
+        entity_list = sorted(entity_list, key=lambda entity: entity_popularity[entity], reverse=True)[:2]
+
+        for context in input_x:
+            # Replace the entity name in the context with the current entity from the list
+            for entity_id in entity_list:
+
+                # Use CPE and CME to generate the masked and unmasked descriptions
+                masked_desc = CME_model.predict(context)
+                unmasked_desc = CPE_model.predict(context)
+
+                # Add the context, entity name, and entity ID to the dataframe
+                df = df.append({'context': context, 'entity_name': entity_name, 'entity_id': entity_id,
+                                'masked_description': masked_desc, 'unmasked_description': unmasked_desc}, ignore_index=True)
+
+    # Save the dataframe to a CSV file
+    df.to_csv(output_file, index=False)

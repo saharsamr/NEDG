@@ -1,6 +1,8 @@
 import os
 dirname = os.path.dirname(__file__)
 
+LOGGING_DIR = f'{dirname}/../logs'
+
 JSONL_PATH = f'{dirname}/../data/wikipedia/wiki_dump.jsonl'
 ENTITY_POPULARITY_PATH = f'{dirname}/../data/entity_popularity.pkl'
 ENTITY_NAME_CARDINALITY_PATH = f'{dirname}/../data/cardinality.json'
