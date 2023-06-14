@@ -11,7 +11,8 @@ from make_datasets.config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
     MONGODB_COLLECTION, MONGODB_READ_BATCH_SIZE, MONGODB_PASSWORD, \
     MONGODB_USERNAME
 from data_analysis.config import ENTITY_NAME_CARDINALITY_PATH, ENTITY_POPULARITY_PATH, \
-    ENTITY_PAGE_VIEW_PATH, ENTITY_WIKIDATA_ID_PATH, TRAIN_JSONL_PATH, TEST_JSONL_PATH, VAL_JSONL_PATH
+    ENTITY_PAGE_VIEW_PATH, ENTITY_WIKIDATA_ID_PATH, TRAIN_JSONL_PATH, TEST_JSONL_PATH, \
+    VAL_JSONL_PATH, CARDINALITY_DATA_JSON_PATH
 
 
 def extract_file_mentions(file, cardinality):
@@ -97,6 +98,38 @@ def extract_cardinality_and_popularity(train_path, test_path, valid_path):
 
     with open(ENTITY_NAME_CARDINALITY_PATH, 'w') as file:
         json.dump(cardinality, file)
+
+
+def extract_entity_specific_context(file_path, json_dump_path):
+
+    with open(file_path, 'r') as file:
+        cardinality = json.load(file)
+
+    cardinality = {k: v for k, v in cardinality.items() if len(v) < 6}
+
+    title_to_entity_info = {}
+    with open(json_dump_path, 'r') as file:
+        for line in file.readlines():
+            data = json.loads(line)
+            title_to_entity_info[data['wikipedia_title']] = data
+
+    cardinality_analysis_data = defaultdict(dict)
+    for entity_name, entity_list in cardinality.items():
+
+        for entity, popularity in entity_list.items():
+
+            entity_contexts = title_to_entity_info[entity]['contexts']
+            entity_contexts = [context for context in entity_contexts if f'<NE>{entity_name}</NE>' in context]
+            entity_description = title_to_entity_info[entity]['wikidata_description']
+
+            cardinality_analysis_data[entity_name][entity] = {
+                'popularity': popularity,
+                'contexts': entity_contexts,
+                'description': entity_description
+            }
+
+    with open(CARDINALITY_DATA_JSON_PATH, 'w') as file:
+        json.dump(cardinality_analysis_data, file)
 
 
 extract_cardinality_and_popularity(

@@ -6,6 +6,7 @@ ENTITY_POPULARITY_PATH = f'{dirname}/../data/entity_popularity.pkl'
 ENTITY_NAME_CARDINALITY_PATH = f'{dirname}/../data/cardinality.json'
 ENTITY_PAGE_VIEW_PATH = f'{dirname}/../data/title_to_view.json'
 ENTITY_WIKIDATA_ID_PATH = f'{dirname}/../data/title_to_wikidata_id.json'
+CARDINALITY_DATA_JSON_PATH = f'{dirname}/../data/cardinality_analysis_data.json'
 
 TRAIN_JSONL_PATH = f'{dirname}/../data/wikipedia/train_wikidata.jsonl'
 TEST_JSONL_PATH = f'{dirname}/../data/wikipedia/test_wikidata.jsonl'
