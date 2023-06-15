@@ -1,4 +1,5 @@
 import json
+import random
 from collections import defaultdict
 import re
 from tqdm import tqdm
@@ -7,6 +8,8 @@ import requests
 import pickle
 import pandas as pd
 import csv
+import random
+random.seed(42)
 
 from transformers import TrainingArguments
 from datasets import load_metric
@@ -91,7 +94,7 @@ def extract_cardinality_and_popularity(train_path, test_path, valid_path):
     with open(valid_path, 'r') as file:
         cardinality = extract_file_mentions(file, cardinality)
 
-    cardinality = {k: list(v) for k, v in tqdm(cardinality.items()) if len(v) > 1}
+    cardinality = {k: list(v) for k, v in tqdm(cardinality.items()) if 1 < len(v) < 6}
     # title_to_wikidata_id = extract_wikidata_ids(cardinality)
 
     with open(ENTITY_POPULARITY_PATH, 'rb') as file:
@@ -117,7 +120,7 @@ def extract_entity_specific_context(file_path, json_dump_path):
             title_to_entity_info[data['wikipedia_title']] = data
 
     cardinality_analysis_data = defaultdict(dict)
-    for entity_name, entity_list in cardinality.items():
+    for entity_name, entity_list in tqdm(cardinality.items()):
 
         for entity, popularity in entity_list.items():
 
@@ -149,29 +152,40 @@ def make_cpe_cme_dataset_for_cardinality_analysis(CPE_model_name, CME_model_name
 
     most_popular_df = pd.DataFrame(columns=['entity_name', 'entity_title', 'context', 'description'])
     second_most_popular_df = pd.DataFrame(columns=['entity_name', 'entity_title', 'context', 'description'])
-    for entity_name, entities_dict in cardinality.items():
+
+    print('Extracting most popular and second most popular entity for each entity name')
+    first_entity_names, first_entity_titles, first_entity_contexts, first_entity_descriptions = [], [], [], []
+    second_entity_names, second_entity_titles, second_entity_contexts, second_entity_descriptions = [], [], [], []
+    for entity_name, entities_dict in tqdm(cardinality.items()):
 
         entities_dict = {k: v for k, v in sorted(entities_dict.items(), key=lambda item: item[1]['popularity'], reverse=True)}
         most_popular_entity = list(entities_dict.keys())[0]
         second_most_popular_entity = list(entities_dict.keys())[1]
-        for context in entities_dict[most_popular_entity]['contexts']:
-            most_popular_df = most_popular_df.append({
-                'entity_name': entity_name,
-                'entity_title': most_popular_entity,
-                'context': context,
-                'description': entities_dict[most_popular_entity]['description']
-            }, ignore_index=True)
-        for context in entities_dict[second_most_popular_entity]['contexts']:
-            second_most_popular_df = second_most_popular_df.append({
-                'entity_name': entity_name,
-                'entity_title': second_most_popular_entity,
-                'context': context,
-                'description': entities_dict[second_most_popular_entity]['description']
-            }, ignore_index=True)
 
+        first_entity_names.append(entity_name)
+        first_entity_titles.append(most_popular_entity)
+        first_entity_contexts.append(random.choice(entities_dict[most_popular_entity]['contexts']))
+        first_entity_descriptions.append(entities_dict[most_popular_entity]['description'])
+
+        second_entity_names.append(entity_name)
+        second_entity_titles.append(second_most_popular_entity)
+        second_entity_contexts.append(random.choice(entities_dict[second_most_popular_entity]['contexts']))
+        second_entity_descriptions.append(entities_dict[second_most_popular_entity]['description'])
+
+    print('Creating dataframes for most popular and second most popular entity for each entity name')
+    most_popular_df['entity_name'] = first_entity_names
+    most_popular_df['entity_title'] = first_entity_titles
+    most_popular_df['context'] = first_entity_contexts
+    most_popular_df['description'] = first_entity_descriptions
+
+    second_most_popular_df['entity_name'] = second_entity_names
+    second_most_popular_df['entity_title'] = second_entity_titles
+    second_most_popular_df['context'] = second_entity_contexts
+    second_most_popular_df['description'] = second_entity_descriptions
+
+    print('Predicting CPE and CME for most popular and second most popular entity for each entity name')
     for df in [most_popular_df, second_most_popular_df]:
-        x = df['context'].values
-        y = df['description'].values
+        x, y = list(df['context']), list(df['description'])
 
         CPE_model = BART(
             training_args,
@@ -196,6 +210,11 @@ def make_cpe_cme_dataset_for_cardinality_analysis(CPE_model_name, CME_model_name
     second_most_popular_df.to_csv(output_file + '_second_most_popular.csv', sep=delimiter, index=False)
 
 
+print('Extracting cardinality and popularity')
+extract_cardinality_and_popularity(TRAIN_JSONL_PATH, TEST_JSONL_PATH, VAL_JSONL_PATH)
+print('Extracting entity specific context')
+extract_entity_specific_context(ENTITY_NAME_CARDINALITY_PATH, JSONL_PATH)
+print('Making CPE and CME dataset for cardinality analysis')
 make_cpe_cme_dataset_for_cardinality_analysis(
     'results/1-context-1epoch-wikidata-CPE',
     'results/1-context-1epoch-wikidata-CME',
