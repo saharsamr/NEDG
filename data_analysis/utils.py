@@ -22,8 +22,8 @@ def compute_correlation(x, y):
 def compute_metrics_for_popularity(df):
 
     descriptions = df['description'].values
-    CPE_preds = df['cpe-pred'].values
-    CME_preds = df['cme-pred'].values
+    CPE_preds = df['cpe_pred'].values
+    CME_preds = df['cme_pred'].values
 
     CPE_preds = [word_tokenize(pred) for pred in CPE_preds]
     CME_preds = [word_tokenize(pred) for pred in CME_preds]
