@@ -22,6 +22,7 @@ from make_datasets.config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
 from data_analysis.config import ENTITY_NAME_CARDINALITY_PATH, ENTITY_POPULARITY_PATH, \
     ENTITY_PAGE_VIEW_PATH, ENTITY_WIKIDATA_ID_PATH, TRAIN_JSONL_PATH, TEST_JSONL_PATH, \
     VAL_JSONL_PATH, CARDINALITY_DATA_JSON_PATH
+from data_analysis.utils import compute_metrics_for_popularity
 
 
 def extract_file_mentions(file, cardinality):
@@ -208,6 +209,15 @@ def make_cpe_cme_dataset_for_cardinality_analysis(CPE_model_name, CME_model_name
 
     most_popular_df.to_csv(output_file + '_most_popular.csv', sep=delimiter, index=False)
     second_most_popular_df.to_csv(output_file + '_second_most_popular.csv', sep=delimiter, index=False)
+
+
+def compare_based_on_popularity(most_popular_df_path, second_most_popular_df_path, delimiter='\1'):
+
+    most_popular_df = pd.read_csv(most_popular_df_path, delimiter=delimiter)
+    second_most_popular_df = pd.read_csv(second_most_popular_df_path, delimiter=delimiter)
+
+    most_popular_df = compute_metrics_for_popularity(most_popular_df)
+    second_most_popular_df = compute_metrics_for_popularity(second_most_popular_df)
 
 
 print('Extracting cardinality and popularity')

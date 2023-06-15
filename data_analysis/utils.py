@@ -19,6 +19,43 @@ def compute_correlation(x, y):
     }
 
 
+def compute_metrics_for_popularity(df):
+
+    descriptions = df['description'].values
+    CPE_preds = df['cpe-pred'].values
+    CME_preds = df['cme-pred'].values
+
+    CPE_preds = [word_tokenize(pred) for pred in CPE_preds]
+    CME_preds = [word_tokenize(pred) for pred in CME_preds]
+    descriptions = [[word_tokenize(description)] for description in descriptions]
+
+    CPE_bert = compute_bertscore(CPE_preds, descriptions)
+    CME_bert = compute_bertscore(CME_preds, descriptions)
+
+    CPE_bleu = [
+        compute_bleu([cpe_pred], [cpe_label], 1) for
+        cpe_pred, cpe_label in tqdm(zip(CPE_preds, descriptions), total=len(CPE_preds))]
+    CME_bleu = [
+        compute_bleu([cme_pred], [cme_label], 1) for
+        cme_pred, cme_label in tqdm(zip(CME_preds, descriptions), total=len(CME_preds))]
+
+    CPE_rouge = [
+        compute_rouge([cpe_pred], [cpe_label]) for
+        cpe_pred, cpe_label in tqdm(zip(CPE_preds, descriptions), total=len(CPE_preds))]
+    CME_rouge = [
+        compute_rouge([cme_pred], [cme_label]) for
+        cme_pred, cme_label in tqdm(zip(CME_preds, descriptions), total=len(CME_preds))]
+
+    df['CPE-bert'] = CPE_bert
+    df['CME-bert'] = CME_bert
+    df['CPE-bleu'] = CPE_bleu
+    df['CME-bleu'] = CME_bleu
+    df['CPE-rouge'] = CPE_rouge
+    df['CME-rouge'] = CME_rouge
+
+    return df
+
+
 def compute_metrics(classification_result):
 
     metrics = {}
@@ -130,4 +167,4 @@ def compute_bertscore(preds, labels):
         predictions=preds, references=labels, lang='en', model_type='bert-base-uncased'
     )
 
-    return bertscore_output
+    return bertscore_output['f1']
