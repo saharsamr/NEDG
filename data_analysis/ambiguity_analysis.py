@@ -211,13 +211,16 @@ def make_cpe_cme_dataset_for_cardinality_analysis(CPE_model_name, CME_model_name
     second_most_popular_df.to_csv(output_file + '_second_most_popular.csv', sep=delimiter, index=False)
 
 
-def compare_based_on_popularity(most_popular_df_path, second_most_popular_df_path, delimiter='\1'):
+def add_metrics(most_popular_df_path, second_most_popular_df_path, delimiter='\1'):
 
     most_popular_df = pd.read_csv(most_popular_df_path, delimiter=delimiter)
     second_most_popular_df = pd.read_csv(second_most_popular_df_path, delimiter=delimiter)
 
     most_popular_df = compute_metrics_for_popularity(most_popular_df)
     second_most_popular_df = compute_metrics_for_popularity(second_most_popular_df)
+
+    most_popular_df.to_csv(most_popular_df_path, sep=delimiter, index=False)
+    second_most_popular_df.to_csv(second_most_popular_df_path, sep=delimiter, index=False)
 
 
 print('Extracting cardinality and popularity')
@@ -230,3 +233,5 @@ make_cpe_cme_dataset_for_cardinality_analysis(
     'results/1-context-1epoch-wikidata-CME',
     CARDINALITY_DATA_JSON_PATH, 'comparison'
 )
+print('Adding metrics')
+add_metrics('comparison_most_popular.csv', 'comparison_second_most_popular.csv')

@@ -156,7 +156,7 @@ def compute_bleu(preds, labels, max_order):
 def compute_rouge(preds, labels):
     rouge_output = rouge_metric.compute(
         predictions=preds, references=labels,
-        rouge_types=['rouge1', 'rouge2', 'rouge3', 'rouge4', 'rougeL', 'rougeLsum']
+        rouge_types=['rougeL']
     )
 
     return rouge_output['rougeL'][1][2]
