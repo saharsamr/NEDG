@@ -1,5 +1,4 @@
 import json
-import random
 from collections import defaultdict
 import re
 from tqdm import tqdm
@@ -7,22 +6,18 @@ from pymongo import MongoClient
 import requests
 import pickle
 import pandas as pd
-import csv
 import random
 random.seed(42)
 
 from transformers import TrainingArguments
-from datasets import load_metric
-from data_analysis.config import *
-from GNED.models.BART import BART
 
+from GNED.models.BART import BART
+from data_analysis.config import *
 from make_datasets.config import MONGODB_LINK, MONGODB_PORT, MONGODB_DATABASE, \
     MONGODB_COLLECTION, MONGODB_READ_BATCH_SIZE, MONGODB_PASSWORD, \
     MONGODB_USERNAME
-from data_analysis.config import ENTITY_NAME_CARDINALITY_PATH, ENTITY_POPULARITY_PATH, \
-    ENTITY_PAGE_VIEW_PATH, ENTITY_WIKIDATA_ID_PATH, TRAIN_JSONL_PATH, TEST_JSONL_PATH, \
-    VAL_JSONL_PATH, CARDINALITY_DATA_JSON_PATH
 from data_analysis.utils import compute_metrics_for_popularity
+from data_analysis.data_plots import violin_plot_for_popularity
 
 
 def extract_file_mentions(file, cardinality):
@@ -235,3 +230,5 @@ make_cpe_cme_dataset_for_cardinality_analysis(
 )
 print('Adding metrics')
 add_metrics('comparison_most_popular.csv', 'comparison_second_most_popular.csv')
+print('Plotting the results')
+violin_plot_for_popularity('comparison_most_popular.csv', 'comparison_second_most_popular.csv')

@@ -1,6 +1,8 @@
 import json
 
 import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
 import numpy as np
 
 
@@ -93,5 +95,40 @@ def plot_correlation(first, second, x_label, y_label):
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     plt.savefig(y_label)
+
+
+def violin_plot_for_popularity(most_popular_df_path, second_most_popular_df_path, delimiter='\1'):
+
+    def add_dataframes_vertically(df, popularity_level, plot_df):
+
+        popularity = [popularity_level] * len(most_popular_df)
+
+        bert_diff = df['CPE_bert'] - df['CME_bert']
+        plot_df = pd.concat([plot_df, pd.DataFrame(
+            {'Popularity': popularity, 'Metric Difference': bert_diff,
+             'Metric': ['BertScore'] * len(most_popular_df)})])
+
+        bleu_diff = most_popular_df['CPE_bleu'] - most_popular_df['CME_bleu']
+        plot_df = pd.concat([plot_df, pd.DataFrame(
+            {'Popularity': popularity, 'Metric Difference': bleu_diff,
+             'Metric': ['BLEU'] * len(most_popular_df)})])
+
+        rouge_diff = most_popular_df['CPE_rouge'] - most_popular_df['CME_rouge']
+        plot_df = pd.concat([plot_df, pd.DataFrame(
+            {'Popularity': popularity, 'Metric Difference': rouge_diff,
+             'Metric': ['ROUGE'] * len(most_popular_df)})])
+
+        return plot_df
+
+    most_popular_df = pd.read_csv(most_popular_df_path, delimiter=delimiter)
+    second_most_popular_df = pd.read_csv(second_most_popular_df_path, delimiter=delimiter)
+
+    plot_df = pd.DataFrame(columns=['popularity', 'score-difference', 'score-type'])
+
+    plot_df = add_dataframes_vertically(most_popular_df, 'Most Popular Entity', plot_df)
+    plot_df = add_dataframes_vertically(second_most_popular_df, 'Second Most Popular Entity', plot_df)
+
+    sns.violinplot(data=plot_df, x='Metric', y='Metric Difference', hue='Popularity', split=True)
+    plt.savefig('violin_plot_for_popularity.svg')
 
 
