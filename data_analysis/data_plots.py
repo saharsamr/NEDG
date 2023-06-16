@@ -101,29 +101,34 @@ def violin_plot_for_popularity(most_popular_df_path, second_most_popular_df_path
 
     def add_dataframes_vertically(df, popularity_level, plot_df):
 
-        popularity = [popularity_level] * len(most_popular_df)
+        popularity = [popularity_level] * len(df)
 
-        bert_diff = df['CPE_bert'] - df['CME_bert']
+        bert_diff = df['CPE-bert'] - df['CME-bert']
         plot_df = pd.concat([plot_df, pd.DataFrame(
             {'Popularity': popularity, 'Metric Difference': bert_diff,
-             'Metric': ['BertScore'] * len(most_popular_df)})])
+             'Metric': ['BertScore'] * len(df)})])
 
-        bleu_diff = most_popular_df['CPE_bleu'] - most_popular_df['CME_bleu']
+        bleu_diff = df['CPE-bleu'] - df['CME-bleu']
         plot_df = pd.concat([plot_df, pd.DataFrame(
             {'Popularity': popularity, 'Metric Difference': bleu_diff,
-             'Metric': ['BLEU'] * len(most_popular_df)})])
+             'Metric': ['BLEU'] * len(df)})])
 
-        rouge_diff = most_popular_df['CPE_rouge'] - most_popular_df['CME_rouge']
+        rouge_diff = df['CPE-rouge'] - df['CME-rouge']
         plot_df = pd.concat([plot_df, pd.DataFrame(
             {'Popularity': popularity, 'Metric Difference': rouge_diff,
-             'Metric': ['ROUGE'] * len(most_popular_df)})])
+             'Metric': ['ROUGE'] * len(df)})])
 
         return plot_df
 
     most_popular_df = pd.read_csv(most_popular_df_path, delimiter=delimiter)
     second_most_popular_df = pd.read_csv(second_most_popular_df_path, delimiter=delimiter)
+    print(len(most_popular_df), len(second_most_popular_df))
 
-    plot_df = pd.DataFrame(columns=['popularity', 'score-difference', 'score-type'])
+    most_popular_df = most_popular_df[most_popular_df['entity_name'].isin(second_most_popular_df['entity_name'])]
+    second_most_popular_df = second_most_popular_df[second_most_popular_df['entity_name'].isin(most_popular_df['entity_name'])]
+    print(len(most_popular_df), len(second_most_popular_df))
+
+    plot_df = pd.DataFrame(columns=['Popularity', 'Metric Difference', 'Metric'])
 
     plot_df = add_dataframes_vertically(most_popular_df, 'Most Popular Entity', plot_df)
     plot_df = add_dataframes_vertically(second_most_popular_df, 'Second Most Popular Entity', plot_df)

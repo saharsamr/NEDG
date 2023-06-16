@@ -210,6 +210,10 @@ def add_metrics(most_popular_df_path, second_most_popular_df_path, delimiter='\1
 
     most_popular_df = pd.read_csv(most_popular_df_path, delimiter=delimiter)
     second_most_popular_df = pd.read_csv(second_most_popular_df_path, delimiter=delimiter)
+    print(len(most_popular_df), len(second_most_popular_df))
+    most_popular_df = most_popular_df[most_popular_df['description'] != ''].dropna()
+    second_most_popular_df = second_most_popular_df[second_most_popular_df['description'] != ''].dropna()
+    print(len(most_popular_df), len(second_most_popular_df))
 
     most_popular_df = compute_metrics_for_popularity(most_popular_df)
     second_most_popular_df = compute_metrics_for_popularity(second_most_popular_df)

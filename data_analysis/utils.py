@@ -1,6 +1,5 @@
 from datasets import load_metric
 from nltk.tokenize import word_tokenize
-import matplotlib.pyplot as plt
 import scipy.stats
 import numpy as np
 from tqdm import tqdm
@@ -21,9 +20,9 @@ def compute_correlation(x, y):
 
 def compute_metrics_for_popularity(df):
 
-    descriptions = df['description'].values
-    CPE_preds = df['cpe_pred'].values
-    CME_preds = df['cme_pred'].values
+    descriptions = df['description']
+    CPE_preds = df['cpe_pred']
+    CME_preds = df['cme_pred']
 
     CPE_preds = [word_tokenize(pred) for pred in CPE_preds]
     CME_preds = [word_tokenize(pred) for pred in CME_preds]
@@ -146,18 +145,26 @@ def compute_metrics_for_every_fraction(df):
 
 
 def compute_bleu(preds, labels, max_order):
-    bleu_output = bleu_metric.compute(
-        predictions=preds, references=labels, max_order=max_order
-    )
+    try:
+        bleu_output = bleu_metric.compute(
+            predictions=preds, references=labels, max_order=max_order
+        )
+    except:
+        print('Zero Devision in Bleu', preds, labels)
+        return 0
 
     return bleu_output['bleu']
 
 
 def compute_rouge(preds, labels):
-    rouge_output = rouge_metric.compute(
-        predictions=preds, references=labels,
-        rouge_types=['rougeL']
-    )
+    try:
+        rouge_output = rouge_metric.compute(
+            predictions=preds, references=labels,
+            rouge_types=['rougeL']
+        )
+    except:
+        print('Zero Devision in Rouge', preds, labels)
+        return 0
 
     return rouge_output['rougeL'][1][2]
 
