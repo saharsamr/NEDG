@@ -13,6 +13,9 @@ dirname = os.path.dirname(__file__)
 def make_classification_dataset(CPE_model_name, CME_model_name, input_file, output_file, split, delimiter='\1'):
 
     input_data = pd.read_csv(input_file, delimiter=delimiter).sample(frac=0.05, random_state=42)
+    print(f'input-data length before dropping non values: {len(input_data)}')
+    input_data = input_data.dropna()
+    print(f'input-data length after dropping non values: {len(input_data)}')
     input_x, input_y = list(input_data['contexts']), list(input_data['entity_description'])
 
     training_args = TrainingArguments(
