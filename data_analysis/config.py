@@ -17,3 +17,6 @@ VAL_JSONL_PATH = f'{dirname}/../data/wikipedia/val_wikidata.jsonl'
 ENTITY_ALIASES_DICT_PATH = f'{dirname}/../data/entity_aliases.pkl'
 ENTITY_CARDINALITY_PATH = f'{dirname}/../data/cardinality.pkl'
 CLASSIFICATION_RESULT_PATH = f'{dirname}/../results/1-context-4epoch-wikidata-con+pred1+pred2-classification-9500/test_result_df.pkl'
+
+TEST_CLASSIFICATION_FILE = f'{dirname}/../results/1-context-classification-test.csv'
+TEST_ANALYSIS_FILE = f'{dirname}/../results/1-context-classification-test-analysis.csv'
