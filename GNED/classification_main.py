@@ -54,9 +54,10 @@ def classification_main():
         logging_steps=100,
         evaluation_strategy='steps',
         do_eval=True,
-        eval_steps=500,
+        eval_steps=1000,
         load_best_model_at_end=True,
         save_strategy='steps',
+        save_steps=1000,
         save_total_limit=5
     )
 
