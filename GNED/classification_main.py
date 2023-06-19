@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 
 from GNED.utils.save_data import save_classification_prediction
-from GNED.models.BERTBinaryClassifier import BERTBinaryClassification
+from GNED.models.Classifier import SequenceClassifier
 from GNED.utils.metrics import evaluate_classification
 from GNED.config import \
     TRAIN_CLASSIFICATION_FILE, TEST_CLASSIFICATION_FILE, VALID_CLASSIFICATION_FILE,\
@@ -50,7 +50,7 @@ def classification_main():
     )
 
     print('Initialing the model...')
-    model = BERTBinaryClassification(
+    model = SequenceClassifier(
         training_args,
         train_x, train_y,
         test_x, test_y,

@@ -1,5 +1,6 @@
 from transformers import Trainer
-from transformers import BertTokenizer, BertForSequenceClassification
+from transformers import BertTokenizer, BertForSequenceClassification, \
+    RobertaTokenizer, RobertaForSequenceClassification
 from datasets import load_metric
 from transformers.optimization import AdamW
 from torch.utils.data import DataLoader
@@ -19,7 +20,7 @@ def compute_metrics(eval_preds):
     return metric.compute(predictions=predictions, references=labels)
 
 
-class BERTBinaryClassification:
+class SequenceClassifier:
 
     def __init__(
       self, training_args,
@@ -29,13 +30,27 @@ class BERTBinaryClassification:
       load=False
     ):
 
-        self.tokenizer = BertTokenizer.from_pretrained(MODEL_CLASSIFICATION_NAME, problem_type='binary_classification',
-                                                       max_lenght=INPUT_CLASSIFICATION_MAX_LENGTH)
+        if 'bert' in MODEL_CLASSIFICATION_NAME:
+            self.tokenizer = BertTokenizer.from_pretrained(
+                MODEL_CLASSIFICATION_NAME, problem_type='binary_classification',
+                max_lenght=INPUT_CLASSIFICATION_MAX_LENGTH)
+        elif 'roberta' in MODEL_CLASSIFICATION_NAME:
+            self.tokenizer = RobertaTokenizer.from_pretrained(
+                MODEL_CLASSIFICATION_NAME, problem_type='binary_classification',
+                max_lenght=INPUT_CLASSIFICATION_MAX_LENGTH)
         self.tokenizer.add_special_tokens({'additional_special_tokens': CLASSIFICATION_SPECIAL_TOKENS})
+
         if not load:
-            self.model = BertForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_NAME, num_labels=2)
+            if 'bert' in MODEL_CLASSIFICATION_NAME:
+                self.model = BertForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_NAME, num_labels=2)
+            elif 'roberta' in MODEL_CLASSIFICATION_NAME:
+                self.model = RobertaForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_NAME, num_labels=2)
         else:
-            self.model = BertForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_PATH, num_labels=2)
+            if 'bert' in MODEL_CLASSIFICATION_NAME:
+                self.model = BertForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_PATH, num_labels=2)
+            elif 'roberta' in MODEL_CLASSIFICATION_NAME:
+                self.model = RobertaForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_PATH, num_labels=2)
+
         self.model.resize_token_embeddings(len(self.tokenizer))
         self.model.model_max_length = INPUT_CLASSIFICATION_MAX_LENGTH
         self.model.cuda()
@@ -58,11 +73,18 @@ class BERTBinaryClassification:
 
     def set_learnable_params(self, freeze_encoder=True):
 
-        for param in self.model.bert.parameters():
-            param.requires_grad = not freeze_encoder
-        for name, param in self.model.bert.named_parameters():
-            if name.startswith('embeddings'):
-                param.requires_grad = True
+        if 'bert' in MODEL_CLASSIFICATION_NAME:
+            for param in self.model.bert.parameters():
+                param.requires_grad = not freeze_encoder
+            for name, param in self.model.bert.named_parameters():
+                if name.startswith('embeddings'):
+                    param.requires_grad = True
+        elif 'roberta' in MODEL_CLASSIFICATION_NAME:
+            for param in self.model.roberta.parameters():
+                param.requires_grad = not freeze_encoder
+            for name, param in self.model.roberta.named_parameters():
+                if name.startswith('embeddings'):
+                    param.requires_grad = True
 
     def train(self):
         self.trainer.train()
