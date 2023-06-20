@@ -18,9 +18,9 @@ def classification_main():
     # col_names = ['label', 'title', 'CPE-context', 'CPE-pred', 'CPE-bert',
     #              'CME-context', 'CME-pred', 'CME-bert', 'class-label']
 
-    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='\1')
-    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1')
-    valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='\1')
+    train = pd.read_csv(TRAIN_CLASSIFICATION_FILE, delimiter='\1').dropna()
+    test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1').dropna()
+    valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='\1').dropna()
 
     print(len(train[train['class-label'] == 0]), len(train[train['class-label'] == 1]))
     print(len(test[test['class-label'] == 0]), len(test[test['class-label'] == 1]))
