@@ -42,6 +42,13 @@ data = add_popularity(data)
 data = add_popularity_log(data)
 data.to_csv(TEST_ANALYSIS_FILE, sep='\1', index=False)
 for metric in ['bert', 'bleu', 'rouge']:
-    plot_properties_in_CPE_CME(TEST_ANALYSIS_FILE, 'description_length', metric, xlim=(0, 20))
-    plot_properties_in_CPE_CME(TEST_ANALYSIS_FILE, 'description_context_overlap_ratio', metric, xlim=(0, 1))
-    plot_properties_in_CPE_CME(TEST_ANALYSIS_FILE, 'popularity_log', metric, xlim=(0, 6.5))
+    plot_properties_in_CPE_CME(data, 'description_length', metric, xlim=(0, 20))
+    plot_properties_in_CPE_CME(data, 'description_context_overlap_ratio', metric, xlim=(0, 1))
+    plot_properties_in_CPE_CME(data, 'popularity_log', metric, xlim=(0, 6.5))
+
+mean_popularity = data['popularity'].mean()
+popular = data[data['popularity'] > mean_popularity]
+unpopular = data[data['popularity'] <= mean_popularity]
+for metric in ['bert', 'bleu', 'rouge']:
+    plot_properties_in_CPE_CME(popular, 'popularity_log', metric, xlim=(0, 6.5), title='popular')
+    plot_properties_in_CPE_CME(unpopular, 'popularity_log', metric, xlim=(0, 6.5), title='unpopular')

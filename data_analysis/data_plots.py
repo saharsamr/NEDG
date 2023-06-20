@@ -154,6 +154,6 @@ def plot_properties_in_CPE_CME(data, property_name, metric_name, xlim=None, titl
     plt.xlabel(property_name)
     plt.legend()
     if title:
-        plt.savefig(f'{title}.svg')
+        plt.savefig(f'{title}_{property_name}_{metric_name}.svg')
     else:
         plt.savefig(f'{property_name}_{metric_name}.svg')
