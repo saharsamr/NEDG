@@ -47,6 +47,8 @@ def compute_generation_metrics(predictions, references):
 
 def evaluate_classification(test_df):
 
+    print('statistics:', len(test_df[test_df['class-pred'] == 1]), len(test_df[test_df['class-pred'] == 0]))
+
     print('accuracy: ', accuracy_score(test_df['class-label'], test_df['class-pred']))
     print('avg precision score: ', average_precision_score(test_df['class-label'], test_df['class-pred']))
     print('f1 score: ', f1_score(test_df['class-label'], test_df['class-pred']))
