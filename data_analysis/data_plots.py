@@ -137,7 +137,7 @@ def violin_plot_for_popularity(most_popular_df_path, second_most_popular_df_path
     plt.savefig('violin_plot_for_popularity.svg')
 
 
-def plot_properties_in_CPE_CME(data, property_name, metric_name, xlim=None):
+def plot_properties_in_CPE_CME(data, property_name, metric_name, xlim=None, title=None):
 
     plt.figure()
     plt.subplot(2, 1, 1)
@@ -153,4 +153,7 @@ def plot_properties_in_CPE_CME(data, property_name, metric_name, xlim=None):
     plt.ylabel('CME-'+metric_name)
     plt.xlabel(property_name)
     plt.legend()
-    plt.savefig(f'{property_name}_{metric_name}.svg')
+    if title:
+        plt.savefig(f'{title}.svg')
+    else:
+        plt.savefig(f'{property_name}_{metric_name}.svg')
