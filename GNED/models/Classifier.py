@@ -13,8 +13,10 @@ from GNED.config import CLASSIFICATION_SPECIAL_TOKENS, MODEL_CLASSIFICATION_PATH
     TEST_CLASSIFICATION_BATCH_SIZE, MODEL_CLASSIFICATION_NAME, INPUT_CLASSIFICATION_MAX_LENGTH
 
 
+metric = load_metric('accuracy')
+
+
 def compute_metrics(eval_preds):
-    metric = load_metric('accuracy')
     logits, labels = eval_preds
     predictions = np.argmax(logits, axis=-1)
     return metric.compute(predictions=predictions, references=labels)
@@ -30,26 +32,26 @@ class SequenceClassifier:
       load=False
     ):
 
-        if 'bert' in MODEL_CLASSIFICATION_NAME:
-            self.tokenizer = BertTokenizer.from_pretrained(
+        if 'roberta' in MODEL_CLASSIFICATION_NAME:
+            self.tokenizer = RobertaTokenizer.from_pretrained(
                 MODEL_CLASSIFICATION_NAME, problem_type='binary_classification',
                 max_lenght=INPUT_CLASSIFICATION_MAX_LENGTH)
-        elif 'roberta' in MODEL_CLASSIFICATION_NAME:
-            self.tokenizer = RobertaTokenizer.from_pretrained(
+        else:
+            self.tokenizer = BertTokenizer.from_pretrained(
                 MODEL_CLASSIFICATION_NAME, problem_type='binary_classification',
                 max_lenght=INPUT_CLASSIFICATION_MAX_LENGTH)
         self.tokenizer.add_special_tokens({'additional_special_tokens': CLASSIFICATION_SPECIAL_TOKENS})
 
         if not load:
-            if 'bert' in MODEL_CLASSIFICATION_NAME:
-                self.model = BertForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_NAME, num_labels=2)
-            elif 'roberta' in MODEL_CLASSIFICATION_NAME:
+            if 'roberta' in MODEL_CLASSIFICATION_NAME:
                 self.model = RobertaForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_NAME, num_labels=2)
+            else:
+                self.model = BertForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_NAME, num_labels=2)
         else:
-            if 'bert' in MODEL_CLASSIFICATION_NAME:
-                self.model = BertForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_PATH, num_labels=2)
-            elif 'roberta' in MODEL_CLASSIFICATION_NAME:
+            if 'roberta' in MODEL_CLASSIFICATION_NAME:
                 self.model = RobertaForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_PATH, num_labels=2)
+            else:
+                self.model = BertForSequenceClassification.from_pretrained(MODEL_CLASSIFICATION_PATH, num_labels=2)
 
         self.model.resize_token_embeddings(len(self.tokenizer))
         self.model.model_max_length = INPUT_CLASSIFICATION_MAX_LENGTH
@@ -61,7 +63,7 @@ class SequenceClassifier:
         self.valid_dataset = ClassificationDataset(self.tokenizer, valid_x, valid_y)
 
         self.optimizer = AdamW(self.model.parameters(), lr=LEARNING_RATE)
-        accuracy = load_metric('accuracy')
+
         self.trainer = Trainer(
             model=self.model, args=training_args,
             tokenizer=self.tokenizer,
@@ -73,16 +75,17 @@ class SequenceClassifier:
 
     def set_learnable_params(self, freeze_encoder=True):
 
-        if 'bert' in MODEL_CLASSIFICATION_NAME:
-            for param in self.model.bert.parameters():
-                param.requires_grad = not freeze_encoder
-            for name, param in self.model.bert.named_parameters():
-                if name.startswith('embeddings'):
-                    param.requires_grad = True
-        elif 'roberta' in MODEL_CLASSIFICATION_NAME:
+        if 'roberta' in MODEL_CLASSIFICATION_NAME:
             for param in self.model.roberta.parameters():
                 param.requires_grad = not freeze_encoder
             for name, param in self.model.roberta.named_parameters():
+                if name.startswith('embeddings'):
+                    param.requires_grad = True
+
+        else:
+            for param in self.model.bert.parameters():
+                param.requires_grad = not freeze_encoder
+            for name, param in self.model.bert.named_parameters():
                 if name.startswith('embeddings'):
                     param.requires_grad = True
 

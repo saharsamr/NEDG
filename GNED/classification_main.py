@@ -22,6 +22,10 @@ def classification_main():
     test = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1')
     valid = pd.read_csv(VALID_CLASSIFICATION_FILE, delimiter='\1')
 
+    print(len(train[train['class-label'] == 0]), len(train[train['class-label'] == 1]))
+    print(len(test[test['class-label'] == 0]), len(test[test['class-label'] == 1]))
+    print(len(valid[valid['class-label'] == 0]), len(valid[valid['class-label'] == 1]))
+
     train['text'] = train['CME-context'] + "[SEC]" + train['CME-pred'] + "[SEC]" + train['CPE-pred']
     test['text'] = test['CME-context'] + "[SEC]" + test['CME-pred'] + "[SEC]" + test['CPE-pred']
     valid['text'] = valid['CME-context'] + "[SEC]" + valid['CME-pred'] + "[SEC]" + valid['CPE-pred']
