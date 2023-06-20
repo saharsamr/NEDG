@@ -137,12 +137,21 @@ def violin_plot_for_popularity(most_popular_df_path, second_most_popular_df_path
     plt.savefig('violin_plot_for_popularity.svg')
 
 
-def plot_properties_in_CPE_CME(data_path, property_name, metric_name):
+def plot_properties_in_CPE_CME(data_path, property_name, metric_name, xlim=None):
 
+    plt.figure()
     data = pd.read_csv(data_path, delimiter='\1')
-    plt.scatter(data[property_name], data['CPE-'+metric_name], label='CPE')
-    plt.scatter(data[property_name], data['CME-'+metric_name], label='CME')
+    plt.subplot(2, 1, 1)
+    res = sns.kdeplot(x=data[property_name], y=data['CPE-'+metric_name], color='red', fill=True, alpha=0.5)
+    plt.xlim(xlim)
+    plt.ylim(0, 1)
+    plt.ylabel('CPE-'+metric_name)
+    plt.xlabel('')
+    plt.subplot(2, 1, 2)
+    res = sns.kdeplot(x=data[property_name], y=data['CME-'+metric_name], color='blue', fill=True, alpha=0.5)
+    plt.xlim(xlim)
+    plt.ylim(0, 1)
+    plt.ylabel('CME-'+metric_name)
     plt.xlabel(property_name)
-    plt.ylabel(metric_name)
     plt.legend()
     plt.savefig(f'{property_name}_{metric_name}.svg')
