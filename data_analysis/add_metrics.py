@@ -39,5 +39,8 @@ def add_bleu_rouge(df):
 
 
 data = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1')
+print(len(data))
+data = data.dropna()
+print(len(data))
 data = add_bleu_rouge(data)
 data.to_csv(TEST_ANALYSIS_FILE, sep='\1', index=False)

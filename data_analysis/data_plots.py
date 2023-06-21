@@ -157,3 +157,38 @@ def plot_properties_in_CPE_CME(data, property_name, metric_name, xlim=None, titl
         plt.savefig(f'{title}_{property_name}_{metric_name}.svg')
     else:
         plt.savefig(f'{property_name}_{metric_name}.svg')
+
+
+def plot_metric_kde(data, metric_name, title=None):
+
+    plt.figure()
+    sns.kdeplot(data['CPE-'+metric_name], color='red', fill=True, alpha=0.5, label='CPE')
+    sns.kdeplot(data['CME-' + metric_name], color='blue', fill=True, alpha=0.5, label='CME')
+    plt.ylabel('Density')
+    plt.xlabel(metric_name)
+    plt.legend()
+    if title:
+        plt.savefig(f'{title}_{metric_name}.svg')
+    else:
+        plt.savefig(f'{metric_name}.svg')
+
+
+def plot_metric_differences(d1, d2, metric_name, title=None):
+
+    plt.figure()
+    sns.kdeplot(d1, color='red', fill=True, alpha=0.5, label='popular')
+    sns.kdeplot(d2, color='blue', fill=True, alpha=0.5, label='unpopular')
+
+    plt.ylabel('Density')
+    plt.xlabel(f'CPE and CME {metric_name} difference (CPE-CME)')
+    plt.legend()
+
+    plt.savefig(f'{title}-{metric_name}_popular_vs_unpopular.svg')
+
+
+def box_plot(df):
+    # pallete = {'popular': 'red', 'unpopular': 'bleu'}
+    sns.boxplot(data=df, x='metric', y='difference', hue='popularity')
+    plt.xlabel('metric')
+    plt.ylabel('CPE and CME differnce')
+    plt.savefig('boxplot.svg')
