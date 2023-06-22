@@ -1,8 +1,10 @@
+import random
+
 from torch.utils.data import Dataset
 import torch
 import re
 
-from GNED.config import INPUT_GENERATION_MAX_LENGTH, OUTPUT_GENERATION_MAX_LENGTH
+from GNED.config import *
 
 
 class WikiDataset(Dataset):
@@ -49,7 +51,7 @@ class WikiDataset(Dataset):
             self.labels[idx], padding='max_length', truncation=True, max_length=OUTPUT_GENERATION_MAX_LENGTH)
         input_text = self.inputs[idx]
 
-        if self.mask_entity:
+        if self.mask_entity and random.random() < MASK_PROB:
             input_encodings['input_ids'], input_encodings['attention_mask'], input_text = \
                 self.masking_entities(input_encodings['input_ids'], input_encodings['attention_mask'], self.inputs[idx])
 
