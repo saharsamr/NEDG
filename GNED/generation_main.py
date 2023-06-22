@@ -13,11 +13,11 @@ from GNED.config import \
 
 def generation_main():
 
-    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1').sample(frac=0.05, random_state=42)
+    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
     print('train size before dropping NaNs: ', len(train))
-    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1').sample(frac=0.05, random_state=42)
+    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
     print('test size before dropping NaNs: ', len(test))
-    valid = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1').sample(frac=0.05, random_state=42)
+    valid = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
     print('valid size before dropping NaNs: ', len(valid))
 
     train = train.dropna()
