@@ -186,9 +186,17 @@ def plot_metric_differences(d1, d2, metric_name, title=None):
     plt.savefig(f'{title}-{metric_name}_popular_vs_unpopular.svg')
 
 
-def box_plot(df):
-    # pallete = {'popular': 'red', 'unpopular': 'bleu'}
-    sns.boxplot(data=df, x='metric', y='difference', hue='popularity')
+def metric_difference_box_plot(df):
+    plt.figure(figsize=(10, 5))
+    sns.boxplot(data=df, x='metric', y='value', hue='popularity')
     plt.xlabel('metric')
     plt.ylabel('CPE and CME differnce')
     plt.savefig('boxplot.svg')
+
+
+def models_box_plot(df, title):
+    plt.figure(figsize=(10, 5))
+    sns.boxplot(data=df, x='metric', y='value', hue='model')
+    plt.xlabel('metric')
+    plt.ylabel('metric value')
+    plt.savefig(f'{title}_models_boxplot.svg')

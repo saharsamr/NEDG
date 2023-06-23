@@ -4,7 +4,8 @@ import pandas as pd
 from scipy.stats import ttest_ind
 
 from data_analysis.config import *
-from data_analysis.data_plots import plot_properties_in_CPE_CME, plot_metric_kde, plot_metric_differences, box_plot
+from data_analysis.data_plots import plot_properties_in_CPE_CME, plot_metric_kde, \
+    plot_metric_differences, metric_difference_box_plot, models_box_plot
 from data_analysis.utils import compute_correlation
 
 
@@ -45,19 +46,26 @@ print(len(data))
 # data = add_popularity_log(data)
 print(len(data))
 print('------------------------------------')
-data.to_csv(TEST_ANALYSIS_FILE, sep='\1', index=False)
+# data.to_csv(TEST_ANALYSIS_FILE, sep='\1', index=False)
 for metric in ['bert', 'bleu', 'rouge']:
     # plot_properties_in_CPE_CME(data, 'description_length', metric, title='short-context')
     # plot_properties_in_CPE_CME(data, 'description_context_overlap_ratio', metric, title='short-context')
     # plot_properties_in_CPE_CME(data, 'popularity_log', metric, title='short-context')
     # plot_metric_kde(data, metric)
-    print(f'{metric}: CPE vs Desc-length: {compute_correlation(data[f"CPE-{metric}"], data["description_length"])}')
-    print(f'{metric}:CPE vs overlap: {compute_correlation(data[f"CPE-{metric}"], data["description_context_overlap_ratio"])}')
-    print(f'{metric}:CPE vs popularity: {compute_correlation(data[f"CPE-{metric}"], data["popularity_log"])}')
-
-    print(f'{metric}:CME vs Desc-length: {compute_correlation(data[f"CME-{metric}"], data["description_length"])}')
-    print(f'{metric}:CME vs overlap: {compute_correlation(data[f"CME-{metric}"], data["description_context_overlap_ratio"])}')
-    print(f'{metric}:CME vs popularity: {compute_correlation(data[f"CME-{metric}"], data["popularity_log"])}')
+    # print(f'{metric}: CPE vs Desc-length: {compute_correlation(data[f"CPE-{metric}"], data["description_length"])}')
+    # print(f'{metric}:CPE vs overlap: {compute_correlation(data[f"CPE-{metric}"], data["description_context_overlap_ratio"])}')
+    # print(f'{metric}:CPE vs popularity-log: {compute_correlation(data[f"CPE-{metric}"], data["popularity_log"])}')
+    # print(f'{metric}:CPE vs popularity: {compute_correlation(data[f"CPE-{metric}"], data["popularity"])}')
+    # print('****')
+    # print(f'{metric}:CME vs Desc-length: {compute_correlation(data[f"CME-{metric}"], data["description_length"])}')
+    # print(f'{metric}:CME vs overlap: {compute_correlation(data[f"CME-{metric}"], data["description_context_overlap_ratio"])}')
+    # print(f'{metric}:CME vs popularity-log: {compute_correlation(data[f"CME-{metric}"], data["popularity_log"])}')
+    # print(f'{metric}:CME vs popularity: {compute_correlation(data[f"CME-{metric}"], data["popularity"])}')
+    # print('****')
+    # print(f'{metric}:CSME vs Desc-length: {compute_correlation(data[f"CSME-{metric}"], data["description_length"])}')
+    # print(f'{metric}:CSME vs overlap: {compute_correlation(data[f"CSME-{metric}"], data["description_context_overlap_ratio"])}')
+    # print(f'{metric}:CSME vs popularity-log: {compute_correlation(data[f"CSME-{metric}"], data["popularity_log"])}')
+    # print(f'{metric}:CSME vs popularity: {compute_correlation(data[f"CSME-{metric}"], data["popularity"])}')
     # print(f'CPE-{metric}:', data[f'CPE-{metric}'].mean(), data[f'CPE-{metric}'].std())
     # print(f'CME-{metric}:', data[f'CME-{metric}'].mean(), data[f'CME-{metric}'].std())
     # stat, p_value = ttest_ind(data[f'CPE-{metric}'], data[f'CME-{metric}'])
@@ -73,16 +81,28 @@ for metric in ['bert', 'bleu', 'rouge']:
 #         popular[f'CPE-{metric}'] - popular[f'CME-{metric}'],
 #         unpopular[f'CPE-{metric}'] - unpopular[f'CME-{metric}'], metric)
 
-# decile_length = len(data) // 10
-# data.sort_values(by='popularity', inplace=True, ascending=False)
-# popular = data[:decile_length]
-# unpopular = data[-decile_length:]
+decile_length = len(data) // 10
+data.sort_values(by='popularity', inplace=True, ascending=False)
+popular = data[:decile_length]
+unpopular = data[-decile_length:]
 # for metric in ['bert', 'bleu', 'rouge']:
 #     plot_metric_differences(
 #         popular[f'CPE-{metric}'] - popular[f'CME-{metric}'],
 #         unpopular[f'CPE-{metric}'] - unpopular[f'CME-{metric}'], metric, title='decile')
-# metric_name, difference, popularity = [], [], []
-# for metric in ['bert', 'bleu', 'rouge']:
+metric_names, difference, value, popularity, model_names = [], [], [], [], []
+for metric in ['bert', 'bleu', 'rouge']:
+    for model_name in ['CPE', 'CME', 'CSME']:
+        for popularity_status, df in zip(['popular', 'unpopular'], [popular, unpopular]):
+            metric_value = df[f'{model_name}-{metric}']
+            value.extend(metric_value.values)
+            metric_names.extend([metric for _ in metric_value])
+            popularity.extend([popularity_status for _ in metric_value])
+            model_names.extend([model_name for _ in metric_value])
+
+df = pd.DataFrame({'metric': metric_names, 'value': value, 'popularity': popularity, 'model': model_names})
+models_box_plot(df[df['popularity'] == 'popular'], 'popular')
+models_box_plot(df[df['popularity'] == 'unpopular'], 'unpopular')
+
 #     popular_diff = popular[f'CPE-{metric}'] - popular[f'CME-{metric}']
 #     unpopular_diff = unpopular[f'CPE-{metric}'] - unpopular[f'CME-{metric}']
 #     print('popular: ', popular_diff.mean(), popular_diff.std())
@@ -101,7 +121,7 @@ for metric in ['bert', 'bleu', 'rouge']:
 #     'difference': difference,
 #     'popularity': popularity
 # })
-# box_plot(df)
+metric_difference_box_plot(df)
 
 # for metric in ['bert', 'bleu', 'rouge']:
 #     # plot_properties_in_CPE_CME(popular, 'popularity_log', metric, title='popular-short-context')
