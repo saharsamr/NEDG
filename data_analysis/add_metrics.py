@@ -50,8 +50,8 @@ def add_bleu_rouge(df):
 
 data = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1')
 csme_data = pd.read_csv(CSME_TEST_FILE, delimiter='\1')
-data = data.dropna()
-csme_data = csme_data.dropna()
+# data = data.dropna()
+# csme_data = csme_data.dropna()
 print(len(data), len(csme_data))
 data = data[data['title'].isin(csme_data['title'])]
 csme_data = csme_data[csme_data['title'].isin(data['title'])]

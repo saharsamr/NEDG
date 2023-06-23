@@ -187,15 +187,15 @@ def plot_metric_differences(d1, d2, metric_name, title=None):
 
 
 def metric_difference_box_plot(df):
-    plt.figure(figsize=(10, 5))
+    # plt.figure(figsize=(10, 5))
     sns.boxplot(data=df, x='metric', y='value', hue='popularity')
     plt.xlabel('metric')
-    plt.ylabel('CPE and CME differnce')
+    plt.ylabel('CPE and CME difference')
     plt.savefig('boxplot.svg')
 
 
 def models_box_plot(df, title):
-    plt.figure(figsize=(10, 5))
+    # plt.figure(figsize=(10, 5))
     sns.boxplot(data=df, x='metric', y='value', hue='model')
     plt.title(title)
     plt.ylabel('metric value')
