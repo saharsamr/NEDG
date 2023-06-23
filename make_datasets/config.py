@@ -34,6 +34,7 @@ MAX_CONTEXT_NUMBER = 1
 LOGGING_DIR = f'{dirname}/../logs'
 CPE_MODEL_NAME = f'{dirname}/../results/{MAX_CONTEXT_NUMBER}-context-wikidata-CPE'
 CME_MODEL_NAME = f'{dirname}/../results/{MAX_CONTEXT_NUMBER}-context-wikidata-CME'
+CSME_MODEL_NAME = f'{dirname}/../results/{MAX_CONTEXT_NUMBER}-context-1epoch-wikidata-CSME/checkpoint-6000'
 
 TRAIN_CSV_PATH = f'{dirname}/../data/wikipedia/{MAX_CONTEXT_NUMBER}_contexts_{SOURCE_DEFINITION}_train.csv'
 TEST_CSV_PATH = f'{dirname}/../data/wikipedia/{MAX_CONTEXT_NUMBER}_contexts_{SOURCE_DEFINITION}_test.csv'
@@ -43,4 +44,5 @@ DATA_PATH = f'{dirname}/../data/wikidata'
 TRAIN_CLASSIFICATION_PATH = f'{dirname}/../data/wikipedia/{MAX_CONTEXT_NUMBER}_contexts_{SOURCE_DEFINITION}_classification_train.csv'
 TEST_CLASSIFICATION_PATH = f'{dirname}/../data/wikipedia/{MAX_CONTEXT_NUMBER}_contexts_{SOURCE_DEFINITION}_classification_test.csv'
 VAL_CLASSIFICATION_PATH = f'{dirname}/../data/wikipedia/{MAX_CONTEXT_NUMBER}_contexts_{SOURCE_DEFINITION}_classification_val.csv'
+CSME_TEST_PATH = f'{dirname}/../data/wikipedia/{MAX_CONTEXT_NUMBER}_contexts_{SOURCE_DEFINITION}_CSME.csv'
 # ========================== CLASSIFICATION DATASETS ==========================
