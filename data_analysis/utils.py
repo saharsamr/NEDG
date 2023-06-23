@@ -150,7 +150,7 @@ def compute_bleu(preds, labels, max_order):
             predictions=preds, references=labels, max_order=max_order
         )
     except:
-        print('Zero Devision in Bleu', preds, labels)
+        # print('Zero Devision in Bleu', preds, labels)
         return 0
 
     return bleu_output['bleu']
@@ -163,7 +163,7 @@ def compute_rouge(preds, labels):
             rouge_types=['rougeL']
         )
     except:
-        print('Zero Devision in Rouge', preds, labels)
+        # print('Zero Devision in Rouge', preds, labels)
         return 0
 
     return rouge_output['rougeL'][1][2]
