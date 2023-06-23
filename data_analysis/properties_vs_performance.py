@@ -103,24 +103,26 @@ df = pd.DataFrame({'metric': metric_names, 'value': value, 'popularity': popular
 models_box_plot(df[df['popularity'] == 'popular'], 'popular')
 models_box_plot(df[df['popularity'] == 'unpopular'], 'unpopular')
 
-#     popular_diff = popular[f'CPE-{metric}'] - popular[f'CME-{metric}']
-#     unpopular_diff = unpopular[f'CPE-{metric}'] - unpopular[f'CME-{metric}']
-#     print('popular: ', popular_diff.mean(), popular_diff.std())
-#     print('unpopular: ', unpopular_diff.mean(), unpopular_diff.std())
-#     stat, p_value = ttest_ind(popular[f'CPE-{metric}'] - popular[f'CME-{metric}'], unpopular[f'CPE-{metric}'] - unpopular[f'CME-{metric}'])
-#     print(f"{metric} t-test: statistic={stat:.4f}, p-value={p_value}")
-#     metric_name.extend([metric for _ in popular_diff])
-#     metric_name.extend([metric for _ in unpopular_diff])
-#     difference.extend(popular_diff.values)
-#     popularity.extend(['popular' for _ in popular_diff])
-#     difference.extend(unpopular_diff.values)
-#     popularity.extend(['unpopular' for _ in unpopular_diff])
-#
-# df = pd.DataFrame({
-#     'metric': metric_name,
-#     'difference': difference,
-#     'popularity': popularity
-# })
+metric_name, difference, popularity = [], [], []
+for metric in ['bert', 'bleu', 'rouge']:
+    popular_diff = popular[f'CPE-{metric}'] - popular[f'CME-{metric}']
+    unpopular_diff = unpopular[f'CPE-{metric}'] - unpopular[f'CME-{metric}']
+    print('popular: ', popular_diff.mean(), popular_diff.std())
+    print('unpopular: ', unpopular_diff.mean(), unpopular_diff.std())
+    stat, p_value = ttest_ind(popular[f'CPE-{metric}'] - popular[f'CME-{metric}'], unpopular[f'CPE-{metric}'] - unpopular[f'CME-{metric}'])
+    print(f"{metric} t-test: statistic={stat:.4f}, p-value={p_value}")
+    metric_name.extend([metric for _ in popular_diff])
+    metric_name.extend([metric for _ in unpopular_diff])
+    difference.extend(popular_diff.values)
+    popularity.extend(['popular' for _ in popular_diff])
+    difference.extend(unpopular_diff.values)
+    popularity.extend(['unpopular' for _ in unpopular_diff])
+
+df = pd.DataFrame({
+    'metric': metric_name,
+    'difference': difference,
+    'popularity': popularity
+})
 metric_difference_box_plot(df)
 
 # for metric in ['bert', 'bleu', 'rouge']:
