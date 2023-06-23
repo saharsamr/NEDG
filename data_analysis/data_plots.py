@@ -197,6 +197,6 @@ def metric_difference_box_plot(df):
 def models_box_plot(df, title):
     plt.figure(figsize=(10, 5))
     sns.boxplot(data=df, x='metric', y='value', hue='model')
-    plt.xlabel('metric')
+    plt.title(title)
     plt.ylabel('metric value')
     plt.savefig(f'{title}_models_boxplot.svg')
