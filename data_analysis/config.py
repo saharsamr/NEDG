@@ -20,3 +20,4 @@ CLASSIFICATION_RESULT_PATH = f'{dirname}/../results/1-context-4epoch-wikidata-co
 
 TEST_CLASSIFICATION_FILE = 'data/wikipedia/1_contexts_wikidata_classification_test.csv'
 TEST_ANALYSIS_FILE = 'data/wikipedia/1_contexts_wikidata_classification_test-analysis.csv'
+CSME_TEST_FILE = 'data/wikipedia/1_contexts_wikidata_CSME_test.csv'
