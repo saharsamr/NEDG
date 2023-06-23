@@ -92,7 +92,7 @@ unpopular = data[-decile_length:]
 # metric_names, difference, value, popularity, model_names = [], [], [], [], []
 # for metric in ['bert', 'bleu', 'rouge']:
 #     for model_name in ['CPE', 'CME', 'CSME']:
-#         for popularity_status, df in zip(['popular', 'unpopular'], [popular, unpopular]):
+#         for popularity_status, df in zip(['Popular', 'Unpopular'], [popular, unpopular]):
 #             metric_value = df[f'{model_name}-{metric}']
 #             value.extend(metric_value.values)
 #             metric_names.extend([metric for _ in metric_value])
@@ -100,8 +100,8 @@ unpopular = data[-decile_length:]
 #             model_names.extend([model_name for _ in metric_value])
 #
 # df = pd.DataFrame({'metric': metric_names, 'value': value, 'popularity': popularity, 'model': model_names})
-# models_box_plot(df[df['popularity'] == 'popular'], 'popular')
-# models_box_plot(df[df['popularity'] == 'unpopular'], 'unpopular')
+# models_box_plot(df[df['popularity'] == 'popular'], 'Popular')
+# models_box_plot(df[df['popularity'] == 'unpopular'], 'Unpopular')
 
 metric_name, difference, popularity = [], [], []
 for metric in ['bert', 'bleu', 'rouge']:
@@ -114,9 +114,9 @@ for metric in ['bert', 'bleu', 'rouge']:
     metric_name.extend([metric for _ in popular_diff])
     metric_name.extend([metric for _ in unpopular_diff])
     difference.extend(popular_diff.values)
-    popularity.extend(['popular' for _ in popular_diff])
+    popularity.extend(['Popular' for _ in popular_diff])
     difference.extend(unpopular_diff.values)
-    popularity.extend(['unpopular' for _ in unpopular_diff])
+    popularity.extend(['Unpopular' for _ in unpopular_diff])
 
 df = pd.DataFrame({
     'metric': metric_name,
