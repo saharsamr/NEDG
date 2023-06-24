@@ -11,9 +11,9 @@ if __name__ == "__main__":
     )
     tokenizer.add_special_tokens({'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS})
 
-    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1')
-    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1')
-    val = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1')
+    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
+    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
+    val = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
 
     data = pd.concat([train, test, val])
     print(len(data))
