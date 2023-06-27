@@ -1,4 +1,4 @@
-# Enhancing Context-Aware ‌Named Entity Description Generation: A Model for Dynamic Utilization of Entity Name and Context
+# A Model for Dynamic Utilization of Entity Name and Context to Enhance Context-Aware ‌Named Entity Description Generation
 
 This repository contains the code and resources for the paper titled "Enhancing Context-Aware ‌Named Entity Description Generation: A Model for Dynamic Utilization of Entity Name and Context". The paper introduces a novel approach for generating descriptions of named entities, addressing the challenges posed by the evolving and ambiguous nature of these entities. The proposed framework uses conditional generation models with mix training data enabling the model to dynamically ignore the entity name to improve the quality and alignment of the generated descriptions with the given context.
 
