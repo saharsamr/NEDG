@@ -22,8 +22,7 @@ class BART:
       valid_x, valid_y,
       model_name=MODEL_GENERATION_NAME,
       model_load_path=MODEL_GENERATION_PATH,
-      load=False,
-      mask_entity=False
+      load=False
     ):
 
         self.model_name = model_name

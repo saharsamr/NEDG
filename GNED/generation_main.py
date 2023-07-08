@@ -8,7 +8,7 @@ from GNED.config import \
     TRAIN_GENERATION_FILE, TEST_GENERATION_FILE, VALID_GENERATION_FILE, \
     EPOCHS, TRAIN_GENERATION_BATCH_SIZE, EVAL_GENERATION_BATCH_SIZE, \
     WARMUP_STEPS, WEIGHT_DECAY, LOGGING_DIR, \
-    OUTPUT_DIR, LOAD_GENERATION_MODEL, PRED_GENERATION_FILE_PATH, EVALUATE_GENERATION, MASK_ENTITY
+    OUTPUT_DIR, LOAD_GENERATION_MODEL, PRED_GENERATION_FILE_PATH, EVALUATE_GENERATION
 
 
 def generation_main():
@@ -56,8 +56,7 @@ def generation_main():
         train_x, train_y,
         test_x, test_y,
         valid_x, valid_y,
-        load=LOAD_GENERATION_MODEL,
-        mask_entity=MASK_ENTITY
+        load=LOAD_GENERATION_MODEL
     )
 
     model.set_learnable_params(freeze_decoder=False)
