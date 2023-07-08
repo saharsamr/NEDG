@@ -2,10 +2,7 @@ from make_datasets.config import MAX_CONTEXT_NUMBER
 import os
 dirname = os.path.dirname(__file__)
 
-
 TASK = 'GENERATION'
-LOGGING_DIR = f'{dirname}/../logs'
-OUTPUT_DIR = f'{dirname}/../results'
 
 WARMUP_STEPS = 200
 WEIGHT_DECAY = 0.1
@@ -14,9 +11,11 @@ LEARNING_RATE = 5e-5
 DEFINITION_SOURCE = 'wikidata'
 
 # ========================== GENERATION CONFIGS ==========================
-MASK_ENTITY = False
 MASK_PROB = 0.5
-MODEL_NAME = 'CME' if MASK_ENTITY else 'CPE'
+MODEL_NAME = f'MASK_{MASK_PROB}'
+OUTPUT_DIR = f'{dirname}/../results/{MODEL_NAME}'
+LOGGING_DIR = f'{dirname}/../logs/{MODEL_NAME}'
+
 TRAIN_GENERATION_BATCH_SIZE = 64
 EVAL_GENERATION_BATCH_SIZE = 64
 TEST_GENERATION_BATCH_SIZE = 64
