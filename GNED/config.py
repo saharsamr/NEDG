@@ -12,6 +12,7 @@ DEFINITION_SOURCE = 'wikidata'
 
 # ========================== GENERATION CONFIGS ==========================
 MASK_PROB = 0.5
+MASKING_STRATEGY = 'Partial'  # or Complete
 MODEL_NAME = f'MASK_{MASK_PROB}'
 OUTPUT_DIR = f'{dirname}/../results/{MODEL_NAME}'
 LOGGING_DIR = f'{dirname}/../logs/{MODEL_NAME}'
