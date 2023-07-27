@@ -32,7 +32,7 @@ class WikiDataset(Dataset):
         entity_start_token_indices = [i for i, tok_id in enumerate(new_input_ids) if tok_id == entity_start_token_id]
         entity_end_token_indices = [i for i, tok_id in enumerate(new_input_ids) if tok_id == entity_end_token_id]
 
-        for st, et, mask in zip(entity_start_token_indices, entity_end_token_indices):
+        for st, et in zip(entity_start_token_indices, entity_end_token_indices):
             if method == 'complete':
                 new_input_ids[st+1:et] = [self.tokenizer.convert_tokens_to_ids('<mask>') for _ in range(st+1, et)]
             if method == 'partial':
@@ -41,7 +41,7 @@ class WikiDataset(Dataset):
                     new_input_ids[i] for i in range(st+1, et)]
 
         entity_names = re.findall(r'<NE>(.*?)</NE>', input_text)
-        for name, st, et, mask in zip(entity_names, entity_start_token_indices, entity_end_token_indices):
+        for name, st, et in zip(entity_names, entity_start_token_indices, entity_end_token_indices):
             new_input_text = new_input_text.replace(f'<NE>{name}</NE>', f'<NE>{"<mask>"*len(range(st+1, et))}</NE>')
 
         return new_input_ids, new_input_text
