@@ -1,3 +1,4 @@
+import numpy as np
 from lit_nlp.api import model as lit_model
 from lit_nlp.api import types as lit_types
 from lit_nlp.lib import utils
@@ -43,7 +44,7 @@ class BartModel(lit_model.Model):
 
         super().__init__()
         self.tokenizer = BartTokenizerFast.from_pretrained(
-            model_name, model_max_length=600, padding=True, truncation=True,
+            model_name, model_max_length=200, padding=True, truncation=True,
         )
         self.tokenizer.add_special_tokens({'additional_special_tokens': ['<NE>', '</NE>', '<CNTXT>', '</CNTXT>']})
         self.model = BartForConditionalGeneration.from_pretrained(model_path)
@@ -98,10 +99,12 @@ class BartModel(lit_model.Model):
             "encoder_layer_1_attention": out.encoder_attentions[0],
             "encoder_final_embedding": masked_token_mean(
                 out.encoder_last_hidden_state, encoded_input["attention_mask"]),
-            'token_embeddings': out.encoder_last_hidden_state
+            'token_embeddings': out.encoder_last_hidden_state,
+            'encoder_attentions': out.encoder_attentions,
+            'decoder_attentions': out.decoder_attentions
+
         }
 
-        # <torch.float32>[batch_size, num_tokens, emb_dim]
         scalar_pred_for_gradients = torch.max(
             batched_outputs["probas"], dim=1, keepdim=False, out=None)[0]
         batched_outputs["input_emb_grad"] = torch.autograd.grad(
