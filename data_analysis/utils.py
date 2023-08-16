@@ -1,6 +1,5 @@
 from datasets import load_metric
 from nltk.tokenize import word_tokenize
-import matplotlib.pyplot as plt
 import scipy.stats
 import numpy as np
 from tqdm import tqdm
@@ -17,6 +16,43 @@ def compute_correlation(x, y):
         'spearman': scipy.stats.spearmanr(x, y),
         'pearson': scipy.stats.pearsonr(x, y)
     }
+
+
+def compute_metrics_for_popularity(df):
+
+    descriptions = df['description']
+    CPE_preds = df['cpe_pred']
+    CME_preds = df['cme_pred']
+
+    CPE_preds = [word_tokenize(pred) for pred in CPE_preds]
+    CME_preds = [word_tokenize(pred) for pred in CME_preds]
+    descriptions = [[word_tokenize(description)] for description in descriptions]
+
+    CPE_bert = compute_bertscore(CPE_preds, descriptions)
+    CME_bert = compute_bertscore(CME_preds, descriptions)
+
+    CPE_bleu = [
+        compute_bleu([cpe_pred], [cpe_label], 1) for
+        cpe_pred, cpe_label in tqdm(zip(CPE_preds, descriptions), total=len(CPE_preds))]
+    CME_bleu = [
+        compute_bleu([cme_pred], [cme_label], 1) for
+        cme_pred, cme_label in tqdm(zip(CME_preds, descriptions), total=len(CME_preds))]
+
+    CPE_rouge = [
+        compute_rouge([cpe_pred], [cpe_label]) for
+        cpe_pred, cpe_label in tqdm(zip(CPE_preds, descriptions), total=len(CPE_preds))]
+    CME_rouge = [
+        compute_rouge([cme_pred], [cme_label]) for
+        cme_pred, cme_label in tqdm(zip(CME_preds, descriptions), total=len(CME_preds))]
+
+    df['CPE-bert'] = CPE_bert
+    df['CME-bert'] = CME_bert
+    df['CPE-bleu'] = CPE_bleu
+    df['CME-bleu'] = CME_bleu
+    df['CPE-rouge'] = CPE_rouge
+    df['CME-rouge'] = CME_rouge
+
+    return df
 
 
 def compute_metrics(classification_result):
@@ -109,18 +145,26 @@ def compute_metrics_for_every_fraction(df):
 
 
 def compute_bleu(preds, labels, max_order):
-    bleu_output = bleu_metric.compute(
-        predictions=preds, references=labels, max_order=max_order
-    )
+    try:
+        bleu_output = bleu_metric.compute(
+            predictions=preds, references=labels, max_order=max_order
+        )
+    except:
+        # print('Zero Devision in Bleu', preds, labels)
+        return 0
 
     return bleu_output['bleu']
 
 
 def compute_rouge(preds, labels):
-    rouge_output = rouge_metric.compute(
-        predictions=preds, references=labels,
-        rouge_types=['rouge1', 'rouge2', 'rouge3', 'rouge4', 'rougeL', 'rougeLsum']
-    )
+    try:
+        rouge_output = rouge_metric.compute(
+            predictions=preds, references=labels,
+            rouge_types=['rougeL']
+        )
+    except:
+        # print('Zero Devision in Rouge', preds, labels)
+        return 0
 
     return rouge_output['rougeL'][1][2]
 
@@ -130,4 +174,4 @@ def compute_bertscore(preds, labels):
         predictions=preds, references=labels, lang='en', model_type='bert-base-uncased'
     )
 
-    return bertscore_output
+    return bertscore_output['f1']
