@@ -137,21 +137,31 @@ def violin_plot_for_popularity(most_popular_df_path, second_most_popular_df_path
     plt.savefig('violin_plot_for_popularity.svg')
 
 
-def plot_properties_in_CPE_CME(data, property_name, metric_name, xlim=None, title=None):
+def plot_properties_in_CPE_CME_CSME(data, property_name, metric_name, xlim=None, title=None):
 
     plt.figure()
-    plt.subplot(2, 1, 1)
+
+    plt.subplot(3, 1, 1)
     res = sns.kdeplot(x=data[property_name], y=data['CPE-'+metric_name], color='red', fill=True, alpha=0.5)
     plt.xlim(xlim)
     plt.ylim(0, 1)
     plt.ylabel('CPE-'+metric_name)
     plt.xlabel('')
-    plt.subplot(2, 1, 2)
+
+    plt.subplot(3, 1, 2)
     res = sns.kdeplot(x=data[property_name], y=data['CME-'+metric_name], color='blue', fill=True, alpha=0.5)
     plt.xlim(xlim)
     plt.ylim(0, 1)
     plt.ylabel('CME-'+metric_name)
+    plt.xlabel('')
+
+    plt.subplot(3, 1, 3)
+    res = sns.kdeplot(x=data[property_name], y=data['CSME-' + metric_name], color='green', fill=True, alpha=0.5)
+    plt.xlim(xlim)
+    plt.ylim(0, 1)
+    plt.ylabel('CSME-' + metric_name)
     plt.xlabel(property_name)
+
     plt.legend()
     if title:
         plt.savefig(f'{title}_{property_name}_{metric_name}.svg')
@@ -164,35 +174,36 @@ def plot_metric_kde(data, metric_name, title=None):
     plt.figure()
     sns.kdeplot(data['CPE-'+metric_name], color='red', fill=True, alpha=0.5, label='CPE')
     sns.kdeplot(data['CME-' + metric_name], color='blue', fill=True, alpha=0.5, label='CME')
+    sns.kdeplot(data['CSME-' + metric_name], color='green', fill=True, alpha=0.5, label='CSME')
     plt.ylabel('Density')
     plt.xlabel(metric_name)
     plt.legend()
     if title:
-        plt.savefig(f'{title}_{metric_name}.svg')
+        plt.savefig(f'kde-{title}_{metric_name}.svg')
     else:
-        plt.savefig(f'{metric_name}.svg')
+        plt.savefig(f'kde-{metric_name}.svg')
 
 
-def plot_metric_differences(d1, d2, metric_name, title=None):
+def plot_metric_differences_kde(d1, d2, metric_name, model1, model2, title=None):
 
     plt.figure()
     sns.kdeplot(d1, color='red', fill=True, alpha=0.5, label='popular')
     sns.kdeplot(d2, color='blue', fill=True, alpha=0.5, label='unpopular')
 
     plt.ylabel('Density')
-    plt.xlabel(f'CPE and CME {metric_name} difference (CPE-CME)')
+    plt.xlabel(f'{model1} and {model2} {metric_name} difference ({model1}-{model2})')
     plt.legend()
 
-    plt.savefig(f'{title}-{metric_name}_popular_vs_unpopular.svg')
+    plt.savefig(f'{title}-{metric_name}-{model1}-{model2}_popular_vs_unpopular.svg')
 
 
-def metric_difference_box_plot(df):
+def metric_difference_box_plot(df, model1, model2):
     # plt.figure(figsize=(10, 5))
     sns.boxplot(data=df, x='metric', y='difference', hue='Popularity')
     plt.xticks([0, 1, 2], ['BertScore', 'BLEU', 'ROUGE'])
     plt.xlabel('')
-    plt.ylabel('CPE-metric - CME-metric')
-    plt.savefig('boxplot.svg')
+    plt.ylabel(f'{model1}-metric - {model2}-metric')
+    plt.savefig(f'{model1}-{model2}-metric-difference-boxplot.svg')
 
 
 def models_box_plot(df, title):
