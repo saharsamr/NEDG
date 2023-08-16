@@ -4,9 +4,12 @@ import pandas as pd
 from scipy.stats import ttest_ind
 
 from data_analysis.config import *
+from GNED.config import *
 from data_analysis.data_plots import plot_properties_in_CPE_CME, plot_metric_kde, \
     plot_metric_differences, metric_difference_box_plot, models_box_plot
 from data_analysis.utils import compute_correlation
+from GNED.data_handler.wiki_dataset import WikiDataset
+from transformers import BartTokenizerFast
 
 
 def add_description_length(df):
@@ -15,16 +18,15 @@ def add_description_length(df):
 
 
 def add_description_context_overlap_ratio(df):
-
     df['description_context_overlap_ratio'] = df.apply(
         lambda x:
-        len(set(x['label'].split()) & set(x['CPE-context'].split())) / len(set(x['label'].split())) if len(set(x['label'].split())) != 0 else 0
+        len(set(x['label'].split()) & set(x['CPE-context'].split())) / len(set(x['label'].split())) if len(
+            set(x['label'].split())) != 0 else 0
         , axis=1)
     return df
 
 
 def add_popularity(df):
-
     with open(ENTITY_POPULARITY_PATH, 'rb') as f:
         popularity = pickle.load(f)
 
@@ -37,13 +39,40 @@ def add_popularity_log(df):
     return df
 
 
+def add_entity_token_count(df, tokenizer):
+    def count_entity_tokens(context_tok_ids, tokenizer):
+
+        entity_start_token_id = tokenizer.convert_tokens_to_ids('<NE>')
+        entity_end_token_id = tokenizer.convert_tokens_to_ids('</NE>')
+
+        entity_start_token_indices = [i for i, tok_id in enumerate(context_tok_ids) if tok_id == entity_start_token_id]
+        entity_end_token_indices = [i for i, tok_id in enumerate(context_tok_ids) if tok_id == entity_end_token_id]
+
+        if len(entity_start_token_indices) != 1 or len(entity_end_token_indices) != 1:
+            print('multiple mentions!')
+        else:
+            return entity_end_token_indices[0] - entity_start_token_indices[0] - 1
+
+    dataset = WikiDataset(tokenizer, df['CPE-context'], df['label'], mask_entity=False)
+    entity_token_counts = [count_entity_tokens(sample['input_ids'], tokenizer) for sample in dataset]
+
+    df['entity_token_count'] = entity_token_counts
+    return df
+
+
 data = pd.read_csv(TEST_ANALYSIS_FILE, delimiter='\1')
+tokenizer = BartTokenizerFast.from_pretrained(
+    MODEL_GENERATION_NAME, model_max_length=INPUT_GENERATION_MAX_LENGTH, padding=True, truncation=True,
+)
+tokenizer.add_special_tokens({'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS})
+
 print(len(data))
-# data = data.replace({'<pad>': ''}, regex=True)
-# data = add_description_length(data)
-# data = add_description_context_overlap_ratio(data)
-# data = add_popularity(data)
-# data = add_popularity_log(data)
+data = data.replace({'<pad>': ''}, regex=True)
+data = add_description_length(data)
+data = add_description_context_overlap_ratio(data)
+data = add_popularity(data)
+data = add_popularity_log(data)
+data = add_entity_token_count(data, tokenizer)
 print(len(data))
 print('------------------------------------')
 # data.to_csv(TEST_ANALYSIS_FILE, sep='\1', index=False)
@@ -71,7 +100,6 @@ for metric in ['bert', 'bleu', 'rouge']:
     # stat, p_value = ttest_ind(data[f'CPE-{metric}'], data[f'CME-{metric}'])
     # print(f"t-test: statistic={stat:.4f}, p-value={p_value}")
     print('---------------------------------')
-
 
 # mean_popularity = data['popularity'].mean()
 # popular = data[data['popularity'] > mean_popularity]
@@ -109,7 +137,8 @@ for metric in ['bert', 'bleu', 'rouge']:
     unpopular_diff = unpopular[f'CPE-{metric}'] - unpopular[f'CME-{metric}']
     print('popular: ', popular_diff.mean(), popular_diff.std())
     print('unpopular: ', unpopular_diff.mean(), unpopular_diff.std())
-    stat, p_value = ttest_ind(popular[f'CPE-{metric}'] - popular[f'CME-{metric}'], unpopular[f'CPE-{metric}'] - unpopular[f'CME-{metric}'])
+    stat, p_value = ttest_ind(popular[f'CPE-{metric}'] - popular[f'CME-{metric}'],
+                              unpopular[f'CPE-{metric}'] - unpopular[f'CME-{metric}'])
     print(f"{metric} t-test: statistic={stat:.4f}, p-value={p_value}")
     metric_name.extend([metric for _ in popular_diff])
     metric_name.extend([metric for _ in unpopular_diff])
