@@ -22,8 +22,7 @@ class BART:
       valid_x, valid_y,
       model_name=MODEL_GENERATION_NAME,
       model_load_path=MODEL_GENERATION_PATH,
-      load=False,
-      mask_entity=False
+      load=False
     ):
 
         self.model_name = model_name
@@ -38,9 +37,9 @@ class BART:
         self.model.resize_token_embeddings(len(self.tokenizer))
 
         print('Making datasets')
-        self.train_dataset = WikiDataset(self.tokenizer, train_x, train_y, mask_entity=mask_entity)
-        self.test_dataset = WikiDataset(self.tokenizer, test_x, test_y, mask_entity=mask_entity)
-        self.valid_dataset = WikiDataset(self.tokenizer, valid_x, valid_y, mask_entity=mask_entity)
+        self.train_dataset = WikiDataset(self.tokenizer, train_x, train_y, mask_entity=True)
+        self.test_dataset = WikiDataset(self.tokenizer, test_x, test_y, mask_entity=False)
+        self.valid_dataset = WikiDataset(self.tokenizer, valid_x, valid_y, mask_entity=False)
 
         self.optimizer = AdamW(self.model.get_decoder().parameters(), lr=LEARNING_RATE)
 
