@@ -2,6 +2,7 @@ import pickle
 import numpy as np
 import pandas as pd
 from scipy.stats import ttest_ind
+from tqdm import tqdm
 
 from data_analysis.config import *
 from GNED.config import *
@@ -20,7 +21,7 @@ def add_description_length(df):
 def add_description_context_overlap_ratio(df):
     df['description_context_overlap_ratio'] = df.apply(
         lambda x:
-        len(set(x['label'].split()) & set(x['CPE-context'].split())) / len(set(x['label'].split())) if len(
+        len(set(x['label'].split()) & set(x['context'].split())) / len(set(x['label'].split())) if len(
             set(x['label'].split())) != 0 else 0
         , axis=1)
     return df
@@ -49,12 +50,13 @@ def add_entity_token_count(df, tokenizer):
         entity_end_token_indices = [i for i, tok_id in enumerate(context_tok_ids) if tok_id == entity_end_token_id]
 
         if len(entity_start_token_indices) != 1 or len(entity_end_token_indices) != 1:
-            print('multiple mentions!')
+            return -1
         else:
             return entity_end_token_indices[0] - entity_start_token_indices[0] - 1
 
-    dataset = WikiDataset(tokenizer, df['CPE-context'], df['label'], mask_entity=False)
-    entity_token_counts = [count_entity_tokens(sample['input_ids'], tokenizer) for sample in dataset]
+    dataset = WikiDataset(tokenizer, list(df['context']), list(df['label']), mask_entity=False)
+    entity_token_counts = [
+        count_entity_tokens(sample['input_ids'], tokenizer) for sample in tqdm(dataset)]
 
     df['entity_token_count'] = entity_token_counts
     return df
@@ -65,8 +67,8 @@ def add_properties(df):
     df = df.replace({'<pad>': ''}, regex=True)
     df = add_description_length(df)
     df = add_description_context_overlap_ratio(df)
-    df = add_popularity(df)
-    df = add_popularity_log(df)
+    # df = add_popularity(df)
+    # df = add_popularity_log(df)
 
     tokenizer = BartTokenizerFast.from_pretrained(
         MODEL_GENERATION_NAME, model_max_length=INPUT_GENERATION_MAX_LENGTH, padding=True, truncation=True,
@@ -79,7 +81,7 @@ def add_properties(df):
 
 def plot_properties_cpe_vs_cme_vs_csme(df):
 
-    for metric in ['bert', 'bleu', 'rouge']:
+    for metric in ['bleu', 'rouge']:
         plot_properties_in_CPE_CME_CSME(df, 'description_length', metric, title='short-context')
         plot_properties_in_CPE_CME_CSME(df, 'description_context_overlap_ratio', metric, title='short-context')
         plot_properties_in_CPE_CME_CSME(df, 'popularity_log', metric, title='short-context')
@@ -88,11 +90,10 @@ def plot_properties_cpe_vs_cme_vs_csme(df):
 
 def properties_correlation_cpe_vs_cme_vs_csme(df):
 
-    for metric in ['bert', 'bleu', 'rouge']:
-        for model in ['CPE', 'CME', 'CSME']:
+    for metric in ['bleu', 'rouge']:
+        for model in ['CSME']:
             for property in [
-                'description_length', 'description_context_overlap_ratio',
-                'popularity_log', 'popularity', 'entity_token_count'
+                'description_length', 'description_context_overlap_ratio', 'entity_token_count'
             ]:
                 print(
                     f'{metric}: {model} vs {property}: '
@@ -102,8 +103,8 @@ def properties_correlation_cpe_vs_cme_vs_csme(df):
 
 def metrics_mean_std(df):
 
-    for metric in ['bert', 'bleu', 'rouge']:
-        for model in ['CPE', 'CME', 'CSME']:
+    for metric in ['bleu', 'rouge']:
+        for model in ['CSME']:
             print(f'{model}-{metric}:', df[f'{model}-{metric}'].mean(), df[f'{model}-{metric}'].std())
 
 
@@ -224,12 +225,17 @@ def popularity_analysis(df):
 
 
 data = pd.read_csv(TEST_ANALYSIS_FILE, delimiter='\1')
+print(len(data))
+print(data)
 data = add_properties(data)
-plot_properties_cpe_vs_cme_vs_csme(data)
+print(len(data))
+data = data[data['entity_token_count'] != -1]
+print(len(data))
+# plot_properties_cpe_vs_cme_vs_csme(data)
 properties_correlation_cpe_vs_cme_vs_csme(data)
 metrics_mean_std(data)
-metrics_ttest(data)
-plot_kde(data)
-popularity_analysis(data)
-data.to_csv(TEST_ANALYSIS_FILE, sep='\1', index=False)
+# metrics_ttest(data)
+# plot_kde(data)
+# popularity_analysis(data)
+# data.to_csv(TEST_ANALYSIS_FILE, sep='\1', index=False)
 
