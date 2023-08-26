@@ -7,10 +7,14 @@ def save_generation_predictions(input_, label, prediction, delimiter='\1'):
 
     with open(PRED_GENERATION_FILE_PATH, 'w+') as f:
         for i, l, p in zip(input_, label, prediction):
-            i = i.replace(delimiter, '')
-            l = l.replace(delimiter, '')
-            p = p.replace(delimiter, '')
-            f.write(f'{i}{delimiter}{l}{delimiter}{p}\n')
+            try:
+                i = i.replace(delimiter, '')
+                l = l.replace(delimiter, '')
+                p = p.replace(delimiter, '')
+                f.write(f'{i}{delimiter}{l}{delimiter}{p}\n')
+            except:
+                print('Exception in save_generation_predictions')
+                continue
 
 
 def save_classification_prediction(input_, label, prediction, delimiter='\1'):
