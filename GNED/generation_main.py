@@ -41,15 +41,15 @@ def generation_main():
         load_best_model_at_end=True,
         evaluation_strategy='steps',
         do_eval=True,
-        eval_steps=1000,
+        eval_steps=2000,
         save_strategy='steps',
-        save_steps=1000,
+        save_steps=2000,
         save_total_limit=5
     )
 
     print('Initialing the model...')
     if 'bart' in MODEL_GENERATION_NAME:
-        model = T5(
+        model = BART(
             training_args,
             train_x, train_y,
             test_x, test_y,
