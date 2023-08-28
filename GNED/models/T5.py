@@ -42,6 +42,8 @@ class T5:
         self.valid_dataset = WikiDataset(self.tokenizer, valid_x, valid_y, mask_entity=False)
 
         self.optimizer = AdamW(self.model.get_decoder().parameters(), lr=LEARNING_RATE)
+        if load:
+            self.optimizer.load_state_dict(torch.load(f'{model_load_path}/optimizer.pt'))
 
         self.trainer = Trainer(
             model=self.model,
