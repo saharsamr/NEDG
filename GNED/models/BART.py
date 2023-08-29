@@ -41,7 +41,7 @@ class BART:
         self.test_dataset = WikiDataset(self.tokenizer, test_x, test_y, mask_entity=False)
         self.valid_dataset = WikiDataset(self.tokenizer, valid_x, valid_y, mask_entity=False)
 
-        self.optimizer = AdamW(self.model.get_decoder().parameters(), lr=LEARNING_RATE)
+        self.optimizer = AdamW(self.model.parameters(), lr=LEARNING_RATE)
 
         self.trainer = Trainer(
             model=self.model,
