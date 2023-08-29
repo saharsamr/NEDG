@@ -11,8 +11,8 @@ LEARNING_RATE = 5e-5
 DEFINITION_SOURCE = 'wikidata'
 
 # ========================== GENERATION CONFIGS ==========================
-MASK_PROB = 0.5
-MASKING_STRATEGY = 'Partial'  # or Complete
+MASK_PROB = 0.0
+MASKING_STRATEGY = 'Complete'  # or Complete
 MODEL_NAME = f'MASK_{MASK_PROB}'
 OUTPUT_DIR = f'{dirname}/../results/{MODEL_NAME}'
 LOGGING_DIR = f'{dirname}/../logs/{MODEL_NAME}'
@@ -23,9 +23,9 @@ TEST_GENERATION_BATCH_SIZE = 32
 
 INPUT_GENERATION_MAX_LENGTH = 300
 OUTPUT_GENERATION_MAX_LENGTH = 100
-OUTPUT_GENERATION_MIN_LENGTH = 5
+OUTPUT_GENERATION_MIN_LENGTH = 3
 
-MODEL_GENERATION_NAME = 'facebook/bart-large-cnn'
+MODEL_GENERATION_NAME = 't5-base'  # or t5-base
 
 DATA_GENERATION_FOLDER = f'{dirname}/../data/wikipedia/'
 TRAIN_GENERATION_FILE = f'{DATA_GENERATION_FOLDER}{MAX_CONTEXT_NUMBER}_contexts_{DEFINITION_SOURCE}_train.csv'
@@ -40,7 +40,7 @@ MODEL_GENERATION_PATH = f'{OUTPUT_DIR}/{MAX_CONTEXT_NUMBER}_contexts_{DEFINITION
 EVALUATE_GENERATION = True
 PRED_GENERATION_FILE_PATH = f'{OUTPUT_DIR}/{MAX_CONTEXT_NUMBER}_contexts_{DEFINITION_SOURCE}_{MODEL_NAME}_preds.csv'
 
-EPOCHS = 2
+EPOCHS = 10
 # ========================== GENERATION CONFIGS ==========================
 
 # ======================== CLASSIFICATION CONFIGS ========================
