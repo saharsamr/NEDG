@@ -41,9 +41,9 @@ def generation_main():
         load_best_model_at_end=True,
         evaluation_strategy='steps',
         do_eval=True,
-        eval_steps=2000,
+        eval_steps=3000,
         save_strategy='steps',
-        save_steps=2000,
+        save_steps=3000,
         save_total_limit=5
     )
 
