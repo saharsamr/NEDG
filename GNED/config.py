@@ -40,7 +40,7 @@ MODEL_GENERATION_PATH = f'{OUTPUT_DIR}/{MAX_CONTEXT_NUMBER}_contexts_{DEFINITION
 EVALUATE_GENERATION = True
 PRED_GENERATION_FILE_PATH = f'{OUTPUT_DIR}/{MAX_CONTEXT_NUMBER}_contexts_{DEFINITION_SOURCE}_{MODEL_NAME}_preds.csv'
 
-EPOCHS = 10
+EPOCHS = 6
 # ========================== GENERATION CONFIGS ==========================
 
 # ======================== CLASSIFICATION CONFIGS ========================
