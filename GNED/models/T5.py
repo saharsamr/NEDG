@@ -1,4 +1,4 @@
-from transformers import T5TokenizerFast, T5ForConditionalGeneration
+from transformers import T5TokenizerFast, T5ForConditionalGeneration, TrainerCallback
 from transformers.optimization import AdamW
 from transformers import EarlyStoppingCallback
 from transformers import Trainer
@@ -7,10 +7,26 @@ import torch
 from tqdm import tqdm
 
 from GNED.data_handler.wiki_dataset import WikiDataset
-from GNED.utils.metrics import compute_metrics
+from GNED.utils.metrics import compute_metrics, compute_bleu, compute_rouge
 from GNED.config import MODEL_GENERATION_NAME, ADDITIONAL_SPECIAL_TOKENS, \
     MODEL_GENERATION_PATH, OUTPUT_GENERATION_MAX_LENGTH, LEARNING_RATE, INPUT_GENERATION_MAX_LENGTH, \
     OUTPUT_GENERATION_MIN_LENGTH, TEST_GENERATION_BATCH_SIZE
+
+
+def compute_generation_metrics(predictions, references):
+
+    bleu1 = compute_bleu(predictions, references, 1)
+    rouge = compute_rouge(predictions, references, rouge_types=['rougeL'])
+    print('bleu1: ', bleu1)
+    print('rougeL: ', rouge['rougeL'])
+
+
+class ComputeMetricsCallback(TrainerCallback):
+
+    def on_evaluate(self, args, state, control, **kwargs):
+        if state.is_local_process_zero:
+            predictions, references = kwargs['predictions'], kwargs['references']
+            compute_generation_metrics(predictions, references)
 
 
 class T5:
@@ -51,7 +67,7 @@ class T5:
             tokenizer=self.tokenizer,
             optimizers=(self.optimizer, None),
             # compute_metrics=compute_metrics,
-            # callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
+            callbacks=[ComputeMetricsCallback()]
         )
 
     def train(self):
