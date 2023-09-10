@@ -48,7 +48,7 @@ def add_bleu_rouge(df):
     return df
 
 
-data = pd.read_csv(TEST_CLASSIFICATION_FILE, delimiter='\1')
+data = pd.read_csv(TEST_RESULTS, delimiter='\1')
 csme_data = pd.read_csv(CSME_TEST_FILE, delimiter='\1')
 data = data.fillna('')
 csme_data = csme_data.fillna('')
