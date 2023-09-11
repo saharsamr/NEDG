@@ -49,9 +49,9 @@ class WikiDataset(Dataset):
     def __getitem__(self, idx):
 
         input_encodings = self.tokenizer(
-            self.inputs[idx], padding=False)
+            self.inputs[idx], padding=True)
         output_encodings = self.tokenizer(
-            self.labels[idx], padding=False)
+            self.labels[idx], padding=True)
         input_text = self.inputs[idx]
 
         if self.mask_entity and MASKING_STRATEGY == 'Complete' and random.random() < MASK_PROB:
