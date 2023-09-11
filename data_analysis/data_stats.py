@@ -25,7 +25,7 @@ def read_json_lines(file_path):
 if __name__ == "__main__":
 
     tokenizer = BartTokenizerFast.from_pretrained(
-        MODEL_GENERATION_NAME, model_max_length=INPUT_GENERATION_MAX_LENGTH, padding=True, truncation=True,
+        MODEL_GENERATION_NAME, padding=True, truncation=True,
     )
     tokenizer.add_special_tokens({'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS})
 
