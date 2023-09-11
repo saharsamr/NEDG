@@ -38,8 +38,9 @@ if __name__ == "__main__":
 
     dataset = WikiDataset(tokenizer, x, y, mask_entity=False)
 
-    context_lengths = [len(sample['input_ids']) for sample in tqdm(dataset)]
-    description_lengths = [len(sample['labels']) for sample in tqdm(dataset)]
+    lengths = [(len(sample['input_ids']), len(sample['labels'])) for sample in tqdm(dataset)]
+    context_lengths = [sample[0] for sample in lengths]
+    description_lengths = [sample[1] for sample in lengths]
 
     input_mean_length = np.mean(context_lengths)
     input_std_length = np.std(context_lengths)
