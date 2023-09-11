@@ -19,6 +19,10 @@ ENTITY_CARDINALITY_PATH = f'{dirname}/../data/cardinality.pkl'
 CLASSIFICATION_RESULT_PATH = \
     f'{dirname}/../results/1-context-4epoch-wikidata-con+pred1+pred2-classification-9500/test_result_df.pkl'
 
+
 TEST_RESULTS = 'results/CompleteMasking/MASK_1.0/1_contexts_wikidata_MASK_1.0_preds.csv'
 TEST_ANALYSIS_FILE = 'results/CompleteMasking/MASK_1.0/1_contexts_wikidata_MASK_1.0_analysis.csv'
+
+PLOT_SAVING_PATH = f'{dirname}/../plots/'
+
 CSME_TEST_FILE = 'data/wikipedia/1_contexts_wikidata_CSME_test.csv'

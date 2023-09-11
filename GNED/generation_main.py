@@ -4,11 +4,8 @@ import pandas as pd
 from GNED.utils.save_data import save_generation_predictions
 from GNED.utils.metrics import evaluate_generation
 from GNED.models.BART import BART
-from GNED.config import \
-    TRAIN_GENERATION_FILE, TEST_GENERATION_FILE, VALID_GENERATION_FILE, \
-    EPOCHS, TRAIN_GENERATION_BATCH_SIZE, EVAL_GENERATION_BATCH_SIZE, \
-    WARMUP_STEPS, WEIGHT_DECAY, LOGGING_DIR, \
-    OUTPUT_DIR, LOAD_GENERATION_MODEL, PRED_GENERATION_FILE_PATH, EVALUATE_GENERATION
+from GNED.models.T5 import T5
+from GNED.config import *
 
 
 def generation_main():
@@ -44,20 +41,31 @@ def generation_main():
         load_best_model_at_end=True,
         evaluation_strategy='steps',
         do_eval=True,
-        eval_steps=1000,
+        eval_steps=3000,
         save_strategy='steps',
-        save_steps=1000,
+        save_steps=3000,
         save_total_limit=5
     )
 
     print('Initialing the model...')
-    model = BART(
-        training_args,
-        train_x, train_y,
-        test_x, test_y,
-        valid_x, valid_y,
-        load=LOAD_GENERATION_MODEL
-    )
+    if 'bart' in MODEL_GENERATION_NAME:
+        model = BART(
+            training_args,
+            train_x, train_y,
+            test_x, test_y,
+            valid_x, valid_y,
+            load=LOAD_GENERATION_MODEL
+        )
+    elif 't5' in MODEL_GENERATION_NAME:
+        model = T5(
+            training_args,
+            train_x, train_y,
+            test_x, test_y,
+            valid_x, valid_y,
+            load=LOAD_GENERATION_MODEL
+        )
+    else:
+        raise Exception('Model name not recognized')
 
     model.set_learnable_params(freeze_decoder=False)
     print('Start training...')

@@ -7,7 +7,9 @@ from nltk.tokenize import word_tokenize
 
 
 def evaluate_generation(pred_file, delimiter='\1'):
-    pred_data = pd.read_csv(pred_file, names=['context', 'label', 'pred'], header=None, delimiter=delimiter)
+    pred_data = pd.read_csv(
+        pred_file, names=['context', 'label', 'pred'], header=None, delimiter=delimiter, on_bad_lines='skip'
+    )
     print('number of test sample before dropping nan values: ', len(pred_data))
     pred_data.dropna(inplace=True)
     print('number of test sample after dropping nan values: ', len(pred_data))
@@ -106,21 +108,24 @@ def compute_bleu(preds, labels, max_order):
     return bleu_output
 
 
-def compute_rouge(preds, labels):
+def compute_rouge(preds, labels, rouge_types=None):
     rouge_metric = load_metric('rouge')
     rouge_output = rouge_metric.compute(
         predictions=preds, references=labels,
-        rouge_types=['rouge1', 'rouge2', 'rouge3', 'rouge4', 'rougeL', 'rougeLsum']
+        rouge_types=['rouge1', 'rouge2', 'rouge3', 'rouge4', 'rougeL', 'rougeLsum'] if rouge_types is None else rouge_types
     )
 
-    return {
-        'rouge1': rouge_output['rouge1'],
-        'rouge2': rouge_output['rouge2'],
-        'rouge3': rouge_output['rouge3'],
-        'rouge4': rouge_output['rouge4'],
-        'rougeL': rouge_output['rougeL'],
-        'rougeLsum': rouge_output['rougeLsum']
-    }
+    if rouge_types is None:
+        return {
+            'rouge1': rouge_output['rouge1'],
+            'rouge2': rouge_output['rouge2'],
+            'rouge3': rouge_output['rouge3'],
+            'rouge4': rouge_output['rouge4'],
+            'rougeL': rouge_output['rougeL'],
+            'rougeLsum': rouge_output['rougeLsum']
+        }
+    else:
+        return rouge_output
 
 
 def compute_bertscore(preds, labels):

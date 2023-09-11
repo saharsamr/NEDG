@@ -5,6 +5,8 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 
+from data_analysis.config import *
+
 
 def count_words(sentence):
     words = sentence.split()
@@ -38,21 +40,13 @@ def distribution_of_contexts_length_in_json(path):
         plt.show()
 
 
-def files_distribution_of_descriptions_length(path):
-    with open(path, 'r') as f:
-        wikipedia_description_lengths = []
-        wikidata_description_lengths = []
-        for line in f.readlines():
-            data = json.loads(line)
-            wikipedia_description_lengths.append(count_words(data['wikipedia_description']))
-            wikidata_description_lengths.append(count_words(data['wikidata_description']))
-        plt.hist(wikipedia_description_lengths, bins=20, alpha=0.5, label='Wikipedia')
-        plt.hist(wikidata_description_lengths, bins=20, alpha=0.5, label='Wikidata')
-        plt.title('Distribution of Description Lengths by Source')
-        plt.xlabel('Description Length')
-        plt.ylabel('Frequency')
-        plt.legend()
-        plt.show()
+def number_of_tokens_histogram(number_of_tokens, title, label):
+
+    plt.hist(number_of_tokens, bins=20, alpha=0.5)
+    plt.title(title)
+    plt.xlabel(label)
+    plt.ylabel('Frequency')
+    plt.savefig(f'{PLOT_SAVING_PATH}{title}.svg')
 
 
 def plot_metrics(

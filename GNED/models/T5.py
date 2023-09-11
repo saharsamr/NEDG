@@ -1,6 +1,6 @@
-from transformers import BartTokenizerFast, BartForConditionalGeneration
+from transformers import T5TokenizerFast, T5ForConditionalGeneration, TrainerCallback
 from transformers.optimization import AdamW
-from transformers import EarlyStoppingCallback, TrainerCallback
+from transformers import EarlyStoppingCallback
 from transformers import Trainer
 from torch.utils.data import DataLoader
 import torch
@@ -12,7 +12,7 @@ from GNED.config import MODEL_GENERATION_NAME, ADDITIONAL_SPECIAL_TOKENS, \
     OUTPUT_GENERATION_MIN_LENGTH, TEST_GENERATION_BATCH_SIZE
 
 
-class BART:
+class T5:
 
     def __init__(
       self, trainer_args,
@@ -25,14 +25,14 @@ class BART:
     ):
 
         self.model_name = model_name
-        self.tokenizer = BartTokenizerFast.from_pretrained(
+        self.tokenizer = T5TokenizerFast.from_pretrained(
             self.model_name, model_max_length=INPUT_GENERATION_MAX_LENGTH, padding=True, truncation=True,
         )
         self.tokenizer.add_special_tokens({'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS})
         if load:
-            self.model = BartForConditionalGeneration.from_pretrained(model_load_path)
+            self.model = T5ForConditionalGeneration.from_pretrained(model_load_path)
         else:
-            self.model = BartForConditionalGeneration.from_pretrained(self.model_name)
+            self.model = T5ForConditionalGeneration.from_pretrained(self.model_name)
         self.model.resize_token_embeddings(len(self.tokenizer))
 
         print('Making datasets')
@@ -63,11 +63,8 @@ class BART:
         for param in self.model.get_decoder().parameters():
             param.requires_grad = not freeze_decoder
 
-        for part in [self.model.get_encoder()]:
-            for param in part.embed_positions.parameters():
-                param.requires_grad = False
-            for param in part.embed_tokens.parameters():
-                param.requires_grad = True
+        for param in self.model.get_encoder().embed_tokens.parameters():
+            param.requires_grad = True
 
     def pred(self):
 

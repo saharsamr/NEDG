@@ -33,8 +33,11 @@ def making_csv(jsonl_path, max_context_number, definition_source, data_split):
             if len(contexts):
                 if len(contexts) > max_context_number:
                     contexts = random.sample(contexts, max_context_number)
-                for context in contexts:
-                    writer.writerow([entity_name, context, entity_description])
+                if MAX_CONTEXT_NUMBER == 1:
+                    contexts = contexts[0]
+                else:
+                    contexts = '<CNTXT>' + '</CNTXT><CNTXT>'.join(contexts) + '</CNTXT>'
+                writer.writerow([entity_name, contexts, entity_description])
 
 
 making_csv(TRAIN_JSONL_PATH, MAX_CONTEXT_NUMBER, SOURCE_DEFINITION, 'train')

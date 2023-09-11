@@ -15,7 +15,7 @@ WIKI_JSONS_PATH = f'{dirname}/../../wikipedia/text'
 MAX_ENTITY_NAME_LENGTH = 5
 MIN_CONTEXT_LENGTH = 20
 WIKI_DUMP_JSONL_PATH = f'{dirname}/../data/wikipedia/wiki_dump.jsonl'
-FINAL_MIN_CONTEXT_LEN = 15
+FINAL_MIN_CONTEXT_LEN = 20
 
 TRAIN_SHARE = 0.8
 TEST_SHARE = 0.1
