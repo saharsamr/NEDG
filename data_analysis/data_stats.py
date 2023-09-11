@@ -17,7 +17,7 @@ def read_json_lines(file_path):
             if not len(json_obj['contexts']):
                 continue
             x.append(json_obj['contexts'])
-            y.append(json_obj['entity_description'])
+            y.append(json_obj[f'{SOURCE_DEFINITION}_description'])
 
     return x, y
 
