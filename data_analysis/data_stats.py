@@ -6,6 +6,7 @@ import numpy as np
 from tqdm import tqdm
 import json
 from make_datasets.config import *
+import pickle
 
 
 def read_json_lines(file_path):
@@ -48,6 +49,10 @@ if __name__ == "__main__":
     output_std_length = np.std(description_lengths)
     print(f'Contexts Mean Length (In Tokens): {input_mean_length}, Standard Deviation: {input_std_length}')
     print(f'Descriptions Mean Length (In Tokens): {output_mean_length}, Standard Deviation: {output_std_length}')
+
+    with open('contexts_token_count.pkl', 'wb') as f1, open('descriptions_token_count.pkl', 'wb') as f2:
+        pickle.dump(context_lengths, f1)
+        pickle.dump(description_lengths, f2)
 
     number_of_tokens_histogram(
         context_lengths, 'Contexts\' Token Count Histogram', 'Contexts\' Token Count')
