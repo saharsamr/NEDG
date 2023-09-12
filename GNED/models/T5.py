@@ -1,4 +1,4 @@
-from transformers import T5TokenizerFast, T5ForConditionalGeneration, TrainerCallback
+from transformers import T5TokenizerFast, T5ForConditionalGeneration
 from transformers.optimization import AdamW
 from transformers import EarlyStoppingCallback
 from transformers import Trainer
@@ -49,8 +49,7 @@ class T5:
             eval_dataset=self.valid_dataset,
             tokenizer=self.tokenizer,
             optimizers=(self.optimizer, None),
-            # compute_metrics=compute_metrics,
-            # callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
+            callbacks=[EarlyStoppingCallback(early_stopping_patience=5)]
         )
 
     def train(self):
