@@ -40,10 +40,10 @@ def distribution_of_contexts_length_in_json(path):
         plt.show()
 
 
-def number_of_tokens_histogram(number_of_tokens, title, label):
+def number_of_tokens_histogram(number_of_tokens, title, label, xlim):
 
     plt.figure()
-    plt.hist(number_of_tokens, bins=100, alpha=0.5, range=(0, 500))
+    plt.hist(number_of_tokens, bins=100, alpha=0.5, range=(0, xlim))
     plt.title(title)
     plt.xlabel(label)
     plt.ylabel('Frequency')
