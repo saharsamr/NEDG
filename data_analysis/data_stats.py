@@ -17,14 +17,9 @@ if __name__ == "__main__":
     tokenizer.add_special_tokens({'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS})
 
     train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
-    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
-    val = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
-
-    data = pd.concat([train, test, val])
-    print(len(data))
-    data = data.dropna()
-    print(len(data))
-    x, y = list(data['contexts']), list(data['entity_description'])
+    train = train.dropna()
+    print(len(train))
+    x, y = list(train['contexts']), list(train['entity_description'])
 
     dataset = WikiDataset(tokenizer, x, y, mask_entity=False)
 
