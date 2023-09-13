@@ -49,7 +49,7 @@ class BART:
             eval_dataset=self.valid_dataset,
             tokenizer=self.tokenizer,
             optimizers=(self.optimizer, None),
-            callbacks=[EarlyStoppingCallback(early_stopping_patience=5)]
+            # callbacks=[EarlyStoppingCallback(early_stopping_patience=5)]
         )
 
     def train(self):
