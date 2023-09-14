@@ -13,19 +13,18 @@ DEFINITION_SOURCE = 'wikidata'
 # ========================== GENERATION CONFIGS ==========================
 MASK_PROB = 0.0
 MASKING_STRATEGY = 'Complete'  # or Complete
-MODEL_NAME = f'MASK_{MASK_PROB}'
-OUTPUT_DIR = f'{dirname}/../results/{MODEL_NAME}'
+MODEL_GENERATION_NAME = 'facebook/bart-large-cnn'  # facebook/bart-large-cnn or t5-base
+MODEL_NAME = f'MASK_{MASK_PROB}_{DEFINITION_SOURCE}'
+OUTPUT_DIR = f'{dirname}/../results/{MODEL_GENERATION_NAME}/{MODEL_NAME}'
 LOGGING_DIR = f'{dirname}/../logs/{MODEL_NAME}'
 
 TRAIN_GENERATION_BATCH_SIZE = 16
-EVAL_GENERATION_BATCH_SIZE = 16
-TEST_GENERATION_BATCH_SIZE = 16
+EVAL_GENERATION_BATCH_SIZE = 32
+TEST_GENERATION_BATCH_SIZE = 32
 
 INPUT_GENERATION_MAX_LENGTH = 600
 OUTPUT_GENERATION_MAX_LENGTH = 25
 OUTPUT_GENERATION_MIN_LENGTH = 5
-
-MODEL_GENERATION_NAME = 'facebook/bart-large-cnn'  # facebook/bart-large-cnn or t5-base
 
 DATA_GENERATION_FOLDER = f'{dirname}/../data/wikipedia/'
 TRAIN_GENERATION_FILE = f'{DATA_GENERATION_FOLDER}{MAX_CONTEXT_NUMBER}_contexts_{DEFINITION_SOURCE}_train.csv'
@@ -43,7 +42,7 @@ MODEL_GENERATION_PATH = f'{OUTPUT_DIR}/{MAX_CONTEXT_NUMBER}_contexts_{DEFINITION
 EVALUATE_GENERATION = True
 PRED_GENERATION_FILE_PATH = f'{OUTPUT_DIR}/{MAX_CONTEXT_NUMBER}_contexts_{DEFINITION_SOURCE}_{MODEL_NAME}_preds.csv'
 
-EPOCHS = 4
+EPOCHS = 2
 # ========================== GENERATION CONFIGS ==========================
 
 # ======================== CLASSIFICATION CONFIGS ========================

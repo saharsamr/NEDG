@@ -7,9 +7,7 @@ import torch
 from tqdm import tqdm
 
 from GNED.data_handler.wiki_dataset import WikiDataset
-from GNED.config import MODEL_GENERATION_NAME, ADDITIONAL_SPECIAL_TOKENS, \
-    MODEL_GENERATION_PATH, OUTPUT_GENERATION_MAX_LENGTH, LEARNING_RATE, INPUT_GENERATION_MAX_LENGTH, \
-    OUTPUT_GENERATION_MIN_LENGTH, TEST_GENERATION_BATCH_SIZE
+from GNED.config import *
 
 
 class T5:
@@ -54,6 +52,7 @@ class T5:
 
     def train(self):
         self.trainer.train()
+        self.trainer.save_model(f'{OUTPUT_DIR}/final_model/')
 
     def set_learnable_params(self, freeze_encoder=True, freeze_decoder=True):
 

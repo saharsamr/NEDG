@@ -10,11 +10,11 @@ from GNED.config import *
 
 def generation_main():
 
-    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
+    train = pd.read_csv(TRAIN_GENERATION_FILE, delimiter='\1').sample(frac=0.1, random_state=43)
     print('train size before dropping NaNs: ', len(train))
-    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
+    test = pd.read_csv(TEST_GENERATION_FILE, delimiter='\1').sample(frac=0.1, random_state=43)
     print('test size before dropping NaNs: ', len(test))
-    valid = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1').sample(frac=0.2, random_state=42)
+    valid = pd.read_csv(VALID_GENERATION_FILE, delimiter='\1').sample(frac=0.1, random_state=43)
     print('valid size before dropping NaNs: ', len(valid))
 
     train = train.dropna()
@@ -41,10 +41,10 @@ def generation_main():
         load_best_model_at_end=True,
         evaluation_strategy='steps',
         do_eval=True,
-        eval_steps=3000,
+        eval_steps=1000,
         save_strategy='steps',
-        save_steps=3000,
-        save_total_limit=5
+        save_steps=1000,
+        save_total_limit=2
     )
 
     print('Initialing the model...')
