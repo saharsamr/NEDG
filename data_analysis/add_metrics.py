@@ -31,7 +31,7 @@ def add_metrics(df):
 
 
 if __name__ == '__main__':
-    data = pd.read_csv(TEST_RESULTS, delimiter='\1', names=['context', 'label', 'model-pred'], header=None)
+    data = pd.read_csv(TEST_RESULTS, delimiter='\1', names=['context', 'label', 'model-pred', 'entity_name'], header=None)
     data = data.fillna('')
     data = add_metrics(data)
     data.to_csv(TEST_ANALYSIS_FILE, sep='\1', index=False)

@@ -9,13 +9,16 @@ from GNED.config import *
 
 class WikiDataset(Dataset):
 
-    def __init__(self, tokenizer, inputs, labels, mask_entity=False, max_length=INPUT_GENERATION_MAX_LENGTH):
+    def __init__(
+      self, tokenizer, inputs, labels, entity_names=None, mask_entity=False, max_length=INPUT_GENERATION_MAX_LENGTH
+    ):
 
         self.inputs = inputs
         self.labels = labels
         self.tokenizer = tokenizer
         self.max_len = max_length
         self.mask_entity = mask_entity
+        self.entity_names = entity_names
 
     def __len__(self):
 
@@ -54,6 +57,7 @@ class WikiDataset(Dataset):
             self.labels[idx], padding='max_length', truncation=True, max_length=OUTPUT_GENERATION_MAX_LENGTH)
         input_text = self.inputs[idx]
 
+
         if self.mask_entity and MASKING_STRATEGY == 'Complete' and random.random() < MASK_PROB:
             input_encodings['input_ids'], input_text = \
                 self.masking_entities(input_encodings['input_ids'], self.inputs[idx], method='complete')
@@ -64,8 +68,11 @@ class WikiDataset(Dataset):
         item = {
             'input_ids': torch.tensor(input_encodings['input_ids']),
             'attention_mask': torch.tensor(input_encodings['attention_mask']),
-            'input_text': input_text
+            'input_text': input_text,
         }
+
+        if self.entity_names:
+            item['entity_name'] = self.entity_names[idx]
 
         if self.labels:
             item['labels'] = torch.tensor(output_encodings['input_ids'])

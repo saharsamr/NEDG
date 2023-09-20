@@ -8,7 +8,7 @@ from nltk.tokenize import word_tokenize
 
 def evaluate_generation(pred_file, delimiter='\1'):
     pred_data = pd.read_csv(
-        pred_file, names=['context', 'label', 'pred'], header=None, delimiter=delimiter, on_bad_lines='skip'
+        pred_file, names=['context', 'label', 'pred', 'entity_name'], header=None, delimiter=delimiter, on_bad_lines='skip'
     )
     print('number of test sample before dropping nan values: ', len(pred_data))
     pred_data.dropna(inplace=True)

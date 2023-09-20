@@ -17,6 +17,7 @@ class T5:
       train_x, train_y,
       test_x, test_y,
       valid_x, valid_y,
+      test_entity_names=None,
       model_name=MODEL_GENERATION_NAME,
       model_load_path=MODEL_GENERATION_PATH,
       load=False
@@ -35,7 +36,7 @@ class T5:
 
         print('Making datasets')
         self.train_dataset = WikiDataset(self.tokenizer, train_x, train_y, mask_entity=True)
-        self.test_dataset = WikiDataset(self.tokenizer, test_x, test_y, mask_entity=False)
+        self.test_dataset = WikiDataset(self.tokenizer, test_x, test_y, entity_names=test_entity_names, mask_entity=False)
         self.valid_dataset = WikiDataset(self.tokenizer, valid_x, valid_y, mask_entity=False)
 
         self.optimizer = AdamW(self.model.parameters(), lr=LEARNING_RATE)
@@ -67,7 +68,7 @@ class T5:
     def pred(self):
 
         test_dataloader = DataLoader(self.test_dataset, batch_size=TEST_GENERATION_BATCH_SIZE, shuffle=False)
-        inputs, labels, predictions = [], [], []
+        inputs, labels, predictions, entity_names = [], [], [], []
         with torch.no_grad():
             for batch in tqdm(test_dataloader):
                 ids = self.model.generate(
@@ -80,7 +81,8 @@ class T5:
                 inputs.extend(batch['input_text'])
                 label = self.tokenizer.batch_decode(batch['labels'], skip_special_tokens=True)
                 labels.extend(label)
-        return predictions, inputs, labels
+                entity_names.extend(batch['entity_name'])
+        return predictions, inputs, labels, entity_names
 
     def save(self):
         pass
