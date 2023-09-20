@@ -19,9 +19,16 @@ ENTITY_CARDINALITY_PATH = f'{dirname}/../data/cardinality.pkl'
 CLASSIFICATION_RESULT_PATH = \
     f'{dirname}/../results/1-context-4epoch-wikidata-con+pred1+pred2-classification-9500/test_result_df.pkl'
 
+MASK_PROB = 0.0
+MASKING_STRATEGY = 'Complete'  # or Complete
+MODEL_GENERATION_NAME = 'facebook/bart-large-cnn'  # facebook/bart-large-cnn or t5-base
+DEFINITION_SOURCE = 'wikidata'  # wikidata or wikipedia
+MODEL_NAME = f'MASK_{MASK_PROB}_{DEFINITION_SOURCE}'
+OUTPUT_DIR = f'{dirname}/../results/{MODEL_GENERATION_NAME.split("/")[-1]}/{MODEL_NAME}'
+MAX_CONTEXT_NUMBER = 1
 
-TEST_RESULTS = 'results/CompleteMasking/MASK_1.0/1_contexts_wikidata_MASK_1.0_preds.csv'
-TEST_ANALYSIS_FILE = 'results/CompleteMasking/MASK_1.0/1_contexts_wikidata_MASK_1.0_analysis.csv'
+TEST_RESULTS = f'{OUTPUT_DIR}/{MAX_CONTEXT_NUMBER}_contexts_{DEFINITION_SOURCE}_{MODEL_NAME}_preds.csv'
+TEST_ANALYSIS_FILE = f'{OUTPUT_DIR}/{MAX_CONTEXT_NUMBER}_contexts_{DEFINITION_SOURCE}_{MODEL_NAME}_analysis.csv'
 
 PLOT_SAVING_PATH = f'{dirname}/../plots/'
 
