@@ -72,7 +72,7 @@ def add_entity_token_count(df, tokenizer):
 
         return entity_end_token_indices[0] - entity_start_token_indices[0] - 1
 
-    dataset = WikiDataset(tokenizer, list(df['context']), list(df['label']), mask_entity=False)
+    dataset = WikiDataset(tokenizer, list(df['context']), list(df['label']), list(df['entity_name']), mask_entity=False)
     entity_token_counts = [
         count_entity_tokens(sample['input_ids'], tokenizer) for sample in tqdm(dataset)]
 
