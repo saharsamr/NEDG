@@ -105,17 +105,16 @@ def add_properties(df):
     return df
 
 
-def properties_correlation(df, model_name):
+def properties_correlation(df, model_name, metric='rouge'):
 
-    for metric in ['bleu', 'rouge', 'bert-score']:
-        for property in [
-            'description_length', 'description_context_overlap_ratio', 'entity_token_count',
-            'popularity', 'popularity_log'
-        ]:
-            print(
-                f'{metric}: {model_name} vs {property}: '
-                f''f'{compute_correlation(df[metric], df[property])}'
-            )
+    for property in [
+        'description_length', 'description_context_overlap_ratio', 'entity_token_count',
+        'popularity', 'popularity_log'
+    ]:
+        print(
+            f'{metric}: {model_name} vs {property}: '
+            f''f'{compute_correlation(df[metric], df[property])}'
+        )
 
 
 def metrics_mean_std(df, model_name):
