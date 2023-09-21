@@ -28,15 +28,15 @@ def find_entity_popularity():
 
 
 def add_description_length(df):
-    df['description_length'] = df['label'].apply(lambda x: len(str(x).split()))
+    df['description_length'] = df['label'].apply(lambda x: len(x.split()))
     return df
 
 
 def add_description_context_overlap_ratio(df):
     df['description_context_overlap_ratio'] = df.apply(
         lambda x:
-        len(set(str(x['label']).split()) & set(x['context'].split())) / len(set(str(x['label']).split())) if len(
-            set(str(x['label']).split())) != 0 else 0
+        len(set(x['label'].split()) & set(x['context'].split())) / len(set(x['label'].split())) if len(
+            set(x['label'].split())) != 0 else 0
         , axis=1)
     return df
 
@@ -64,6 +64,7 @@ def add_entity_token_count(df, tokenizer):
         entity_end_token_indices = [i for i, tok_id in enumerate(context_tok_ids) if tok_id == entity_end_token_id]
 
         if len(entity_start_token_indices) != 1 or len(entity_end_token_indices) != 1:
+            print('multiple entities in context')
             return -1
         else:
             return entity_end_token_indices[0] - entity_start_token_indices[0] - 1
@@ -152,14 +153,21 @@ def popularity_analysis(df):
     popularity_metrics_ztest(popular, unpopular, MODEL_NAME)
 
 
-find_entity_popularity()
-data = pd.read_csv(TEST_ANALYSIS_FILE, delimiter='\1')
-print(len(data))
-data = add_properties(data)
-print(len(data))
-data = data[data['entity_token_count'] != -1]
-print(len(data))
-properties_correlation(data, MODEL_NAME)
-metrics_mean_std(data, MODEL_NAME)
-popularity_analysis(data)
-data.to_csv(TEST_ANALYSIS_FILE, sep='\1', index=False)
+if __name__ == '__main__':
+
+    find_entity_popularity()
+
+    data = pd.read_csv(TEST_ANALYSIS_FILE, delimiter='\1')
+    data['label'].fillna('', inplace=True)
+    data['entity_name'].fillna('', inplace=True)
+
+    print(len(data))
+    data = add_properties(data)
+    data = data[data['entity_token_count'] != -1]
+    print(len(data))
+
+    properties_correlation(data, MODEL_NAME)
+    metrics_mean_std(data, MODEL_NAME)
+    popularity_analysis(data)
+
+    data.to_csv(TEST_ANALYSIS_FILE, sep='\1', index=False)
