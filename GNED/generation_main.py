@@ -27,7 +27,10 @@ def generation_main():
     train_x, train_y = list(train['contexts']), list(train['entity_description'])
     test_x, test_y = list(test['contexts']), list(test['entity_description'])
     valid_x, valid_y = list(valid['contexts']), list(valid['entity_description'])
+
+    train_entity_names = list(train['entity_name'])
     test_entity_names = list(test['entity_name'])
+    valid_entity_names = list(valid['entity_name'])
 
     training_args = TrainingArguments(
         num_train_epochs=EPOCHS,
@@ -55,7 +58,7 @@ def generation_main():
             train_x, train_y,
             test_x, test_y,
             valid_x, valid_y,
-            test_entity_names=test_entity_names,
+            train_entity_names, test_entity_names, valid_entity_names,
             load=LOAD_GENERATION_MODEL
         )
     elif 't5' in MODEL_GENERATION_NAME:
@@ -64,7 +67,7 @@ def generation_main():
             train_x, train_y,
             test_x, test_y,
             valid_x, valid_y,
-            test_entity_names=test_entity_names,
+            train_entity_names, test_entity_names, valid_entity_names,
             load=LOAD_GENERATION_MODEL
         )
     else:

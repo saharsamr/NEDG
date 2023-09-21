@@ -17,7 +17,9 @@ class BART:
       train_x, train_y,
       test_x, test_y,
       valid_x, valid_y,
-      test_entity_names=None,
+      train_entity_names,
+      test_entity_names,
+      valid_entity_names,
       model_name=MODEL_GENERATION_NAME,
       model_load_path=MODEL_GENERATION_PATH,
       load=False
@@ -35,9 +37,9 @@ class BART:
         self.model.resize_token_embeddings(len(self.tokenizer))
 
         print('Making datasets')
-        self.train_dataset = WikiDataset(self.tokenizer, train_x, train_y, mask_entity=True)
-        self.test_dataset = WikiDataset(self.tokenizer, test_x, test_y, entity_names=test_entity_names, mask_entity=False)
-        self.valid_dataset = WikiDataset(self.tokenizer, valid_x, valid_y, mask_entity=False)
+        self.train_dataset = WikiDataset(self.tokenizer, train_x, train_y, train_entity_names, mask_entity=True)
+        self.test_dataset = WikiDataset(self.tokenizer, test_x, test_y, test_entity_names, mask_entity=False)
+        self.valid_dataset = WikiDataset(self.tokenizer, valid_x, valid_y, valid_entity_names, mask_entity=False)
 
         self.optimizer = AdamW(self.model.parameters(), lr=LEARNING_RATE)
 

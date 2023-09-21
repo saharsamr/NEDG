@@ -10,7 +10,7 @@ from GNED.config import *
 class WikiDataset(Dataset):
 
     def __init__(
-      self, tokenizer, inputs, labels, entity_names=None, mask_entity=False, max_length=INPUT_GENERATION_MAX_LENGTH
+      self, tokenizer, inputs, labels, entity_names, mask_entity=False, max_length=INPUT_GENERATION_MAX_LENGTH
     ):
 
         self.inputs = inputs
@@ -56,6 +56,7 @@ class WikiDataset(Dataset):
         output_encodings = self.tokenizer(
             self.labels[idx], padding='max_length', truncation=True, max_length=OUTPUT_GENERATION_MAX_LENGTH)
         input_text = self.inputs[idx]
+        entity_name = self.entity_names[idx]
 
 
         if self.mask_entity and MASKING_STRATEGY == 'Complete' and random.random() < MASK_PROB:
@@ -69,10 +70,8 @@ class WikiDataset(Dataset):
             'input_ids': torch.tensor(input_encodings['input_ids']),
             'attention_mask': torch.tensor(input_encodings['attention_mask']),
             'input_text': input_text,
+            'entity_name': entity_name
         }
-
-        if self.entity_names:
-            item['entity_name'] = self.entity_names[idx]
 
         if self.labels:
             item['labels'] = torch.tensor(output_encodings['input_ids'])
