@@ -64,8 +64,7 @@ def add_entity_token_count(df, tokenizer):
         entity_end_token_indices = [i for i, tok_id in enumerate(context_tok_ids) if tok_id == entity_end_token_id]
 
         if len(entity_start_token_indices) != 1 or len(entity_end_token_indices) != 1:
-            print('multiple entities in context')
-            return -1
+            return np.mean([e - s - 1 for e, s in zip(entity_end_token_indices, entity_start_token_indices)])
         else:
             return entity_end_token_indices[0] - entity_start_token_indices[0] - 1
 
