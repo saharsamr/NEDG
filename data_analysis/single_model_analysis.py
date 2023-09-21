@@ -28,15 +28,15 @@ def find_entity_popularity():
 
 
 def add_description_length(df):
-    df['description_length'] = df['label'].apply(lambda x: len(x.split()))
+    df['description_length'] = df['label'].apply(lambda x: len(str(x).split()))
     return df
 
 
 def add_description_context_overlap_ratio(df):
     df['description_context_overlap_ratio'] = df.apply(
         lambda x:
-        len(set(x['label'].split()) & set(x['context'].split())) / len(set(x['label'].split())) if len(
-            set(x['label'].split())) != 0 else 0
+        len(set(str(x['label']).split()) & set(x['context'].split())) / len(set(str(x['label']).split())) if len(
+            set(str(x['label']).split())) != 0 else 0
         , axis=1)
     return df
 
