@@ -63,10 +63,14 @@ def add_entity_token_count(df, tokenizer):
         entity_start_token_indices = [i for i, tok_id in enumerate(context_tok_ids) if tok_id == entity_start_token_id]
         entity_end_token_indices = [i for i, tok_id in enumerate(context_tok_ids) if tok_id == entity_end_token_id]
 
-        if len(entity_start_token_indices) != 1 or len(entity_end_token_indices) != 1:
+        if len(entity_start_token_indices) == 0 or len(entity_end_token_indices) == 0:
+            print('Entity token not found in context.')
+            return -1
+
+        if len(entity_start_token_indices) > 1 or len(entity_end_token_indices) > 1:
             return np.mean([e - s - 1 for e, s in zip(entity_end_token_indices, entity_start_token_indices)])
-        else:
-            return entity_end_token_indices[0] - entity_start_token_indices[0] - 1
+
+        return entity_end_token_indices[0] - entity_start_token_indices[0] - 1
 
     dataset = WikiDataset(tokenizer, list(df['context']), list(df['label']), mask_entity=False)
     entity_token_counts = [
@@ -152,18 +156,25 @@ def popularity_analysis(df):
     popularity_metrics_ztest(popular, unpopular, MODEL_NAME)
 
 
+def clean_data(df):
+
+    print(len(df))
+    df['label'].fillna('', inplace=True)
+    df['entity_name'].fillna('', inplace=True)
+    df['entity_token_count'].fillna(0, inplace=True)
+    df = add_properties(df)
+    df = df[df['entity_token_count'] != -1]
+    print(len(df))
+    
+    return df
+
+
 if __name__ == '__main__':
 
     find_entity_popularity()
 
     data = pd.read_csv(TEST_ANALYSIS_FILE, delimiter='\1')
-    data['label'].fillna('', inplace=True)
-    data['entity_name'].fillna('', inplace=True)
-
-    print(len(data))
-    data = add_properties(data)
-    data = data[data['entity_token_count'] != -1]
-    print(len(data))
+    data = clean_data(data)
 
     properties_correlation(data, MODEL_NAME)
     metrics_mean_std(data, MODEL_NAME)
