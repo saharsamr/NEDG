@@ -156,25 +156,19 @@ def popularity_analysis(df):
     popularity_metrics_ztest(popular, unpopular, MODEL_NAME)
 
 
-def clean_data(df):
-
-    print(len(df))
-    df['label'].fillna('', inplace=True)
-    df['entity_name'].fillna('', inplace=True)
-    df['entity_token_count'].fillna(0, inplace=True)
-    df = add_properties(df)
-    df = df[df['entity_token_count'] != -1]
-    print(len(df))
-    
-    return df
-
 
 if __name__ == '__main__':
 
     find_entity_popularity()
 
     data = pd.read_csv(TEST_ANALYSIS_FILE, delimiter='\1')
-    data = clean_data(data)
+    data['label'].fillna('', inplace=True)
+    data['entity_name'].fillna('', inplace=True)
+    print(len(data))
+
+    data = add_properties(data)
+    data = data[data['entity_token_count'] != -1]
+    print(len(data))
 
     properties_correlation(data, MODEL_NAME)
     metrics_mean_std(data, MODEL_NAME)
