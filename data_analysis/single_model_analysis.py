@@ -1,4 +1,7 @@
+import json
 import pickle
+from collections import defaultdict
+
 import numpy as np
 import pandas as pd
 from statsmodels.stats.weightstats import ztest
@@ -9,6 +12,19 @@ from GNED.config import INPUT_GENERATION_MAX_LENGTH, ADDITIONAL_SPECIAL_TOKENS
 from data_analysis.utils import compute_correlation
 from GNED.data_handler.wiki_dataset import WikiDataset
 from transformers import BartTokenizerFast, T5TokenizerFast
+
+
+def find_entity_popularity():
+
+    title_to_popularity = defaultdict(int)
+
+    with open(MAIN_JSONL_PATH, 'r') as f:
+        for line in tqdm(f.readlines()):
+            data = json.loads(line)
+            title_to_popularity[data['wikipedia_title']] = len(data['contexts'])
+
+    with open(ENTITY_POPULARITY_PATH, 'wb') as file:
+        pickle.dump(title_to_popularity, file)
 
 
 def add_description_length(df):
@@ -29,7 +45,7 @@ def add_popularity(df):
     with open(ENTITY_POPULARITY_PATH, 'rb') as f:
         popularity = pickle.load(f)
 
-    df['popularity'] = df['title'].apply(lambda x: popularity[x])
+    df['popularity'] = df['entity_name'].apply(lambda x: popularity[x])
     return df
 
 
@@ -136,6 +152,7 @@ def popularity_analysis(df):
     popularity_metrics_ztest(popular, unpopular, MODEL_NAME)
 
 
+find_entity_popularity()
 data = pd.read_csv(TEST_ANALYSIS_FILE, delimiter='\1')
 print(len(data))
 data = add_properties(data)

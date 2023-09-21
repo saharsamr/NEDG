@@ -7,7 +7,7 @@ import pymongo
 from scipy import stats
 import numpy as np
 
-from data_analysis.config import CLASSIFICATION_RESULT_PATH, JSONL_PATH, \
+from data_analysis.config import CLASSIFICATION_RESULT_PATH, MAIN_JSONL_PATH, \
     ENTITY_ALIASES_DICT_PATH, ENTITY_CARDINALITY_PATH
 from data_analysis.utils import compute_metrics, compute_correlation, \
     add_bleu_rouge_to_df, remove_empty_preds, compute_metrics_for_every_fraction

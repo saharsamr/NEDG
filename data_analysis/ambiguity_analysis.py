@@ -225,7 +225,7 @@ def add_metrics(most_popular_df_path, second_most_popular_df_path, delimiter='\1
 print('Extracting cardinality and popularity')
 extract_cardinality_and_popularity(TRAIN_JSONL_PATH, TEST_JSONL_PATH, VAL_JSONL_PATH)
 print('Extracting entity specific context')
-extract_entity_specific_context(ENTITY_NAME_CARDINALITY_PATH, JSONL_PATH)
+extract_entity_specific_context(ENTITY_NAME_CARDINALITY_PATH, MAIN_JSONL_PATH)
 print('Making CPE and CME dataset for cardinality analysis')
 make_cpe_cme_dataset_for_cardinality_analysis(
     'results/1-context-1epoch-wikidata-CPE',

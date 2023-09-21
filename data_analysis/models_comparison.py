@@ -104,6 +104,11 @@ def popularity_models_metrics_ttest(popular_df, unpopular_df):
             print(f"unpopular-{model1}-{model2}-{metric} t-test: statistic={stat:.4f}, p-value={p_value}")
 
 
+def compare_highest_popularity():
+    # a function to compare the evaluation of models performance in each decile.
+    pass
+
+
 def popularity_analysis(df):
 
     decile_length = len(df) // 10
@@ -116,6 +121,7 @@ def popularity_analysis(df):
     popularity_metric_differences_boxplot(popular, unpopular)
     popularity_plot_models_properties(popular, unpopular)
     popularity_models_metrics_ttest(popular, unpopular)
+    compare_highest_popularity()
 
 
 data = pd.read_csv(TEST_ANALYSIS_FILE, delimiter='\1')

@@ -3,8 +3,8 @@ dirname = os.path.dirname(__file__)
 
 LOGGING_DIR = f'{dirname}/../logs'
 
-JSONL_PATH = f'{dirname}/../data/wikipedia/wiki_dump.jsonl'
-ENTITY_POPULARITY_PATH = f'{dirname}/../data/entity_popularity.pkl'
+MAIN_JSONL_PATH = f'{dirname}/../data/wikipedia/wiki_dump.jsonl'
+ENTITY_POPULARITY_PATH = f'{dirname}/../results/entity_popularity.pkl'
 ENTITY_NAME_CARDINALITY_PATH = f'{dirname}/../data/cardinality.json'
 ENTITY_PAGE_VIEW_PATH = f'{dirname}/../data/title_to_view.json'
 ENTITY_WIKIDATA_ID_PATH = f'{dirname}/../data/title_to_wikidata_id.json'
