@@ -52,9 +52,9 @@ class WikiDataset(Dataset):
     def __getitem__(self, idx):
 
         input_encodings = self.tokenizer(
-            self.inputs[idx], padding='max_length', truncation=True, max_length=INPUT_GENERATION_MAX_LENGTH)
+            self.inputs[idx], padding=False, truncation=True, max_length=INPUT_GENERATION_MAX_LENGTH)
         output_encodings = self.tokenizer(
-            self.labels[idx], padding='max_length', truncation=True, max_length=OUTPUT_GENERATION_MAX_LENGTH)
+            self.labels[idx], padding=False, truncation=True, max_length=OUTPUT_GENERATION_MAX_LENGTH)
         input_text = self.inputs[idx]
         entity_name = self.entity_names[idx]
 
