@@ -59,14 +59,9 @@ class GPT2:
 
     def set_learnable_params(self, freeze_encoder=True, freeze_decoder=True):
 
-        for param in self.model.get_encoder().parameters():
-            param.requires_grad = not freeze_encoder
-        for param in self.model.get_decoder().parameters():
-            param.requires_grad = not freeze_decoder
-
-        for param in self.model.wte.parameters():
+        for param in self.model.parameters():
             param.requires_grad = True
-
+            
     def pred(self):
 
         test_dataloader = DataLoader(self.test_dataset, batch_size=TEST_GENERATION_BATCH_SIZE, shuffle=False)
