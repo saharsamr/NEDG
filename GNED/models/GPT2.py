@@ -27,7 +27,7 @@ class GPT2:
 
         self.model_name = model_name
         self.tokenizer = GPT2TokenizerFast.from_pretrained(
-            self.model_name, model_max_length=INPUT_GENERATION_MAX_LENGTH, padding=True, truncation=True,
+            self.model_name, model_max_length=INPUT_GENERATION_MAX_LENGTH, padding=False, truncation=True,
         )
         self.tokenizer.add_special_tokens({
             'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS,
@@ -64,7 +64,7 @@ class GPT2:
 
         for param in self.model.parameters():
             param.requires_grad = True
-            
+
     def pred(self):
 
         test_dataloader = DataLoader(self.test_dataset, batch_size=TEST_GENERATION_BATCH_SIZE, shuffle=False)
