@@ -1,4 +1,4 @@
-from transformers import GPT2TokenizerFast, GPT2Model
+from transformers import GPT2TokenizerFast, GPT2LMHeadModel
 from transformers.optimization import AdamW
 from transformers import EarlyStoppingCallback
 from transformers import Trainer
@@ -34,9 +34,9 @@ class GPT2:
             'pad_token': '<pad>',
         })
         if load:
-            self.model = GPT2Model.from_pretrained(model_load_path)
+            self.model = GPT2LMHeadModel.from_pretrained(model_load_path)
         else:
-            self.model = GPT2Model.from_pretrained(self.model_name)
+            self.model = GPT2LMHeadModel.from_pretrained(self.model_name)
         self.model.resize_token_embeddings(len(self.tokenizer))
 
         print('Making datasets')
