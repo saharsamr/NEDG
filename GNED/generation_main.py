@@ -5,6 +5,7 @@ from GNED.utils.save_data import save_generation_predictions
 from GNED.utils.metrics import evaluate_generation
 from GNED.models.BART import BART
 from GNED.models.T5 import T5
+from GNED.models.GPT2 import GPT2
 from GNED.config import *
 
 
@@ -63,6 +64,15 @@ def generation_main():
         )
     elif 't5' in MODEL_GENERATION_NAME:
         model = T5(
+            training_args,
+            train_x, train_y,
+            test_x, test_y,
+            valid_x, valid_y,
+            train_entity_names, test_entity_names, valid_entity_names,
+            load=LOAD_GENERATION_MODEL
+        )
+    elif 'gpt2' in MODEL_GENERATION_NAME:
+        model = GPT2(
             training_args,
             train_x, train_y,
             test_x, test_y,
