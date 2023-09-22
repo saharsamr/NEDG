@@ -64,7 +64,7 @@ class GPT2:
 
         for param in self.model.parameters():
             param.requires_grad = True
-        for param in self.model.wpe.parameters():
+        for param in self.model.transformer.wpe.parameters():
             param.requires_grad = False
 
     def pred(self):
