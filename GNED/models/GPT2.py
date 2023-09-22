@@ -64,7 +64,7 @@ class GPT2:
 
         for param in self.model.parameters():
             param.requires_grad = True
-            
+
     def pred(self):
 
         test_dataloader = DataLoader(self.test_dataset, batch_size=TEST_GENERATION_BATCH_SIZE, shuffle=False)
