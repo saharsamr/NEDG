@@ -64,6 +64,9 @@ class GPT2:
         for param in self.model.get_decoder().parameters():
             param.requires_grad = not freeze_decoder
 
+        for param in self.model.wte.parameters():
+            param.requires_grad = True
+
     def pred(self):
 
         test_dataloader = DataLoader(self.test_dataset, batch_size=TEST_GENERATION_BATCH_SIZE, shuffle=False)
