@@ -29,7 +29,10 @@ class GPT2:
         self.tokenizer = GPT2TokenizerFast.from_pretrained(
             self.model_name, model_max_length=INPUT_GENERATION_MAX_LENGTH, padding=True, truncation=True,
         )
-        self.tokenizer.add_special_tokens({'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS})
+        self.tokenizer.add_special_tokens({
+            'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS,
+            'pad_token': '<pad>',
+        })
         if load:
             self.model = GPT2Model.from_pretrained(model_load_path)
         else:
