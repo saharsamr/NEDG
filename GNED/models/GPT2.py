@@ -33,8 +33,8 @@ class GPT2:
         self.tokenizer.add_special_tokens({
             'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS,
             'pad_token': '<pad>',
-            'bos_token': '<bos>',
-            'eos_token': '<eos>'
+            'bos_token': '<cntxt>',
+            'eos_token': '<dscrp>'
         })
         if load:
             self.model = GPT2LMHeadModel.from_pretrained(model_load_path)
@@ -80,14 +80,14 @@ class GPT2:
         with torch.no_grad():
             for batch in tqdm(test_dataloader):
                 ids = self.model.generate(
-                    batch['input_ids'].cuda(), min_length=OUTPUT_GENERATION_MIN_LENGTH
-                    , max_length=OUTPUT_GENERATION_MAX_LENGTH
+                    batch['actual_input'].cuda(), attention_mask=batch['actual_attention_mask'].cuda(),
+                    min_length=OUTPUT_GENERATION_MIN_LENGTH, max_length=OUTPUT_GENERATION_MAX_LENGTH
                 )[0]
                 preds = self.tokenizer.batch_decode(ids, skip_special_tokens=True)
                 predictions.extend(preds)
                 # input_ = self.tokenizer.batch_decode(batch['input_ids'], skip_special_tokens=False)
                 inputs.extend(batch['input_text'])
-                label = self.tokenizer.batch_decode(batch['labels'], skip_special_tokens=True)
+                label = self.tokenizer.batch_decode(batch['target_output'], skip_special_tokens=True)
                 labels.extend(label)
                 entity_names.extend(batch['entity_name'])
         return predictions, inputs, labels, entity_names
