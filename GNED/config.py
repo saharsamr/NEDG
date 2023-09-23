@@ -33,12 +33,12 @@ VALID_GENERATION_FILE = f'{DATA_GENERATION_FOLDER}{MAX_CONTEXT_NUMBER}_contexts_
 
 if MAX_CONTEXT_NUMBER == 1:
     if 'gpt' in MODEL_GENERATION_NAME:
-        ADDITIONAL_SPECIAL_TOKENS = ['<NE>', '</NE>', '<dscrp>', '<cntxt>']
+        ADDITIONAL_SPECIAL_TOKENS = ['<NE>', '</NE>', '<entity_description>', '<entity_context>']
     else:
         ADDITIONAL_SPECIAL_TOKENS = ['<NE>', '</NE>']
 else:
     if 'gpt' in MODEL_GENERATION_NAME:
-        ADDITIONAL_SPECIAL_TOKENS = ['<NE>', '</NE>', '<dscrp>', '<cntxt>', '<CNTXT>', '</CNTXT>']
+        ADDITIONAL_SPECIAL_TOKENS = ['<NE>', '</NE>', '<entity_description>', '<entity_context>', '<CNTXT>', '</CNTXT>']
     else:
         ADDITIONAL_SPECIAL_TOKENS = ['<NE>', '</NE>', '<CNTXT>', '</CNTXT>']
 

@@ -21,7 +21,7 @@ class WikiDataset(Dataset):
         self.entity_names = entity_names
         self.is_gpt = is_gpt
         if self.is_gpt:
-            self.description_token = self.tokenizer.convert_tokens_to_ids('<dscrp>')
+            self.description_token = self.tokenizer.convert_tokens_to_ids('<entity_description>')
 
     def __len__(self):
 
@@ -40,32 +40,39 @@ class WikiDataset(Dataset):
 
         for st, et in zip(entity_start_token_indices, entity_end_token_indices):
             if method == 'complete':
-                new_input_ids[st+1:et] = [self.tokenizer.convert_tokens_to_ids('<mask>') for _ in range(st+1, et)]
+                new_input_ids[st + 1:et] = [self.tokenizer.convert_tokens_to_ids('<mask>') for _ in range(st + 1, et)]
             if method == 'partial':
-                new_input_ids[st+1:et] = [
+                new_input_ids[st + 1:et] = [
                     self.tokenizer.convert_tokens_to_ids('<mask>') if random.random() < MASK_PROB else
-                    new_input_ids[i] for i in range(st+1, et)]
+                    new_input_ids[i] for i in range(st + 1, et)]
 
         entity_names = re.findall(r'<NE>(.*?)</NE>', input_text)
         for name, st, et in zip(entity_names, entity_start_token_indices, entity_end_token_indices):
-            new_input_text = new_input_text.replace(f'<NE>{name}</NE>', f'<NE>{"<mask>"*len(range(st+1, et))}</NE>')
+            new_input_text = new_input_text.replace(f'<NE>{name}</NE>', f'<NE>{"<mask>" * len(range(st + 1, et))}</NE>')
 
         return new_input_ids, new_input_text
 
     def __getitem__(self, idx):
 
         if self.is_gpt:
-            text = '<cntxt> ' + self.inputs[idx] + ' <dscrp> ' + self.labels[idx]
+            input_encodings = self.tokenizer(
+                self.inputs[idx], padding=False, truncation=True, max_length=INPUT_GENERATION_MAX_LENGTH)
+
+            output_encodings = self.tokenizer(
+                self.labels[idx], padding=False, truncation=True, max_length=OUTPUT_GENERATION_MAX_LENGTH)
+
+            text = '<entity_context>' + self.tokenizer.decode(input_encodings) + \
+                   '<entity_description>' + self.tokenizer.decode(output_encodings)
             input_encodings = self.tokenizer(
                 text, padding='max_length', truncation=True,
-                max_length=INPUT_GENERATION_MAX_LENGTH+OUTPUT_GENERATION_MAX_LENGTH+2
+                max_length=INPUT_GENERATION_MAX_LENGTH + OUTPUT_GENERATION_MAX_LENGTH + 2
             )
         else:
             input_encodings = self.tokenizer(
                 self.inputs[idx], padding='max_length', truncation=True, max_length=INPUT_GENERATION_MAX_LENGTH)
 
-        output_encodings = self.tokenizer(
-            self.labels[idx], padding='max_length', truncation=True, max_length=OUTPUT_GENERATION_MAX_LENGTH)
+            output_encodings = self.tokenizer(
+                self.labels[idx], padding='max_length', truncation=True, max_length=OUTPUT_GENERATION_MAX_LENGTH)
         input_text = self.inputs[idx]
         entity_name = self.entity_names[idx]
 
@@ -86,8 +93,8 @@ class WikiDataset(Dataset):
         if self.is_gpt:
             item['target_output'] = torch.tensor(output_encodings['input_ids'])
             description_token = input_encodings['input_ids'].index(self.description_token)
-            item['actual_input'] = torch.tensor(input_encodings['input_ids'][:description_token+1])
-            item['actual_attention_mask'] = torch.tensor(input_encodings['attention_mask'][:description_token+1])
+            item['actual_input'] = torch.tensor(input_encodings['input_ids'][:description_token + 1])
+            item['actual_attention_mask'] = torch.tensor(input_encodings['attention_mask'][:description_token + 1])
 
         if self.labels:
             if self.is_gpt:
@@ -96,6 +103,3 @@ class WikiDataset(Dataset):
                 item['labels'] = torch.tensor(output_encodings['input_ids'])
 
         return item
-
-
-
