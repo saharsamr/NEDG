@@ -83,7 +83,9 @@ class WikiDataset(Dataset):
 
         if self.is_gpt:
             item['target_output'] = torch.tensor(output_encodings['input_ids'])
-            eos_token_idx = input_encodings['input_ids'].index(self.tokenizer.eos_token)
+            eos_token_idx = input_encodings['input_ids'].index(
+                self.tokenizer.convert_tokens_to_ids(self.tokenizer.eos_token)
+            )
             item['actual_input'] = torch.tensor(input_encodings['input_ids'][:eos_token_idx+1])
             item['actual_attention_mask'] = torch.tensor(input_encodings['attention_mask'][:eos_token_idx+1])
 
