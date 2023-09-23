@@ -96,10 +96,7 @@ class WikiDataset(Dataset):
             item['actual_input'] = torch.tensor(input_encodings['input_ids'][:description_token + 1])
             item['actual_attention_mask'] = torch.tensor(input_encodings['attention_mask'][:description_token + 1])
 
-        if self.labels:
-            if self.is_gpt:
-                item['labels'] = torch.tensor(input_encodings['input_ids'])
-            else:
-                item['labels'] = torch.tensor(output_encodings['input_ids'])
+        if self.labels and not self.is_gpt:
+            item['labels'] = torch.tensor(output_encodings['input_ids'])
 
         return item
