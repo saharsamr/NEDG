@@ -55,7 +55,7 @@ class WikiDataset(Dataset):
     def __getitem__(self, idx):
 
         if self.is_gpt:
-            text = '<cntxt>' + self.inputs[idx] + '<dscrp>' + self.labels[idx]
+            text = '<cntxt> ' + self.inputs[idx] + ' <dscrp> ' + self.labels[idx]
             input_encodings = self.tokenizer(
                 text, padding='max_length', truncation=True,
                 max_length=INPUT_GENERATION_MAX_LENGTH+OUTPUT_GENERATION_MAX_LENGTH+2
