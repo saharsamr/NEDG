@@ -21,7 +21,7 @@ class WikiDataset(Dataset):
         self.entity_names = entity_names
         self.is_gpt = is_gpt
         if self.is_gpt:
-            self.eos_token_id = self.tokenizer.convert_tokens_to_ids(self.tokenizer.eos_token)
+            self.description_token = self.tokenizer.convert_tokens_to_ids(self.tokenizer.description_token)
 
     def __len__(self):
 
@@ -55,7 +55,7 @@ class WikiDataset(Dataset):
     def __getitem__(self, idx):
 
         if self.is_gpt:
-            text = self.tokenizer.bos_token + self.inputs[idx] + self.tokenizer.eos_token + self.labels[idx]
+            text = self.tokenizer.context_token + self.inputs[idx] + self.tokenizer.description_token + self.labels[idx]
             input_encodings = self.tokenizer(
                 text, padding='max_length', truncation=True,
                 max_length=INPUT_GENERATION_MAX_LENGTH+OUTPUT_GENERATION_MAX_LENGTH+2
@@ -85,9 +85,9 @@ class WikiDataset(Dataset):
 
         if self.is_gpt:
             item['target_output'] = torch.tensor(output_encodings['input_ids'])
-            eos_token_idx = input_encodings['input_ids'].index(self.eos_token_id)
-            item['actual_input'] = torch.tensor(input_encodings['input_ids'][:eos_token_idx+1])
-            item['actual_attention_mask'] = torch.tensor(input_encodings['attention_mask'][:eos_token_idx+1])
+            description_token = input_encodings['input_ids'].index(self.description_token)
+            item['actual_input'] = torch.tensor(input_encodings['input_ids'][:description_token+1])
+            item['actual_attention_mask'] = torch.tensor(input_encodings['attention_mask'][:description_token+1])
 
         if self.labels:
             if self.is_gpt:

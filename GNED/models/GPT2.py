@@ -28,13 +28,13 @@ class GPT2:
         self.model_name = model_name
         self.tokenizer = GPT2TokenizerFast.from_pretrained(
             self.model_name, model_max_length=INPUT_GENERATION_MAX_LENGTH+OUTPUT_GENERATION_MAX_LENGTH+2,
-            padding=True, truncation=True,
+            padding=True, truncation=True, pad_token='<pad>'
         )
         self.tokenizer.add_special_tokens({
             'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS,
             'pad_token': '<pad>',
-            'bos_token': '<cntxt>',
-            'eos_token': '<dscrp>'
+            'context_token': '<cntxt>',
+            'description_token': '<dscrp>'
         })
         if load:
             self.model = GPT2LMHeadModel.from_pretrained(model_load_path)
