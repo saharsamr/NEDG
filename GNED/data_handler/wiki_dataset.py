@@ -61,8 +61,8 @@ class WikiDataset(Dataset):
             output_encodings = self.tokenizer(
                 self.labels[idx], padding=False, truncation=True, max_length=OUTPUT_GENERATION_MAX_LENGTH)
 
-            text = '<entity_context>' + self.tokenizer.decode(input_encodings) + \
-                   '<entity_description>' + self.tokenizer.decode(output_encodings)
+            text = '<entity_context>' + self.tokenizer.decode(input_encodings['input_ids']) + \
+                   '<entity_description>' + self.tokenizer.decode(output_encodings['input_ids'])
             input_encodings = self.tokenizer(
                 text, padding='max_length', truncation=True,
                 max_length=INPUT_GENERATION_MAX_LENGTH + OUTPUT_GENERATION_MAX_LENGTH + 2
