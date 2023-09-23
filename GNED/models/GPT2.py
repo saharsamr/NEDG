@@ -27,11 +27,14 @@ class GPT2:
 
         self.model_name = model_name
         self.tokenizer = GPT2TokenizerFast.from_pretrained(
-            self.model_name, model_max_length=INPUT_GENERATION_MAX_LENGTH, padding=True, truncation=True,
+            self.model_name, model_max_length=INPUT_GENERATION_MAX_LENGTH+OUTPUT_GENERATION_MAX_LENGTH+2,
+            padding=True, truncation=True,
         )
         self.tokenizer.add_special_tokens({
             'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS,
             'pad_token': '<pad>',
+            'bos_token': '<bos>',
+            'eos_token': '<eos>'
         })
         if load:
             self.model = GPT2LMHeadModel.from_pretrained(model_load_path)
@@ -40,9 +43,12 @@ class GPT2:
         self.model.resize_token_embeddings(len(self.tokenizer))
 
         print('Making datasets')
-        self.train_dataset = WikiDataset(self.tokenizer, train_x, train_y, train_entity_names, mask_entity=True)
-        self.test_dataset = WikiDataset(self.tokenizer, test_x, test_y, test_entity_names, mask_entity=False)
-        self.valid_dataset = WikiDataset(self.tokenizer, valid_x, valid_y, valid_entity_names, mask_entity=False)
+        self.train_dataset = WikiDataset(
+            self.tokenizer, train_x, train_y, train_entity_names, mask_entity=True, is_gpt=True)
+        self.test_dataset = WikiDataset(
+            self.tokenizer, test_x, test_y, test_entity_names, mask_entity=False, is_gpt=True)
+        self.valid_dataset = WikiDataset(
+            self.tokenizer, valid_x, valid_y, valid_entity_names, mask_entity=False, is_gpt=True)
 
         self.optimizer = AdamW(self.model.parameters(), lr=LEARNING_RATE)
 
@@ -76,7 +82,7 @@ class GPT2:
                 ids = self.model.generate(
                     batch['input_ids'].cuda(), min_length=OUTPUT_GENERATION_MIN_LENGTH
                     , max_length=OUTPUT_GENERATION_MAX_LENGTH
-                )
+                )[0]
                 preds = self.tokenizer.batch_decode(ids, skip_special_tokens=True)
                 predictions.extend(preds)
                 # input_ = self.tokenizer.batch_decode(batch['input_ids'], skip_special_tokens=False)

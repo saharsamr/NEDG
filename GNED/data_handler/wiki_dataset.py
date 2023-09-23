@@ -10,7 +10,7 @@ from GNED.config import *
 class WikiDataset(Dataset):
 
     def __init__(
-      self, tokenizer, inputs, labels, entity_names, mask_entity=False, max_length=INPUT_GENERATION_MAX_LENGTH
+      self, tokenizer, inputs, labels, entity_names, mask_entity=False, max_length=None, is_gpt=False
     ):
 
         self.inputs = inputs
@@ -19,6 +19,7 @@ class WikiDataset(Dataset):
         self.max_len = max_length
         self.mask_entity = mask_entity
         self.entity_names = entity_names
+        self.is_gpt = is_gpt
 
     def __len__(self):
 
@@ -51,13 +52,20 @@ class WikiDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        input_encodings = self.tokenizer(
-            self.inputs[idx], padding='max_length', truncation=True, max_length=INPUT_GENERATION_MAX_LENGTH)
+        if self.is_gpt:
+            text = self.tokenizer.bos_token + self.inputs[idx] + self.tokenizer.eos_token + self.labels[idx]
+            input_encodings = self.tokenizer(
+                text, padding='max_length', truncation=True,
+                max_length=INPUT_GENERATION_MAX_LENGTH+OUTPUT_GENERATION_MAX_LENGTH+2
+            )
+        else:
+            input_encodings = self.tokenizer(
+                self.inputs[idx], padding='max_length', truncation=True, max_length=INPUT_GENERATION_MAX_LENGTH)
+
         output_encodings = self.tokenizer(
             self.labels[idx], padding='max_length', truncation=True, max_length=OUTPUT_GENERATION_MAX_LENGTH)
         input_text = self.inputs[idx]
         entity_name = self.entity_names[idx]
-
 
         if self.mask_entity and MASKING_STRATEGY == 'Complete' and random.random() < MASK_PROB:
             input_encodings['input_ids'], input_text = \
