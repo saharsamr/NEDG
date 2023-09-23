@@ -21,7 +21,7 @@ class WikiDataset(Dataset):
         self.entity_names = entity_names
         self.is_gpt = is_gpt
         if self.is_gpt:
-            self.description_token = self.tokenizer.convert_tokens_to_ids(self.tokenizer.description_token)
+            self.description_token = self.tokenizer.convert_tokens_to_ids('<dscrp>')
 
     def __len__(self):
 
@@ -55,7 +55,7 @@ class WikiDataset(Dataset):
     def __getitem__(self, idx):
 
         if self.is_gpt:
-            text = self.tokenizer.context_token + self.inputs[idx] + self.tokenizer.description_token + self.labels[idx]
+            text = '<cntxt>' + self.inputs[idx] + '<dscrp>' + self.labels[idx]
             input_encodings = self.tokenizer(
                 text, padding='max_length', truncation=True,
                 max_length=INPUT_GENERATION_MAX_LENGTH+OUTPUT_GENERATION_MAX_LENGTH+2

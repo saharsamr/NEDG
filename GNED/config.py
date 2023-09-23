@@ -32,9 +32,15 @@ TEST_GENERATION_FILE = f'{DATA_GENERATION_FOLDER}{MAX_CONTEXT_NUMBER}_contexts_{
 VALID_GENERATION_FILE = f'{DATA_GENERATION_FOLDER}{MAX_CONTEXT_NUMBER}_contexts_{DEFINITION_SOURCE}_val.csv'
 
 if MAX_CONTEXT_NUMBER == 1:
-    ADDITIONAL_SPECIAL_TOKENS = ['<NE>', '</NE>']
+    if 'gpt' in MODEL_GENERATION_NAME:
+        ADDITIONAL_SPECIAL_TOKENS = ['<NE>', '</NE>', '<dscrp>', '<cntxt>']
+    else:
+        ADDITIONAL_SPECIAL_TOKENS = ['<NE>', '</NE>']
 else:
-    ADDITIONAL_SPECIAL_TOKENS = ['<NE>', '</NE>', '<CNTXT>', '</CNTXT>']
+    if 'gpt' in MODEL_GENERATION_NAME:
+        ADDITIONAL_SPECIAL_TOKENS = ['<NE>', '</NE>', '<dscrp>', '<cntxt>', '<CNTXT>', '</CNTXT>']
+    else:
+        ADDITIONAL_SPECIAL_TOKENS = ['<NE>', '</NE>', '<CNTXT>', '</CNTXT>']
 
 LOAD_GENERATION_MODEL = False
 MODEL_GENERATION_PATH = f'{OUTPUT_DIR}/final_model/'

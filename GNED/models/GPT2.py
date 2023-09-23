@@ -33,8 +33,6 @@ class GPT2:
         self.tokenizer.add_special_tokens({
             'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS,
             'pad_token': '<pad>',
-            'context_token': '<cntxt>',
-            'description_token': '<dscrp>'
         })
         if load:
             self.model = GPT2LMHeadModel.from_pretrained(model_load_path)
