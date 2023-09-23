@@ -81,8 +81,17 @@ class WikiDataset(Dataset):
             'entity_name': entity_name
         }
 
+        if self.is_gpt:
+            item['target_output'] = torch.tensor(output_encodings['input_ids'])
+            eos_token_idx = input_encodings['input_ids'].index(self.tokenizer.eos_token_id)[-1]
+            item['actual_input'] = torch.tensor(input_encodings['input_ids'][:eos_token_idx+1])
+            item['actual_attention_mask'] = torch.tensor(input_encodings['attention_mask'][:eos_token_idx+1])
+
         if self.labels:
-            item['labels'] = torch.tensor(output_encodings['input_ids'])
+            if self.is_gpt:
+                item['labels'] = torch.tensor(input_encodings['input_ids'])
+            else:
+                item['labels'] = torch.tensor(output_encodings['input_ids'])
 
         return item
 
