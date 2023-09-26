@@ -79,8 +79,8 @@ class GPT2:
             for batch in tqdm(test_dataloader):
                 ids = self.model.generate(
                     batch['actual_input'].cuda(), attention_mask=batch['actual_attention_mask'].cuda(),
-                    min_length=OUTPUT_GENERATION_MIN_LENGTH, max_length=OUTPUT_GENERATION_MAX_LENGTH
-                )[0]
+                    min_new_tokens=OUTPUT_GENERATION_MIN_LENGTH, max_length=OUTPUT_GENERATION_MAX_LENGTH
+                )
                 preds = self.tokenizer.batch_decode(ids, skip_special_tokens=True)
                 predictions.extend(preds)
                 # input_ = self.tokenizer.batch_decode(batch['input_ids'], skip_special_tokens=False)
