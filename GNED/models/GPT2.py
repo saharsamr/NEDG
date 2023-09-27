@@ -28,11 +28,11 @@ class GPT2:
         self.model_name = model_name
         self.tokenizer = GPT2TokenizerFast.from_pretrained(
             self.model_name, model_max_length=INPUT_GENERATION_MAX_LENGTH+OUTPUT_GENERATION_MAX_LENGTH+2,
-            padding=True, truncation=True, pad_token='<pad>'
+            padding=True, truncation=True
         )
         self.tokenizer.add_special_tokens({
             'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS,
-            'pad_token': '<pad>',
+            'pad_token': self.tokenizer.eos_token,
         })
         if load:
             self.model = GPT2LMHeadModel.from_pretrained(model_load_path)
