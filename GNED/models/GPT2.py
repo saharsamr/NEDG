@@ -32,7 +32,7 @@ class GPT2:
         )
         self.tokenizer.add_special_tokens({
             'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS,
-            'pad_token': self.tokenizer.eos_token,
+            # 'pad_token': self.tokenizer.eos_token,
         })
         if load:
             self.model = GPT2LMHeadModel.from_pretrained(model_load_path)
@@ -79,8 +79,9 @@ class GPT2:
             for batch in tqdm(test_dataloader):
                 ids = self.model.generate(
                     batch['actual_input'].cuda(), attention_mask=batch['actual_attention_mask'].cuda(),
-                    min_new_tokens=OUTPUT_GENERATION_MIN_LENGTH, max_new_tokens=OUTPUT_GENERATION_MAX_LENGTH
-                )
+                    min_new_tokens=OUTPUT_GENERATION_MIN_LENGTH, max_new_tokens=OUTPUT_GENERATION_MAX_LENGTH,
+                    pad_token_id=self.tokenizer.eos_token_id
+                )[0]
                 preds = self.tokenizer.batch_decode(ids, skip_special_tokens=True)
                 predictions.extend(preds)
                 # input_ = self.tokenizer.batch_decode(batch['input_ids'], skip_special_tokens=False)
