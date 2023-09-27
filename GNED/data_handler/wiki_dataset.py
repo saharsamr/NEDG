@@ -64,7 +64,7 @@ class WikiDataset(Dataset):
             text = '<entity_context>' + self.tokenizer.decode(input_encodings['input_ids']) + \
                    '<entity_description>' + self.tokenizer.decode(output_encodings['input_ids'])
             input_encodings = self.tokenizer(
-                text, padding='max_length', truncation=True, pad_token_id=self.tokenizer.eos_token_id,
+                text, padding='max_length', truncation=True,
                 max_length=INPUT_GENERATION_MAX_LENGTH + OUTPUT_GENERATION_MAX_LENGTH + 2
             )
         else:
