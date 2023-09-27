@@ -32,13 +32,15 @@ class GPT2:
         )
         self.tokenizer.add_special_tokens({
             'additional_special_tokens': ADDITIONAL_SPECIAL_TOKENS,
-            # 'pad_token': self.tokenizer.eos_token,
+            'pad_token': '<pad>',
         })
+        self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
         if load:
             self.model = GPT2LMHeadModel.from_pretrained(model_load_path)
         else:
             self.model = GPT2LMHeadModel.from_pretrained(self.model_name)
         self.model.resize_token_embeddings(len(self.tokenizer))
+        self.model.padding_token_id = self.tokenizer.eos_token_id
 
         print('Making datasets')
         self.train_dataset = WikiDataset(
