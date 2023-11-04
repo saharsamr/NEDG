@@ -16,7 +16,7 @@ MASKING_STRATEGY = 'Complete'  # or Complete
 MODEL_GENERATION_NAME = 'facebook/bart-large-cnn'  # facebook/bart-large-cnn or t5-base
 MODEL_NAME = f'MASK_{MASK_PROB}_{DEFINITION_SOURCE}'
 OUTPUT_DIR = f'{dirname}/../results/{MODEL_GENERATION_NAME.split("/")[-1]}/{MODEL_NAME}'
-LOGGING_DIR = f'{dirname}/../logs/{MODEL_NAME}'
+LOGGING_DIR = f'{dirname}/../logs/{MODEL_GENERATION_NAME.split("/")[-1]}/{MODEL_NAME}'
 
 TRAIN_GENERATION_BATCH_SIZE = 16
 EVAL_GENERATION_BATCH_SIZE = 16
